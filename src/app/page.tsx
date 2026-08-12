@@ -22,13 +22,13 @@ function percentile(val: number, mean: number, sd: number): number {
 }
 
 function heightLabel(pct: number): { label: string; short: string } {
-  if (pct >= 99) return { label: "大高个", short: "高" };
-  if (pct >= 90) return { label: "高个子", short: "高" };
-  if (pct >= 70) return { label: "中等偏高", short: "中高" };
-  if (pct <= 1) return { label: "迷你", short: "矮" };
-  if (pct <= 10) return { label: "小个子", short: "矮" };
-  if (pct <= 30) return { label: "中小个子", short: "中小" };
-  return { label: "中等身高", short: "中等" };
+  if (pct >= 95) return { label: "大高个", short: "高" };
+  if (pct >= 80) return { label: "高个子", short: "高" };
+  if (pct >= 60) return { label: "中高", short: "中高" };
+  if (pct <= 5) return { label: "迷你", short: "矮" };
+  if (pct <= 20) return { label: "小个子", short: "矮" };
+  if (pct <= 40) return { label: "中小个子", short: "中小" };
+  return { label: "标准身高", short: "标准" };
 }
 
 function weightLabel(bmi: number): string {
