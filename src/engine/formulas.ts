@@ -45,9 +45,9 @@ export function calculateBodyDimensions(
 function calcSeatHeight(H: number, c: FormulaConfig): Range {
   const { seatHeight: s } = c;
   if (H > s.tallThreshold) {
-    return r(H * s.tallCoefLow + s.shoeLow - s.cylinderLow, H * s.tallCoefHigh + s.shoeHigh - s.cylinderHigh);
+    return r(H * s.tallCoefLow + s.shoeLow, H * s.tallCoefHigh + s.shoeHigh - s.cylinderHigh);
   }
-  return r(H * s.coefLow + s.shoeLow - s.cylinderLow, H * s.coefHigh + s.shoeHigh - s.cylinderHigh);
+  return r(H * s.coefLow + s.shoeLow, H * s.coefHigh + s.shoeHigh - s.cylinderHigh);
 }
 
 function calcSeatDepth(H: number, c: FormulaConfig): Range {
@@ -61,7 +61,7 @@ function calcSeatDepth(H: number, c: FormulaConfig): Range {
 function calcSeatWidth(H: number, W: number, c: FormulaConfig): Range {
   const { seatWidth: s } = c;
   const B_cm = (s.intercept + s.coefH * H + s.coefW * W) / 10; // 臀宽 cm
-  return r(B_cm + s.activityLow, B_cm + s.activityHigh);
+  return r(0, B_cm + s.activityHigh); // 范围从0到最大需求
 }
 
 function calcBackHeight(H: number, c: FormulaConfig): Range {
