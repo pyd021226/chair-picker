@@ -66,13 +66,13 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
         ref={linkRef}
         href={"/chair/" + chair.id + "?h=" + match.h + "&w=" + match.w + (sitLong ? "&sit=1" : "")}
         onClick={handleClick}
-        className="relative z-10 block bg-white border border-neutral-200 rounded-2xl p-4 transition-all duration-300 hover:shadow-md"
-        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+        className="relative z-10 flex flex-col bg-white border border-neutral-200 rounded-2xl p-4 transition-all duration-300 hover:shadow-md h-full"
+        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)", minHeight: "200px" }}
         onMouseEnter={() => setPeek(true)}
         onMouseLeave={() => setPeek(false)}
       >
         <div className="flex items-start justify-between mb-3">
-          <div className="min-w-0">
+          <div className="min-w-0 min-h-[40px]">
             <p className="text-[10px] text-neutral-400 uppercase tracking-wider">{chair.brand}</p>
             <h3 className="font-semibold text-neutral-900 text-sm mt-0.5 line-clamp-2">{chair.name}</h3>
           </div>
@@ -80,7 +80,7 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
             {overallScore}
           </span>
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-1.5" style={{ minHeight: "54px" }}>
           {dims.map((d: any) => (
             <div key={d.key} className="flex items-center gap-2 text-xs">
               <span className="w-8 text-neutral-400">{d.label}</span>
@@ -91,8 +91,8 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100">
-          {chair.price && <span className="text-sm font-bold text-blue-600">{chair.price}</span>}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-neutral-100" style={{ minHeight: "32px" }}>
+          {chair.price ? <span className="text-sm font-bold text-blue-600">{chair.price}</span> : <span />}
           {sitLong && (
             <span className="text-[10px] font-medium" style={{ color: countFeatures(chair) >= 3 ? "#16a34a" : countFeatures(chair) >= 2 ? "#ca8a04" : "#dc2626" }}>
               功能 {countFeatures(chair)}/3
