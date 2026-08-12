@@ -269,7 +269,7 @@ export default function Home() {
       )}
 
       <p className="mt-6 text-xs text-[#a3a3a3]">
-        已收录 36 款工学椅 · <Link href="/admin" className="text-[#2563eb] hover:underline">公式管理</Link>
+        已收录 60 款工学椅 · <Link href="/admin" className="text-[#2563eb] hover:underline">公式管理</Link>
       </p>
     </main>
   );
