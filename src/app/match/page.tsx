@@ -109,29 +109,36 @@ function GroupStack({ list, sitLong, color, expanded, onToggle }: { list: any[];
   const rest = sorted.slice(1);
 
   if (!expanded) {
+    // 以左上角为圆心，右下角逐渐下沉，最多堆8张
+    const backCards = rest.slice(0, 7); // 前面1张 + 后面最多7张 = 8张
     return (
-      <div className="relative cursor-pointer select-none" style={{ height: "220px" }} onClick={onToggle}>
-        {/* 后面的卡片：微信式 轻微旋转+偏移 */}
-        {rest.slice(0, 3).reverse().map((m, i) => {
-          const depth = rest.slice(0, 3).length - i; // 3,2,1
+      <div className="relative cursor-pointer select-none" style={{ height: "240px" }} onClick={onToggle}>
+        {/* 后面的卡片：绕左上角旋转，右下角下沉 */}
+        {backCards.reverse().map((m, i) => {
+          const depth = backCards.length - i; // 越靠后 depth 越大
+          const angle = depth * 0.6; // 每张多转0.6度
+          const drop = depth * 3; // 右下角下沉
           return (
             <div
               key={m.chair.id}
-              className="absolute inset-x-0 rounded-2xl border border-neutral-200 bg-neutral-50"
+              className="absolute inset-0 rounded-2xl border border-neutral-200 bg-neutral-50"
               style={{
                 height: "100%",
                 top: 0,
-                transform: `rotate(${(depth - 1) * 0.8}deg) translateY(${depth * 6}px)`,
+                left: 0,
+                transformOrigin: "top left",
+                transform: `rotate(${angle}deg) translateY(${drop}px)`,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-                opacity: 0.85,
+                opacity: 0.75,
+                zIndex: depth,
               }}
             />
           );
         })}
 
         {/* 前面卡片（不可点击，点击触发展开） */}
-        <div className="absolute inset-0" style={{ zIndex: 5 }}>
-          <div className="relative z-10 flex flex-col bg-white border border-neutral-200 rounded-2xl p-4 h-full" style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.08)", minHeight: "200px" }}>
+        <div className="absolute inset-0" style={{ zIndex: 20 }}>
+          <div className="relative z-10 flex flex-col bg-white border border-neutral-200 rounded-2xl p-4 h-full" style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.08)", minHeight: "200px", transformOrigin: "top left" }}>
             <CardContent match={front} sitLong={sitLong} />
           </div>
         </div>
@@ -139,7 +146,7 @@ function GroupStack({ list, sitLong, color, expanded, onToggle }: { list: any[];
         {/* 数量徽章 */}
         {list.length > 1 && (
           <div
-            className="absolute -top-2 -right-2 z-20 text-white text-xs font-bold rounded-full flex items-center justify-center"
+            className="absolute -top-2 -right-2 z-30 text-white text-xs font-bold rounded-full flex items-center justify-center"
             style={{ backgroundColor: color, width: "28px", height: "28px", boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}
           >
             +{list.length - 1}
