@@ -142,11 +142,16 @@ function calcLumbarDepth(W: number, c: FormulaConfig): number {
 // ---- 兼容旧接口 ----
 
 export function computeCoverage(userRange: Range, chairRange: Range): number {
+  // 无交集：根据距离和用户范围的比例扣分
   if (chairRange.min > userRange.max || chairRange.max < userRange.min) {
     const gap = chairRange.min > userRange.max
       ? chairRange.min - userRange.max
       : userRange.min - chairRange.max;
-    return Math.max(0, 1 - gap / (userRange.max || 1));
+    const userSpan = userRange.max - userRange.min || 1;
+    // gap 相对于用户范围的比例：gap 越大，覆盖度越低
+    // 只有 gap 非常小（<10% 用户范围）时才给"尚可"
+    const ratio = gap / userSpan;
+    return Math.max(0, Math.min(0.65, 0.65 - ratio * 0.5));
   }
   const overlapMin = Math.max(userRange.min, chairRange.min);
   const overlapMax = Math.min(userRange.max, chairRange.max);
