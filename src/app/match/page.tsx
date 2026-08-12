@@ -109,28 +109,27 @@ function GroupStack({ list, sitLong, color, expanded, onToggle }: { list: any[];
   const rest = sorted.slice(1);
 
   if (!expanded) {
-    // 以左上角为圆心，右下角逐渐下沉，最多堆8张
+    // 右下角逐张平移堆叠，最多8张
     const backCards = rest.slice(0, 7); // 第2张~第8张（按价格排序）
+    const stepX = 4;  // 每张向右平移4px
+    const stepY = 6;  // 每张向下平移6px
     return (
       <div className="relative cursor-pointer select-none" style={{ height: "240px" }} onClick={onToggle}>
-        {/* 后面的卡片：第2张最小偏移，越往后偏移越大 */}
+        {/* 后面的卡片：第2张偏移最小，逐张递增 */}
         {backCards.map((m, i) => {
-          const angle = (i + 1) * 0.6;   // 第2张0.6° → 第8张4.2°
-          const drop = (i + 1) * 3;       // 右下角逐张下沉
-          const zIndex = backCards.length - i; // 第2张最高，第8张最低
+          const offset = i + 1; // 第2张=1，第8张=7
           return (
             <div
               key={m.chair.id}
-              className="absolute inset-0 rounded-2xl border border-neutral-200 bg-neutral-50"
+              className="absolute rounded-2xl border border-neutral-200 bg-neutral-50"
               style={{
-                height: "100%",
                 top: 0,
                 left: 0,
-                transformOrigin: "top left",
-                transform: `rotate(${angle}deg) translateY(${drop}px)`,
+                right: 0,
+                bottom: 0,
+                transform: `translate(${offset * stepX}px, ${offset * stepY}px)`,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-                opacity: 0.75,
-                zIndex: zIndex,
+                zIndex: backCards.length - i, // 第2张最高，第8张最低
               }}
             />
           );
@@ -138,7 +137,7 @@ function GroupStack({ list, sitLong, color, expanded, onToggle }: { list: any[];
 
         {/* 前面卡片（不可点击，点击触发展开） */}
         <div className="absolute inset-0" style={{ zIndex: 20 }}>
-          <div className="relative z-10 flex flex-col bg-white border border-neutral-200 rounded-2xl p-4 h-full" style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.08)", minHeight: "200px", transformOrigin: "top left" }}>
+          <div className="flex flex-col bg-white border border-neutral-200 rounded-2xl p-4 h-full" style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.08)", minHeight: "200px" }}>
             <CardContent match={front} sitLong={sitLong} />
           </div>
         </div>
