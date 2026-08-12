@@ -176,7 +176,11 @@ export default function MatchPage() {
   const sitLong = sitStr === "1";
 
   const body = useMemo(() => isValid ? calculateBodyDimensions(H, W) : null, [H, W, isValid]);
-  const allChairs = useMemo(() => applyOverrides([...chairs, ...loadCustomChairs()]), []);
+  // 自定义椅子/覆盖数据只在客户端加载，避免 hydration 不匹配
+  const [allChairs, setAllChairs] = useState<any[]>(chairs);
+  useEffect(() => {
+    setAllChairs(applyOverrides([...chairs, ...loadCustomChairs()]));
+  }, []);
   const matches = useMemo(() => {
     if (!isValid) return [];
     let r = matchAllChairs(allChairs, H, W);
