@@ -1,120 +1,161 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { getChairById } from "@/data/chairs";
+import { calculateBodyDimensions } from "@/engine/formulas";
+import { matchAllChairs } from "@/engine/matcher";
+import DimensionBar from "@/components/visualization/DimensionBar";
+import RadarComparison from "@/components/visualization/RadarComparison";
+import type { BodyDimensions, ChairMatch } from "@/engine/types";
 
-export default function ChairContent({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default function ChairContent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const chair = getChairById(slug);
+
+  // 从 URL 读取 h/w 参数
+  const [query, setQuery] = useState({ h: "", w: "" });
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    setQuery({ h: sp.get("h") || "", w: sp.get("w") || "" });
+  }, []);
+
+  const H = parseFloat(query.h), W = parseFloat(query.w);
+  const hasUser = !isNaN(H) && !isNaN(W);
+
+  const body = useMemo(() => hasUser ? calculateBodyDimensions(H, W) : null, [H, W, hasUser]);
+  const match = useMemo(() => {
+    if (!hasUser || !chair) return null;
+    const matches = matchAllChairs([chair], H, W);
+    return matches[0] || null;
+  }, [chair, H, W, hasUser]);
 
   if (!chair) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
         <p className="text-neutral-500 text-lg mb-4">椅子未找到</p>
-        <Link href="/" className="text-blue-600 hover:underline">
-          ← 返回首页
-        </Link>
+        <Link href="/" className="text-blue-600 hover:underline">← 返回首页</Link>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-800 transition-colors">
-        ← 返回首页
+      <Link href={hasUser ? `/match?h=${H}&w=${W}` : "/"} className="text-sm text-neutral-500 hover:text-neutral-800">
+        ← {hasUser ? "返回匹配列表" : "返回首页"}
       </Link>
 
-      <div className="mt-6">
+      {/* 标题 */}
+      <div className="mt-4">
         <span className="text-xs text-neutral-400">{chair.brand}</span>
-        <h1 className="text-2xl font-bold mt-1">{chair.name}</h1>
-        {chair.sku && <p className="text-xs text-neutral-400 mt-1">SKU: {chair.sku}</p>}
+        <h1 className="text-xl font-bold mt-1">{chair.name}</h1>
       </div>
 
-      {chair.price && (
-        <div className="mt-4 bg-neutral-50 border border-neutral-200 rounded-xl p-4">
-          <span className="text-2xl font-bold text-blue-600">¥{chair.price}</span>
-          {chair.priceWithFootrest && (
-            <span className="text-sm text-neutral-400 ml-2">
-              带脚托 ¥{chair.priceWithFootrest}
-            </span>
-          )}
+      {/* 匹配评分（如果有用户数据） */}
+      {match && (
+        <div className={`mt-4 rounded-2xl p-5 text-white ${
+          match.overallScore === 100 ? "bg-blue-500" :
+          match.overallScore >= 95 ? "bg-emerald-500" :
+          match.overallScore >= 80 ? "bg-amber-500" : "bg-red-400"
+        }`}>
+          <div className="flex items-center gap-4">
+            <div className="text-4xl font-bold">{match.overallScore}<span className="text-lg font-normal">分</span></div>
+            <div>
+              <p className="font-semibold text-lg">
+                {match.overallScore === 100 ? "💎 完美契合" :
+                 match.overallScore >= 95 ? "✅ 合适" :
+                 match.overallScore >= 80 ? "⚠️ 凑合" : "❌ 不建议"}
+              </p>
+              <p className="text-sm text-white/80">
+                基于 {H}cm / {W}kg 的身体数据
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
-        <Spec label="坐高" value={chair.seatHeight} />
-        <Spec label="坐深" value={chair.seatDepth} />
-        <Spec label="坐宽" value={chair.seatWidth ? `${chair.seatWidth}cm` : null} />
-        <Spec label="背高" value={chair.backHeight} />
-        <Spec label="背宽" value={chair.backWidth ? `${chair.backWidth}cm` : null} />
-        <Spec label="扶手高" value={chair.armrestHeight} />
-        <Spec label="扶手宽" value={chair.armrestWidth ? `${chair.armrestWidth}cm` : null} />
-        <Spec label="头枕高" value={chair.headrestHeight} />
-        <Spec label="头枕宽" value={chair.headrestWidth ? `${chair.headrestWidth}cm` : null} />
-        <Spec label="总高" value={chair.totalHeight} />
-        <Spec label="表面材质" value={chair.surface ? surfaceLabel(chair.surface) : null} />
-        <Spec label="后仰角度" value={chair.reclineAngle} />
-        {chair.baseType && <Spec label="底盘" value={chair.baseType} />}
-        {chair.gasCylinder && <Spec label="气压棒" value={chair.gasCylinder} />}
-        {chair.baseMaterial && <Spec label="五星杆" value={chair.baseMaterial} />}
-      </div>
+      {/* 价格 */}
+      {chair.price && (
+        <div className="mt-4 bg-neutral-50 border border-neutral-200 rounded-xl p-4 flex items-center justify-between">
+          <span className="text-2xl font-bold text-blue-600">¥{chair.price}</span>
+          {chair.priceWithFootrest && <span className="text-sm text-neutral-400">带脚托 ¥{chair.priceWithFootrest}</span>}
+        </div>
+      )}
 
+      {/* 尺寸对比 */}
+      {match && body && (
+        <div className="mt-6 space-y-4">
+          <h3 className="font-bold text-neutral-800">📐 尺寸匹配</h3>
+          {match.dimensions
+            .filter(d => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key))
+            .map(d => (
+              <DimensionBar key={d.key} dimKey={d.key} label={d.label}
+                userMin={d.userIdeal.min} userMax={d.userIdeal.max}
+                chairMin={d.chairRange.min} chairMax={d.chairRange.max}
+                coverage={d.coverage} status={d.status} />
+            ))}
+        </div>
+      )}
+
+      {/* 雷达图 */}
+      {match && body && (
+        <div className="mt-6">
+          <RadarComparison body={body} chair={chair} dimensions={match.dimensions} />
+        </div>
+      )}
+
+      {/* 完整参数 */}
       <div className="mt-6">
-        <h3 className="font-semibold mb-2">功能特性</h3>
-        <div className="space-y-2 text-sm">
-          {chair.lumbarFunc && <Feature label="腰撑" value={chair.lumbarFunc} />}
-          {chair.armrestFunc && <Feature label="扶手" value={chair.armrestFunc} />}
-          {chair.headrestFunc && <Feature label="头枕" value={chair.headrestFunc} />}
+        <h3 className="font-bold text-neutral-800 mb-3">📋 完整参数</h3>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <Spec label="坐高" v={chair.seatHeight} />
+          <Spec label="坐深" v={chair.seatDepth} />
+          <Spec label="坐宽" v={chair.seatWidth} />
+          <Spec label="背高" v={chair.backHeight} />
+          <Spec label="背宽" v={chair.backWidth} />
+          <Spec label="扶手高" v={chair.armrestHeight} />
+          <Spec label="扶手宽" v={chair.armrestWidth} />
+          <Spec label="头枕高" v={chair.headrestHeight} />
+          <Spec label="总高" v={chair.totalHeight} />
+          <Spec label="表面" v={chair.surface && surfaceLabel(chair.surface)} />
+          <Spec label="后仰" v={chair.reclineAngle} />
+          {chair.baseType && <Spec label="底盘" v={chair.baseType} />}
+          {chair.gasCylinder && <Spec label="气压棒" v={chair.gasCylinder} />}
+          {chair.maxWeight && <Spec label="最大承重" v={`${chair.maxWeight}kg`} />}
         </div>
       </div>
 
-      <div className="mt-4 flex gap-1.5 flex-wrap">
-        {chair.tags.map((tag) => (
-          <span key={tag} className="text-xs bg-neutral-100 text-neutral-600 px-2 py-1 rounded-full">
-            {tag}
-          </span>
-        ))}
-      </div>
+      {/* 功能 */}
+      {(chair.lumbarFunc || chair.armrestFunc || chair.headrestFunc) && (
+        <div className="mt-6">
+          <h3 className="font-bold text-neutral-800 mb-2">🔧 功能特性</h3>
+          <div className="space-y-1 text-sm">
+            {chair.lumbarFunc && <div className="flex gap-2"><span className="text-neutral-400">腰撑</span><span>{chair.lumbarFunc}</span></div>}
+            {chair.armrestFunc && <div className="flex gap-2"><span className="text-neutral-400">扶手</span><span>{chair.armrestFunc}</span></div>}
+            {chair.headrestFunc && <div className="flex gap-2"><span className="text-neutral-400">头枕</span><span>{chair.headrestFunc}</span></div>}
+          </div>
+        </div>
+      )}
+
+      {!hasUser && (
+        <div className="mt-6 p-4 bg-neutral-50 rounded-xl text-center">
+          <p className="text-sm text-neutral-500">从匹配页面进入可查看你的专属对比</p>
+          <Link href="/" className="text-blue-600 text-sm font-medium hover:underline mt-1 inline-block">去匹配 →</Link>
+        </div>
+      )}
     </div>
   );
 }
 
-function Spec({ label, value }: { label: string; value: { min: number; max: number } | string | null }) {
-  if (value === null) return null;
-  let display: string;
-  if (typeof value === "object") {
-    display = value.min === value.max ? `${value.min}cm` : `${value.min}-${value.max}cm`;
-  } else {
-    display = value;
-  }
-  return (
-    <div className="bg-neutral-50 rounded-lg p-2.5">
-      <span className="text-neutral-400 text-xs">{label}</span>
-      <p className="font-medium text-sm">{display}</p>
-    </div>
-  );
-}
-
-function Feature({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex gap-2">
-      <span className="text-neutral-400 w-10 flex-shrink-0">{label}</span>
-      <span className="text-neutral-800">{value}</span>
-    </div>
-  );
+function Spec({ label, v }: { label: string; v: { min: number; max: number } | number | string | null }) {
+  if (v === null || v === undefined) return null;
+  let d: string;
+  if (typeof v === "object") d = v.min === v.max ? `${v.min}cm` : `${v.min}-${v.max}cm`;
+  else if (typeof v === "number") d = `${v}cm`;
+  else d = v;
+  return <div className="bg-neutral-50 rounded-lg p-2"><span className="text-neutral-400 text-[10px]">{label}</span><p className="font-medium text-xs">{d}</p></div>;
 }
 
 function surfaceLabel(s: string): string {
-  switch (s) {
-    case "mesh": return "网布";
-    case "sponge": return "海绵/软包";
-    case "leather": return "真皮";
-    case "fabric": return "布面";
-    default: return s;
-  }
+  switch (s) { case "mesh": return "网布"; case "sponge": return "海绵/软包"; case "leather": return "真皮"; default: return s; }
 }
