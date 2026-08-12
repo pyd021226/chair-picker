@@ -1,46 +1,30 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { chairs } from "@/data/chairs";
 import { matchAllChairs } from "@/engine/matcher";
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { loadCustomChairs, applyOverrides } from "@/engine/storage";
-import type { ChairMatch, BodyDimensions } from "@/engine/types";
 
 function useQueryParams() {
   const [p, setP] = useState({ h: "", w: "", sit: "" });
-  useEffect(() => {
-    const sp = new URLSearchParams(window.location.search);
-    setP({ h: sp.get("h") || "", w: sp.get("w") || "", sit: sp.get("sit") || "" });
-  }, []);
+  useEffect(() => { const sp = new URLSearchParams(window.location.search); setP({ h: sp.get("h") || "", w: sp.get("w") || "", sit: sp.get("sit") || "" }); }, []);
   return p;
 }
 
-/** 统计椅子可调维度数量（针对久坐用户的功能性评分） */
-function countAdjustableFeatures(chair: any): number {
-  let count = 0;
-  // 扶手可调方向数
-  const armFunc = chair.armrestFunc || "";
-  const armDirs = (armFunc.match(/\d+D/g) || []).map((s: string) => parseInt(s));
-  if (armDirs.length > 0 && Math.max(...armDirs) >= 3) count++;
-  // 腰撑可调
-  const lumFunc = chair.lumbarFunc || "";
-  const lumDirs = (lumFunc.match(/\d+D/g) || []).map((s: string) => parseInt(s));
-  if (lumFunc.includes("多维") || lumFunc.includes("5D") || lumFunc.includes("4D") || lumFunc.includes("3D") || lumDirs.some((d: number) => d >= 3)) count++;
-  // 头枕
-  const headFunc = chair.headrestFunc || "";
-  const headAdj = chair.headrestAdjustable;
-  if (headAdj || headFunc.includes("可调") || headFunc.includes("升降")) count++;
-  return count; // 0-3
+function countFeatures(chair: any): number {
+  let n = 0;
+  if ((chair.armrestFunc || "").match(/\d+D/g)?.some((d: string) => parseInt(d) >= 3)) n++;
+  const lum = chair.lumbarFunc || ""; if (lum.includes("多维") || lum.includes("5D") || lum.includes("4D") || lum.includes("3D")) n++;
+  if (chair.headrestAdjustable || (chair.headrestFunc || "").includes("升降")) n++;
+  return n;
 }
 
 export default function MatchPage() {
-  const router = useRouter();
   const { h: hStr, w: wStr, sit: sitStr } = useQueryParams();
   const [loaded, setLoaded] = useState(false);
-  useEffect(() => { setLoaded(true); }, []);
+  useEffect(() => { setTimeout(() => setLoaded(true), 80); }, []);
 
   const H = parseFloat(hStr), W = parseFloat(wStr);
   const isValid = !isNaN(H) && !isNaN(W) && H >= 130 && H <= 220 && W >= 30 && W <= 150;
@@ -50,136 +34,111 @@ export default function MatchPage() {
   const allChairs = useMemo(() => applyOverrides([...chairs, ...loadCustomChairs()]), []);
   const matches = useMemo(() => {
     if (!isValid) return [];
-    let result = matchAllChairs(allChairs, H, W);
-    // 久坐用户：加入功能性评分维度
-    if (sitLong) {
-      result = result.map(m => {
-        const featCount = countAdjustableFeatures(m.chair);
-        const featCoverage = featCount / 3; // 3项全满足=100%
-        const featScore = Math.round(featCoverage * 100);
-        // 调整总分：功能性占25%，三维度占75%
-        const newScore = Math.round(m.overallScore * 0.75 + featScore * 0.25);
-        return { ...m, overallScore: newScore };
-      });
-    }
-    return result.sort((a, b) => b.overallScore - a.overallScore);
-  }, [H, W, isValid, sitLong]);
+    let r = matchAllChairs(allChairs, H, W);
+    if (sitLong) r = r.map(m => ({ ...m, overallScore: Math.round(m.overallScore * 0.75 + (countFeatures(m.chair) / 3) * 25) }));
+    return r.sort((a, b) => b.overallScore - a.overallScore);
+  }, [H, W, isValid, allChairs, sitLong]);
 
-  if (!loaded) return <div className="flex items-center justify-center py-20"><p className="text-neutral-400">加载中...</p></div>;
-  if (!isValid) return <div className="flex flex-col items-center justify-center py-20 px-4"><p className="text-neutral-500 text-lg mb-4">参数不完整或不合法</p><Link href="/" className="text-blue-600 hover:underline">← 返回首页重新输入</Link></div>;
+  if (!loaded) return <div className="flex items-center justify-center py-24"><div className="skeleton w-40 h-5 rounded-full" /></div>;
+  if (!isValid) return <div className="flex flex-col items-center justify-center py-24 gap-3"><p className="text-[var(--text-tertiary)]">参数不完整</p><Link href="/" className="text-[var(--accent)] text-sm hover:underline">返回首页</Link></div>;
   if (!body) return null;
 
-  // 分组
-  const perfect = matches.filter(m => m.overallScore === 100);
-  const good = matches.filter(m => m.overallScore >= 95 && m.overallScore < 100);
-  const ok = matches.filter(m => m.overallScore >= 80 && m.overallScore < 95);
-  const poor = matches.filter(m => m.overallScore < 80);
+  const top = matches[0];
+  const rest = matches.slice(1);
 
-  const groups: { label: string; icon: string; color: string; chairs: ChairMatch[] }[] = [
-    { label: "完美契合", icon: "💎", color: "text-blue-600", chairs: perfect },
-    { label: "合适", icon: "✅", color: "text-emerald-600", chairs: good },
-    { label: "凑合", icon: "⚠️", color: "text-amber-600", chairs: ok },
-    { label: "不建议", icon: "❌", color: "text-red-500", chairs: poor },
-  ];
+  const accentColor = (s: number) => s === 100 ? "var(--accent)" : s >= 95 ? "var(--success)" : s >= 80 ? "var(--warning)" : "var(--danger)";
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => router.push("/")} className="text-sm text-neutral-500 hover:text-neutral-800">← 返回修改</button>
-        <span className="text-xs text-neutral-400">{H}cm / {W}kg{sitLong ? " · 久坐" : ""}</span>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Nav */}
+      <Link href="/" className="inline-flex items-center text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors duration-200 mb-8">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="mr-1"><path d="M10 3L5 8l5 5"/></svg>
+        返回修改
+      </Link>
+
+      {/* Body badge */}
+      <div className="inline-flex flex-wrap items-center gap-3 px-5 py-2.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl mb-8 shadow-sm">
+        <span className="text-xs text-[var(--text-secondary)] font-medium">{H}cm / {W}kg{sitLong ? " / 久坐" : ""}</span>
+        <span className="text-[var(--border)] text-xs">|</span>
+        <span className="text-xs text-[var(--text-tertiary)]">坐高 <b className="text-[var(--text-primary)]">{body.seatHeight.min}-{body.seatHeight.max}cm</b></span>
+        <span className="text-xs text-[var(--text-tertiary)]">坐深 <b className="text-[var(--text-primary)]">{body.seatDepth.min}-{body.seatDepth.max}cm</b></span>
+        <span className="text-xs text-[var(--text-tertiary)]">坐宽 <b className="text-[var(--text-primary)]">{body.seatWidth.min}-{body.seatWidth.max}cm</b></span>
       </div>
 
-      {/* Body card */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 mb-6">
-        <div className="grid grid-cols-3 gap-3 text-sm text-center">
-          <div><span className="text-neutral-400 text-xs">坐高需求</span><p className="font-semibold">{body.seatHeight.min}-{body.seatHeight.max}cm</p></div>
-          <div><span className="text-neutral-400 text-xs">坐深需求</span><p className="font-semibold">{body.seatDepth.min}-{body.seatDepth.max}cm</p></div>
-          <div><span className="text-neutral-400 text-xs">坐宽需求</span><p className="font-semibold">{body.seatWidth.min}-{body.seatWidth.max}cm</p></div>
-        </div>
-      </div>
-
-      {/* Score groups */}
-      {groups.map(group => {
-        if (group.chairs.length === 0) return null;
-        return (
-          <div key={group.label} className="mb-6">
-            <h3 className={`text-sm font-bold mb-3 ${group.color}`}>
-              {group.icon} {group.label} <span className="font-normal text-neutral-400">({group.chairs.length}款)</span>
-            </h3>
-            <div className="space-y-2">
-              {group.chairs.map((m, i) => (
-                <Link
-                  key={m.chair.id}
-                  href={`/chair/${m.chair.id}?h=${H}&w=${W}${sitLong ? "&sit=1" : ""}`}
-                  className="block border border-neutral-200 rounded-xl hover:border-neutral-300 hover:shadow-sm transition-all overflow-hidden bg-white"
-                >
-                  <div className="flex items-center gap-3 p-3">
-                    {/* Chair image 2:3 */}
-                    <div className="flex-shrink-0 w-16 h-24 rounded-lg bg-neutral-100 overflow-hidden">
-                      {m.chair.imageUrl ? (
-                        <img src={m.chair.imageUrl} alt={m.chair.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-2xl text-neutral-300">🪑</div>
-                      )}
-                    </div>
-                    {/* Score badge */}
-                    <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center text-white ${
-                      m.overallScore === 100 ? "bg-blue-500" :
-                      m.overallScore >= 95 ? "bg-emerald-500" :
-                      m.overallScore >= 80 ? "bg-amber-500" : "bg-red-400"
-                    }`}>
-                      <span className="text-lg font-bold leading-tight">{m.overallScore}</span>
-                      <span className="text-[9px] leading-tight opacity-90">分</span>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-neutral-900 truncate text-sm">{m.chair.name}</h4>
-                      <span className="text-xs text-neutral-400">{m.chair.brand}</span>
-
-                      {/* Mini bars */}
-                      <div className="flex gap-2 mt-1.5">
-                        {m.dimensions.filter(d => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key)).map(d => (
-                          <div key={d.key} className="flex-1">
-                            <div className="flex justify-between mb-0.5">
-                              <span className="text-[9px] text-neutral-400">{d.label}</span>
-                              <span className={`text-[9px] font-medium ${
-                                d.status === "good" ? "text-emerald-600" : d.status === "marginal" ? "text-amber-600" : "text-red-500"
-                              }`}>{Math.round(d.coverage*100)}%</span>
-                            </div>
-                            <div className="h-1 bg-neutral-100 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${
-                                d.status === "good" ? "bg-emerald-500" : d.status === "marginal" ? "bg-amber-400" : "bg-red-400"
-                              }`} style={{width:`${Math.round(d.coverage*100)}%`}}/>
-                            </div>
-                          </div>
-                        ))}
+      {/* Top match: Hero card */}
+      {top && (
+        <div className="mb-10">
+          <p className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-3">最佳匹配</p>
+          <Link href={"/chair/" + top.chair.id + "?h=" + H + "&w=" + W}
+            className="group block bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden transition-shadow duration-300"
+            style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.04)" }}>
+            <div className="flex flex-col sm:flex-row">
+              {/* Score hero column */}
+              <div className="flex-shrink-0 sm:w-44 flex flex-col items-center justify-center py-8 px-6 border-b sm:border-b-0 sm:border-r border-[var(--border-light)] bg-[var(--accent-subtle)]">
+                <span className="text-7xl font-bold tracking-tighter" style={{ color: accentColor(top.overallScore) }}>{top.overallScore}</span>
+                <span className="text-xs text-[var(--text-tertiary)] mt-1.5">分</span>
+                <p className="mt-2 text-xs font-medium text-[var(--text-secondary)]">
+                  {top.overallScore === 100 ? "完美契合" : top.overallScore >= 95 ? "推荐选择" : top.overallScore >= 80 ? "可以一试" : "不太合适"}
+                </p>
+              </div>
+              {/* Info column */}
+              <div className="flex-1 p-6 flex flex-col justify-center">
+                <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">{top.chair.brand}</p>
+                <h2 className="text-xl font-bold text-[var(--text-primary)] mt-1 group-hover:text-[var(--accent)] transition-colors duration-200">{top.chair.name}</h2>
+                <div className="flex gap-4 mt-4">
+                  {top.dimensions.filter(d => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key)).map(d => (
+                    <div key={d.key} className="flex-1">
+                      <div className="flex justify-between text-xs mb-1"><span className="text-[var(--text-tertiary)]">{d.label}</span><span className="font-medium text-[var(--text-secondary)]">{Math.round(d.coverage * 100)}%</span></div>
+                      <div className="h-1.5 bg-[var(--border-light)] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: accentColor(top.overallScore) }} />
                       </div>
                     </div>
-
-                    {/* 久坐功能性评分 */}
-                    {sitLong && (
-                      <div className="mt-1">
-                        <span className={`text-[9px] font-medium ${
-                          countAdjustableFeatures(m.chair) >= 3 ? "text-emerald-600" :
-                          countAdjustableFeatures(m.chair) >= 2 ? "text-amber-600" : "text-red-500"
-                        }`}>
-                          功能性: {countAdjustableFeatures(m.chair)}/3 项达标
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Price + arrow */}
-                    <div className="flex-shrink-0 text-right">
-                      {m.chair.price && <span className="text-sm font-bold text-blue-600">¥{m.chair.price}</span>}
-                      <div className="text-[10px] text-neutral-300 mt-0.5">详情 →</div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  ))}
+                </div>
+                {top.chair.price && <p className="text-lg font-bold mt-3" style={{ color: "var(--accent)" }}>{top.chair.price}</p>}
+              </div>
             </div>
+          </Link>
+        </div>
+      )}
+
+      {/* Rest: Bento grid */}
+      {rest.length > 0 && (
+        <div>
+          <p className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-3">其他选择</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {rest.map((m, i) => (
+              <Link key={m.chair.id} href={"/chair/" + m.chair.id + "?h=" + H + "&w=" + W}
+                className="group block bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 hover:shadow-lg transition-all duration-300"
+                style={{ animation: "fade-up 0.35s cubic-bezier(0.16,1,0.3,1) both", animationDelay: i * 0.04 + "s" }}>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider truncate">{m.chair.brand}</p>
+                    <h3 className="font-semibold text-[var(--text-primary)] text-sm mt-0.5 group-hover:text-[var(--accent)] transition-colors duration-200 line-clamp-2">{m.chair.name}</h3>
+                  </div>
+                  <span className="flex-shrink-0 ml-2 text-2xl font-bold tracking-tighter" style={{ color: accentColor(m.overallScore) }}>{m.overallScore}</span>
+                </div>
+                <div className="space-y-1.5">
+                  {m.dimensions.filter(d => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key)).map(d => (
+                    <div key={d.key} className="flex items-center gap-2 text-xs">
+                      <span className="w-8 text-[var(--text-tertiary)]">{d.label}</span>
+                      <div className="flex-1 h-1 bg-[var(--border-light)] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: accentColor(m.overallScore) }} />
+                      </div>
+                      <span className="w-7 text-right font-medium text-[var(--text-secondary)]">{Math.round(d.coverage * 100)}%</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--border-light)]">
+                  {m.chair.price && <span className="text-sm font-bold" style={{ color: "var(--accent)" }}>{m.chair.price}</span>}
+                  {sitLong && <span className="text-[10px] font-medium" style={{ color: countFeatures(m.chair) >= 3 ? "var(--success)" : countFeatures(m.chair) >= 2 ? "var(--warning)" : "var(--danger)" }}>功能 {countFeatures(m.chair)}/3</span>}
+                  <span className="text-[10px] text-[var(--text-tertiary)] ml-auto group-hover:text-[var(--text-secondary)] transition-colors">详情</span>
+                </div>
+              </Link>
+            ))}
           </div>
-        );
-      })}
+        </div>
+      )}
     </div>
   );
 }
