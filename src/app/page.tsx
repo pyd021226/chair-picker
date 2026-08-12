@@ -18,7 +18,9 @@ function percentile(val: number, mean: number, sd: number): number {
   const t = 1 / (1 + 0.2316419 * Math.abs(z));
   const d = 0.3989423 * Math.exp(-z * z / 2);
   const p = 1 - d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-  return Math.round((z > 0 ? p : 1 - p) * 1000) / 10;
+  const raw = z > 0 ? p : 1 - p;
+  // 限制在 0.1 ~ 99.9 之间，不显示100%
+  return Math.min(99.9, Math.max(0.1, Math.round(raw * 1000) / 10));
 }
 
 function heightLabel(pct: number): { label: string; short: string } {
