@@ -85,45 +85,34 @@ interface ScoreContext {
 }
 
 function scoreSeatWidth(ctx: ScoreContext): DimensionResult {
-  const userIdeal = ctx.body.seatWidth;
-  const effectiveWidth = getEffectiveSeatWidth(ctx.chair, ctx.cfg);
-  const chairRange: Range = effectiveWidth !== null
-    ? { min: effectiveWidth, max: effectiveWidth }
-    : { min: 0, max: 0 };
-  const chairDataMissing = effectiveWidth === null;
+  const userRange: Range = ctx.body.seatWidth; // 现在是 Range：[min, max]
+  const effWidth = getEffectiveSeatWidth(ctx.chair, ctx.cfg); // 有效坐宽 = 标称 - 扣减
+  const chairDataMissing = effWidth === null;
 
   if (chairDataMissing) {
     return {
-      key: "seatWidth",
-      label: "坐宽",
-      unit: "cm",
-      userIdeal: { min: userIdeal, max: userIdeal },
-      chairRange: { min: 0, max: 0 },
-      coverage: 0.5,
-      status: "marginal",
-      explanation: "椅子坐宽数据缺失",
-      priority: 3,
-      chairDataMissing: true,
+      key: "seatWidth", label: "坐宽", unit: "cm",
+      userIdeal: userRange, chairRange: { min: 0, max: 0 },
+      coverage: 0.5, status: "marginal" as FitStatus,
+      explanation: "椅子坐宽数据缺失", priority: 3, chairDataMissing: true,
     };
   }
 
-  // 坐宽是标量（椅子通常固定宽度）
-  const coverage = clamp(effectiveWidth! / userIdeal, 0, 1);
-  const diff = effectiveWidth! - userIdeal;
+  // 椅子容纳范围：[0, 有效坐宽]
+  const chairRange: Range = { min: 0, max: effWidth! };
+  // 用户需求最大值 vs 椅子有效宽度
+  const coverage = effWidth! >= userRange.max ? 1 : clamp(effWidth! / userRange.max, 0, 1);
   const status = coverageToStatus(coverage, ctx.rules);
-  const direction = diff > 0 ? `宽${diff.toFixed(0)}cm` : `窄${Math.abs(diff).toFixed(0)}cm`;
+  const diff = effWidth! - userRange.max;
+  const explanation = diff >= 0
+    ? `椅子有效宽${effWidth!.toFixed(0)}cm ≥ 你最大需求${userRange.max.toFixed(0)}cm，宽裕${diff.toFixed(0)}cm`
+    : `椅子有效宽${effWidth!.toFixed(0)}cm < 你最大需求${userRange.max.toFixed(0)}cm，窄${Math.abs(diff).toFixed(0)}cm`;
 
   return {
-    key: "seatWidth",
-    label: "坐宽",
-    unit: "cm",
-    userIdeal: { min: userIdeal, max: userIdeal },
-    chairRange,
-    coverage,
-    status,
-    explanation: `用户需要≥${userIdeal.toFixed(0)}cm（有效坐宽），椅子${effectiveWidth!.toFixed(0)}cm，${direction}`,
-    priority: 3,
-    chairDataMissing: false,
+    key: "seatWidth", label: "坐宽", unit: "cm",
+    userIdeal: userRange, chairRange,
+    coverage, status,
+    explanation, priority: 3, chairDataMissing: false,
   };
 }
 

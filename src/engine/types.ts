@@ -56,7 +56,7 @@ export type DimensionKey =
 export interface BodyDimensions {
   seatHeight: Range;
   seatDepth: Range;
-  seatWidth: number;
+  seatWidth: Range;
   backHeight: Range;
   backWidth: number;
   armrestHeight: Range;

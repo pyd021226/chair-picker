@@ -58,10 +58,10 @@ function calcSeatDepth(H: number, c: FormulaConfig): Range {
   return r(H * cl - s.postureMax - s.gap, H * ch - s.postureMin - s.gap);
 }
 
-function calcSeatWidth(H: number, W: number, c: FormulaConfig): number {
+function calcSeatWidth(H: number, W: number, c: FormulaConfig): Range {
   const { seatWidth: s } = c;
-  const B_mm = s.intercept + s.coefH * H + s.coefW * W;
-  return Math.round((B_mm / 10 + (s.activityLow + s.activityHigh) / 2) * 10) / 10;
+  const B_cm = (s.intercept + s.coefH * H + s.coefW * W) / 10; // 臀宽 cm
+  return r(B_cm + s.activityLow, B_cm + s.activityHigh);
 }
 
 function calcBackHeight(H: number, c: FormulaConfig): Range {

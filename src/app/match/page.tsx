@@ -62,7 +62,7 @@ function BodyCard({ body }: { body: BodyDimensions }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
         <div><span className="text-neutral-400">坐高需求</span><p className="font-semibold text-neutral-900">{body.seatHeight.min}-{body.seatHeight.max}cm</p></div>
         <div><span className="text-neutral-400">坐深需求</span><p className="font-semibold text-neutral-900">{body.seatDepth.min}-{body.seatDepth.max}cm</p></div>
-        <div><span className="text-neutral-400">坐宽需求</span><p className="font-semibold text-neutral-900">{body.seatWidth}cm</p></div>
+        <div><span className="text-neutral-400">坐宽需求</span><p className="font-semibold text-neutral-900">{body.seatWidth.min}-{body.seatWidth.max}cm</p></div>
         <div><span className="text-neutral-400">背高需求</span><p className="font-semibold text-neutral-900">{body.backHeight.min}-{body.backHeight.max}cm</p></div>
       </div>
       <details className="mt-3 text-xs text-neutral-500">
