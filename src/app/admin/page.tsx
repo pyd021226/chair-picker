@@ -16,7 +16,7 @@ export default function AdminPage() {
   const [testH, setTestH] = useState("175");
   const [testW, setTestW] = useState("70");
   const [saveMsg, setSaveMsg] = useState("");
-  const [tab, setTab] = useState<"formula" | "rules" | "dashboard" | "addchair">("formula");
+  const [tab, setTab] = useState<"formula" | "rules" | "dashboard" | "addchair" | "chairs">("formula");
 
   useEffect(() => { setConfig(loadConfig()); setRules(loadMatchRules()); setLoaded(true); }, []);
 
@@ -32,9 +32,7 @@ export default function AdminPage() {
   const setRule = useCallback((key: string, value: number) => {
     setRules((prev) => {
       const next = JSON.parse(JSON.stringify(prev));
-      if (key.includes(".")) { const [a, b] = key.split("."); next[a][b] = value; }
-      else { next[key] = value; }
-      return next;
+      if (key.includes(".")) { const [a, b] = key.split("."); next[a][b] = value; }      else { next[key] = value; }      return next;
     });
   }, []);
 
@@ -139,9 +137,7 @@ export default function AdminPage() {
         </div>
       </div>
       {saveMsg && <div className="mb-4 px-4 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium">{saveMsg}</div>}
-
-      {/* 实时预览 */}
-      <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-6 sticky top-2 z-10 shadow-sm">
+      {/* 实时预览 */}      <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-6 sticky top-2 z-10 shadow-sm">
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-sm font-semibold text-neutral-600">测试：</span>
           <input type="number" value={testH} onChange={e => setTestH(e.target.value)} className="w-20 px-3 py-1.5 border rounded-lg text-sm" /> cm
@@ -156,16 +152,15 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Tab 切换 */}
-      <div className="flex gap-2 mb-4">
+      {/* Tab 切换 */}      <div className="flex gap-2 mb-4">
         <button onClick={() => setTab("formula")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "formula" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📐 公式系数</button>
         <button onClick={() => setTab("rules")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "rules" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📋 匹配规则</button>
         <button onClick={() => setTab("dashboard")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "dashboard" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📊 数据看板</button>
         <button onClick={() => setTab("addchair")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "addchair" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>➕ 录入椅子</button>
+        <button onClick={() => setTab("chairs")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "chairs" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📋 椅子列表</button>
       </div>
 
-      {/* 系数编辑 */}
-      {tab === "formula" && (
+      {/* 系数编辑 */}      {tab === "formula" && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {groups.map(g => {
           const groupData = (config as any)[g.key] || {};
@@ -177,21 +172,15 @@ export default function AdminPage() {
                   <div key={f.key} className="flex items-center gap-2">
                     <label className="text-[11px] text-neutral-500 w-24 flex-shrink-0 truncate" title={f.label}>{f.label}</label>
                     <input
-                      type="number" step={f.step} value={groupData[f.key] ?? 0}
-                      onChange={e => set(g.key, f.key, parseFloat(e.target.value) || 0)}
-                      className="flex-1 px-2 py-1 border border-neutral-200 rounded text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      type="number" step={f.step} value={groupData[f.key] ?? 0}                      onChange={e => set(g.key, f.key, parseFloat(e.target.value) || 0)}                      className="flex-1 px-2 py-1 border border-neutral-200 rounded text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-400"
                     />
                   </div>
-                ))}
-              </div>
+                ))}              </div>
             </div>
           );
-        })}
-      </div>
+        })}      </div>
       )}
-
-      {/* 规则编辑 */}
-      {tab === "rules" && (
+      {/* 规则编辑 */}      {tab === "rules" && (
       <div className="space-y-4">
         <div className="border border-neutral-200 rounded-xl p-4">
           <h3 className="text-sm font-semibold mb-3">📊 评分阈值</h3>
@@ -204,11 +193,9 @@ export default function AdminPage() {
             ].map(f => (
               <div key={f.key}>
                 <label className="text-[11px] text-neutral-500 block">{f.label} <span className="text-neutral-300">({f.desc})</span></label>
-                <input type="number" step={f.step} value={(rules as any)[f.key] ?? 0} onChange={e => setRule(f.key, parseFloat(e.target.value) || 0)}
-                  className="w-full px-2 py-1.5 border rounded text-sm font-mono mt-0.5" />
+                <input type="number" step={f.step} value={(rules as any)[f.key] ?? 0} onChange={e => setRule(f.key, parseFloat(e.target.value) || 0)}                  className="w-full px-2 py-1.5 border rounded text-sm font-mono mt-0.5" />
               </div>
-            ))}
-          </div>
+            ))}          </div>
         </div>
         <div className="border border-neutral-200 rounded-xl p-4">
           <h3 className="text-sm font-semibold mb-3">⚖️ 维度权重（越大越重要）</h3>
@@ -225,24 +212,16 @@ export default function AdminPage() {
               <div key={f.key}>
                 <label className="text-[11px] text-neutral-500 block">{f.label}</label>
                 <input type="number" step="1" min="0" max="30"
-                  value={(() => { const [a, b] = f.key.split("."); return (rules as any)[a]?.[b] ?? 0; })()}
-                  onChange={e => setRule(f.key, parseInt(e.target.value) || 0)}
-                  className="w-full px-2 py-1.5 border rounded text-sm font-mono mt-0.5" />
+                  value={(() => { const [a, b] = f.key.split("."); return (rules as any)[a]?.[b] ?? 0; })()}                  onChange={e => setRule(f.key, parseInt(e.target.value) || 0)}                  className="w-full px-2 py-1.5 border rounded text-sm font-mono mt-0.5" />
               </div>
-            ))}
-          </div>
+            ))}          </div>
         </div>
       </div>
       )}
-
-      {/* 数据看板 */}
-      {tab === "dashboard" && <DashboardTab />}
-
-      {/* 录入椅子 */}
-      {tab === "addchair" && <AddChairTab />}
-
-      {/* 匹配预览 */}
-      <details className="mt-6 border border-neutral-200 rounded-xl overflow-hidden">
+      {/* 数据看板 */}      {tab === "dashboard" && <DashboardTab />}
+      {/* 录入椅子 */}      {tab === "addchair" && <AddChairTab />}
+      {/* 椅子列表 */}      {tab === "chairs" && <ChairsTableTab />}
+      {/* 匹配预览 */}      <details className="mt-6 border border-neutral-200 rounded-xl overflow-hidden">
         <summary className="px-4 py-3 bg-neutral-50 cursor-pointer text-sm font-semibold hover:bg-neutral-100">
           📊 匹配结果预览（{testH}cm/{testW}kg — Top 15）
         </summary>
@@ -254,13 +233,11 @@ export default function AdminPage() {
               <span className="text-xs text-neutral-400">{m.chair.price ? `¥${m.chair.price}` : "-"}</span>
               <span className={`w-10 text-right font-bold text-sm ${m.overallScore>=85?"text-green-600":m.overallScore>=70?"text-amber-600":"text-red-500"}`}>{m.overallScore}%</span>
             </div>
-          ))}
-        </div>
+          ))}        </div>
       </details>
     </div>
   );
 }
-
 // ====== 数据看板 ======
 function DashboardTab() {
   const stats = getUsageStats();
@@ -275,14 +252,12 @@ function DashboardTab() {
       </div>
     );
   }
-
   const maxH = Math.max(...stats.heightDist.map(d => d.count), 1);
   const maxW = Math.max(...stats.weightDist.map(d => d.count), 1);
 
   return (
     <div className="space-y-6">
-      {/* 概览卡片 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* 概览卡片 */}      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-blue-50 rounded-xl p-4 text-center">
           <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
           <div className="text-xs text-neutral-500">总使用次数</div>
@@ -301,8 +276,7 @@ function DashboardTab() {
         </div>
       </div>
 
-      {/* 身高分布 */}
-      <div className="border rounded-xl p-4">
+      {/* 身高分布 */}      <div className="border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-3">📏 身高分布（每5cm一组）</h3>
         <div className="space-y-1">
           {stats.heightDist.map(d => (
@@ -313,12 +287,10 @@ function DashboardTab() {
                 <span className="absolute left-1 top-1/2 -translate-y-1/2 text-white text-[10px] font-medium">{d.count}</span>
               </div>
             </div>
-          ))}
-        </div>
+          ))}        </div>
       </div>
 
-      {/* 体重分布 */}
-      <div className="border rounded-xl p-4">
+      {/* 体重分布 */}      <div className="border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-3">⚖️ 体重分布（每5kg一组）</h3>
         <div className="space-y-1">
           {stats.weightDist.map(d => (
@@ -329,22 +301,18 @@ function DashboardTab() {
                 <span className="absolute left-1 top-1/2 -translate-y-1/2 text-white text-[10px] font-medium">{d.count}</span>
               </div>
             </div>
-          ))}
-        </div>
+          ))}        </div>
       </div>
 
-      {/* 自定义椅子数量 */}
-      <div className="border rounded-xl p-4">
+      {/* 自定义椅子数量 */}      <div className="border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-2">🪑 已录入自定义椅子</h3>
         <p className="text-2xl font-bold text-neutral-700">{customChairs.length} 把</p>
       </div>
 
-      <button onClick={() => { if(confirm("确定清空所有使用数据？")) clearUsageRecords(); window.location.reload(); }}
-        className="text-xs text-red-400 hover:text-red-600">清空使用数据</button>
+      <button onClick={() => { if(confirm("确定清空所有使用数据？")) clearUsageRecords(); window.location.reload(); }}        className="text-xs text-red-400 hover:text-red-600">清空使用数据</button>
     </div>
   );
 }
-
 // ====== 录入椅子 ======
 function AddChairTab() {
   const [customChairs, setCustomChairs] = useState<Chair[]>([]);
@@ -358,8 +326,7 @@ function AddChairTab() {
   useEffect(() => { setCustomChairs(loadCustomChairs()); }, []);
 
   const handleAdd = () => {
-    if (!form.brand || !form.name) { setMsg("品牌和名称必填"); return; }
-    const shMin = parseFloat(form.seatHeightMin) || 0;
+    if (!form.brand || !form.name) { setMsg("品牌和名称必填"); return; }    const shMin = parseFloat(form.seatHeightMin) || 0;
     const shMax = parseFloat(form.seatHeightMax) || shMin;
     const sdMin = parseFloat(form.seatDepthMin) || 0;
     const sdMax = parseFloat(form.seatDepthMax) || sdMin;
@@ -398,8 +365,7 @@ function AddChairTab() {
 
   return (
     <div className="space-y-6">
-      {/* 录入表单 */}
-      <div className="border rounded-xl p-4">
+      {/* 录入表单 */}      <div className="border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-3">➕ 录入新椅子</h3>
         <div className="grid grid-cols-2 gap-3">
           <div><label className="text-[11px] text-neutral-500">品牌 *</label><input value={form.brand} onChange={e=>setForm({...form,brand:e.target.value})} placeholder="如 黑白调" className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
@@ -419,11 +385,9 @@ function AddChairTab() {
           <div><label className="text-[11px] text-neutral-500">腰撑功能（如：4D腰托：上下5cm, 前后2cm）</label><input value={form.lumbarFunc} onChange={e=>setForm({...form,lumbarFunc:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
         </div>
         <button onClick={handleAdd} className="mt-3 px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">添加椅子</button>
-        {msg && <p className={`text-xs mt-2 ${msg.includes("✅")?"text-green-600":"text-red-500"}`}>{msg}</p>}
-      </div>
+        {msg && <p className={`text-xs mt-2 ${msg.includes("✅")?"text-green-600":"text-red-500"}`}>{msg}</p>}      </div>
 
-      {/* 已录入列表 */}
-      {customChairs.length > 0 && (
+      {/* 已录入列表 */}      {customChairs.length > 0 && (
         <div className="border rounded-xl p-4">
           <h3 className="text-sm font-semibold mb-2">📋 已录入 ({customChairs.length} 把)</h3>
           <div className="space-y-1">
@@ -433,10 +397,103 @@ function AddChairTab() {
                 <span className="text-xs text-neutral-400">{c.price ? `¥${c.price}` : "-"}</span>
                 <button onClick={()=>handleDelete(c.id)} className="text-xs text-red-400 hover:text-red-600">删除</button>
               </div>
-            ))}
-          </div>
+            ))}          </div>
         </div>
-      )}
+      )}    </div>
+  );
+}
+// ====== 椅子列表（按品牌分类） ======
+function ChairsTableTab() {
+  const customChairs = loadCustomChairs();
+  const allChairs = [...chairs, ...customChairs];
+
+  // 按品牌分组
+  const grouped: Record<string, Chair[]> = {};
+  for (const c of allChairs) {
+    if (!grouped[c.brand]) grouped[c.brand] = [];
+    grouped[c.brand].push(c);
+  }
+
+  const [expandedBrand, setExpandedBrand] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const brands = Object.keys(grouped).sort();
+  const filteredBrands = search
+    ? brands.filter(b => b.includes(search) || grouped[b].some(c => c.name.includes(search)))
+    : brands;
+
+  return (
+    <div className="space-y-4">
+      {/* 搜索 */}
+      <div className="flex gap-3 items-center">
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="搜索品牌或椅子名..."
+          className="flex-1 px-3 py-2 border rounded-lg text-sm" />
+        <span className="text-xs text-neutral-400">{customChairs.length > 0 ? `含${customChairs.length}把自定义` : ""}</span>
+      </div>
+
+      {/* 品牌分组表格 */}
+      {filteredBrands.map(brand => {
+        const brandChairs = grouped[brand];
+        const isExpanded = expandedBrand === brand || !!search;
+
+        return (
+          <div key={brand} className="border rounded-xl overflow-hidden">
+            {/* 品牌头 */}
+            <button
+              onClick={() => setExpandedBrand(isExpanded ? null : brand)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-neutral-50 hover:bg-neutral-100 text-left"
+            >
+              <span className="font-semibold text-sm">
+                {brand} <span className="text-neutral-400 font-normal text-xs">({brandChairs.length}款)</span>
+              </span>
+              <span className="text-xs text-neutral-400">{isExpanded ? "收起 ▲" : "展开 ▼"}</span>
+            </button>
+
+            {/* 表格 */}
+            {isExpanded && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-neutral-100/50 text-neutral-500">
+                      <th className="text-left px-3 py-2 font-medium">产品名</th>
+                      <th className="text-right px-2 py-2 font-medium w-16">价格</th>
+                      <th className="text-center px-2 py-2 font-medium w-20">坐高(cm)</th>
+                      <th className="text-center px-2 py-2 font-medium w-20">坐深(cm)</th>
+                      <th className="text-center px-2 py-2 font-medium w-14">坐宽</th>
+                      <th className="text-center px-2 py-2 font-medium w-12">材质</th>
+                      <th className="text-left px-2 py-2 font-medium">头枕功能</th>
+                      <th className="text-left px-2 py-2 font-medium">扶手功能</th>
+                      <th className="text-left px-2 py-2 font-medium">腰撑功能</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {brandChairs.map(c => {
+                      const isCustom = customChairs.some(x => x.id === c.id);
+                      return (
+                        <tr key={c.id} className={`border-t border-neutral-100 hover:bg-neutral-50 ${isCustom ? "bg-blue-50/30" : ""}`}>
+                          <td className="px-3 py-2">
+                            <span className="font-medium">{c.name}</span>
+                            {isCustom && <span className="ml-1 text-[10px] bg-blue-100 text-blue-600 px-1 rounded">自建</span>}
+                          </td>
+                          <td className="px-2 py-2 text-right font-mono">{c.price ? `¥${c.price}` : "-"}</td>
+                          <td className="px-2 py-2 text-center font-mono">{c.seatHeight ? `${c.seatHeight.min}-${c.seatHeight.max}` : "-"}</td>
+                          <td className="px-2 py-2 text-center font-mono">{c.seatDepth ? `${c.seatDepth.min}-${c.seatDepth.max}` : "-"}</td>
+                          <td className="px-2 py-2 text-center font-mono">{c.seatWidth ?? "-"}</td>
+                          <td className="px-2 py-2 text-center">{c.surface === "mesh" ? "网布" : c.surface === "sponge" ? "海绵" : c.surface === "leather" ? "真皮" : "-"}</td>
+                          <td className="px-2 py-2 max-w-48 truncate" title={c.headrestFunc || ""}>{c.headrestFunc || "-"}</td>
+                          <td className="px-2 py-2 max-w-56 truncate" title={c.armrestFunc || ""}>{c.armrestFunc || "-"}</td>
+                          <td className="px-2 py-2 max-w-48 truncate" title={c.lumbarFunc || ""}>{c.lumbarFunc || "-"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
