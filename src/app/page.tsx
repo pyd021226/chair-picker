@@ -54,7 +54,7 @@ export default function Home() {
     const w = parseFloat(weight);
     const bMin = parseFloat(budgetMin);
     const bMax = parseFloat(budgetMax);
-    router.push(`/match?h=${h}&w=${w}&bmin=${bMin}&bmax=${bMax}`);
+    router.push(`/match?h=${h}&w=${w}&bmin=${bMin}&bmax=${bMax}&sit=${sitLong ? "1" : "0"}`);
   }
 
   function progress() {
