@@ -72,8 +72,6 @@ export default function ChairContent() {
         <div className="flex-1">
           <span className="text-xs text-neutral-400">{chair.brand}</span>
           <h1 className="text-xl font-bold mt-1">{chair.name}</h1>
-      </div>
-
         </div>
       </div>
 
