@@ -168,6 +168,7 @@ function GroupStack({ list, sitLong, color, expanded, onToggle }: { list: any[];
 export default function MatchPage() {
   const { h: hStr, w: wStr, sit: sitStr } = useQueryParams();
   const [loaded, setLoaded] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   useEffect(() => { setTimeout(() => setLoaded(true), 80); }, []);
 
   const H = parseFloat(hStr), W = parseFloat(wStr);
@@ -187,8 +188,6 @@ export default function MatchPage() {
   if (!loaded) return <div className="flex items-center justify-center py-24"><div className="h-5 w-40 rounded-full bg-neutral-100 animate-pulse" /></div>;
   if (!isValid) return <div className="flex flex-col items-center justify-center py-24 gap-3"><p className="text-neutral-400">参数不完整</p><Link href="/" className="text-blue-600 text-sm hover:underline">返回首页</Link></div>;
   if (!body) return null;
-
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const toggleGroup = (key: string) => {
     setExpandedGroups(prev => {
