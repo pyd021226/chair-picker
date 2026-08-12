@@ -5,7 +5,7 @@ import { DEFAULT_CONFIG, loadConfig, saveConfig, resetConfig, exportConfig, DEFA
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import { chairs } from "@/data/chairs";
-import { getUsageStats, clearUsageRecords, loadCustomChairs, addCustomChair, removeCustomChair } from "@/engine/storage";
+import { getUsageStats, clearUsageRecords, loadCustomChairs, addCustomChair, removeCustomChair, saveCustomChairs } from "@/engine/storage";
 import type { Chair } from "@/engine/types";
 import Link from "next/link";
 
@@ -446,7 +446,7 @@ function ChairsTableTab() {
       brand: editForm.brand || orig.brand,
       name: editForm.name || orig.name,
       price: editForm.price ?? orig.price,
-      surface: (editForm.surface as any) || orig.surface,
+      surface: (editForm.surface as Chair["surface"]) || orig.surface,
       seatHeight: editForm.seatHeight || orig.seatHeight,
       seatDepth: editForm.seatDepth || orig.seatDepth,
       seatWidth: editForm.seatWidth ?? orig.seatWidth,
@@ -478,7 +478,7 @@ function ChairsTableTab() {
               <div><label className="text-xs text-neutral-500">品牌</label><input value={editForm.brand||""} onChange={e=>setEditForm({...editForm,brand:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
               <div><label className="text-xs text-neutral-500">名称</label><input value={editForm.name||""} onChange={e=>setEditForm({...editForm,name:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
               <div><label className="text-xs text-neutral-500">价格¥</label><input type="number" value={editForm.price??""} onChange={e=>setEditForm({...editForm,price:parseFloat(e.target.value)||null})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
-              <div><label className="text-xs text-neutral-500">材质</label><select value={editForm.surface||"mesh"} onChange={e=>setEditForm({...editForm,surface:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"><option value="mesh">网布</option><option value="sponge">海绵</option><option value="leather">真皮</option></select></div>
+              <div><label className="text-xs text-neutral-500">材质</label><select value={(editForm.surface as string)||"mesh"} onChange={e=>setEditForm({...editForm,surface:e.target.value as Chair["surface"]})} className="w-full px-2 py-1.5 border rounded mt-0.5"><option value="mesh">网布</option><option value="sponge">海绵</option><option value="leather">真皮</option></select></div>
               <div><label className="text-xs text-neutral-500">坐高min</label><input type="number" value={editForm.seatHeight?.min??""} onChange={e=>setEditForm({...editForm,seatHeight:{min:parseFloat(e.target.value)||0,max:editForm.seatHeight?.max??0}})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
               <div><label className="text-xs text-neutral-500">坐高max</label><input type="number" value={editForm.seatHeight?.max??""} onChange={e=>setEditForm({...editForm,seatHeight:{min:editForm.seatHeight?.min??0,max:parseFloat(e.target.value)||0}})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
               <div><label className="text-xs text-neutral-500">坐深min</label><input type="number" value={editForm.seatDepth?.min??""} onChange={e=>setEditForm({...editForm,seatDepth:{min:parseFloat(e.target.value)||0,max:editForm.seatDepth?.max??0}})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
