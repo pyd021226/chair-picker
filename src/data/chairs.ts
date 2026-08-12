@@ -1971,6 +1971,46 @@ export const chairs: Chair[] = [
       "网布",
       "大角度后仰"
     ]
+  },
+  {
+    "id": "西昊-西昊-m57",
+    "brand": "西昊",
+    "name": "西昊 M57",
+    "sku": null,
+    "imageUrl": "/chairs/sihoo-m57/1.jpg",
+    "price": 1100,
+    "priceWithFootrest": null,
+    "surface": "mesh",
+    "seatHeight": null,
+    "seatDepth": null,
+    "seatWidth": null,
+    "seatWidthEffective": null,
+    "backHeight": null,
+    "backWidth": null,
+    "lumbarWidth": null,
+    "lumbarHeight": null,
+    "lumbarFunc": "3D护脊腰靠",
+    "lumbarDepth": null,
+    "lumbarAdjustable": true,
+    "armrestHeight": null,
+    "armrestWidth": null,
+    "armrestFunc": "3D活动扶手",
+    "headrestHeight": null,
+    "headrestWidth": null,
+    "headrestFunc": "可调头枕",
+    "headrestAdjustable": true,
+    "totalHeight": null,
+    "reclineAngle": "可躺",
+    "reclineTensionAdjustable": false,
+    "baseType": null,
+    "gasCylinder": null,
+    "baseMaterial": null,
+    "maxWeight": null,
+    "tags": [
+      "网布",
+      "人体工学",
+      "带头枕"
+    ]
   }
 ];
 
