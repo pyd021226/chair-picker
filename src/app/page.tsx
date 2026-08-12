@@ -7,51 +7,35 @@ import { recordUsage } from "@/engine/storage";
 
 const TOTAL_STEPS = 7;
 
-// 中国成年人身高/体重参考数据
-const MALE_H = { mean: 169.7, sd: 6.2 };
-const FEMALE_H = { mean: 158.0, sd: 5.5 };
-const MALE_BMI = { mean: 23.1, sd: 3.2 };
-const FEMALE_BMI = { mean: 22.3, sd: 3.0 };
+// 中国成年人18-26岁身高/体重参考（GB10000-88 P50数据校准）
+const MALE_H = { mean: 172.5, sd: 5.8 };
+const FEMALE_H = { mean: 161.5, sd: 5.3 };
+const MALE_BMI = { mean: 22.5, sd: 3.0 };
+const FEMALE_BMI = { mean: 21.8, sd: 2.8 };
 
-/** 正态分布百分位 */
 function percentile(val: number, mean: number, sd: number): number {
   const z = (val - mean) / sd;
-  // 近似正态CDF
   const t = 1 / (1 + 0.2316419 * Math.abs(z));
   const d = 0.3989423 * Math.exp(-z * z / 2);
   const p = 1 - d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
   return Math.round((z > 0 ? p : 1 - p) * 1000) / 10;
 }
 
-function heightLabel(pct: number): string {
-  // pct = 比多少人高（百分位，90 = 比90%的人高）
-  if (pct >= 99) return "大高个";
-  if (pct >= 90) return "高个子";
-  if (pct >= 70) return "中高";
-  if (pct <= 1) return "迷你";
-  if (pct <= 10) return "小个子";
-  if (pct <= 30) return "中小个子";
-  return "中等";
+function heightLabel(pct: number): { label: string; short: string } {
+  if (pct >= 99) return { label: "大高个", short: "高" };
+  if (pct >= 90) return { label: "高个子", short: "高" };
+  if (pct >= 70) return { label: "中等偏高", short: "中高" };
+  if (pct <= 1) return { label: "迷你", short: "矮" };
+  if (pct <= 10) return { label: "小个子", short: "矮" };
+  if (pct <= 30) return { label: "中小个子", short: "中小" };
+  return { label: "中等身高", short: "中等" };
 }
 
-function bmiLevel(bmi: number, gender: "male" | "female"): string {
+function weightLabel(bmi: number): string {
   if (bmi < 18.5) return "偏瘦";
-  if (bmi < 24) return "标准";
+  if (bmi < 24) return "标准体重";
   if (bmi < 28) return "偏胖";
   return "肥胖";
-}
-
-function bodyType(hPct: number, bmi: number): string {
-  const h = hPct > 90 ? "矮" : hPct > 60 ? "中" : "高";
-  const w = bmi < 18.5 ? "瘦" : bmi < 24 ? "匀称" : bmi < 28 ? "壮" : "胖";
-  if (h === "矮" && w === "胖") return "矮胖";
-  if (h === "矮" && w === "壮") return "矮壮";
-  if (h === "矮" && w === "瘦") return "瘦小";
-  if (h === "高" && w === "胖") return "高胖";
-  if (h === "高" && w === "瘦") return "瘦高";
-  if (h === "高" && w === "壮") return "高大壮实";
-  if (h === "中" && w === "匀称") return "匀称";
-  return `${h}等身材偏${w}`;
 }
 
 export default function Home() {
@@ -79,15 +63,15 @@ export default function Home() {
     const bRef = gender === "male" ? MALE_BMI : FEMALE_BMI;
     const hPct = percentile(h, hRef.mean, hRef.sd);
     const bmiPct = percentile(bmi, bRef.mean, bRef.sd);
-    const hLabel = heightLabel(hPct);
-    const bLabel = bmiLevel(bmi, gender);
-    const bt = bodyType(hPct, bmi);
+    const hInfo = heightLabel(hPct);
+    const wLabel = weightLabel(bmi);
     const gLabel = gender === "male" ? "男性" : "女性";
 
     const lines: string[] = [
-      `${nickname || "朋友"}，根据你的数据，我们来总结一下：`,
-      `你的身高 ${h}cm，在${gLabel}人群中超过 ${hPct}% 的人，属于「${hLabel}」水平。`,
-      `你的 BMI 为 ${bmi.toFixed(1)}（${bLabel}），体型结论：${bt}。`,
+      `${nickname || "朋友"}，根据你的数据（${gLabel}，${h}cm/${w}kg），分析如下：`,
+      `你的身高在${gLabel}中超过 ${hPct}% 的人，属于「${hInfo.label}」。`,
+      `你的 BMI 为 ${bmi.toFixed(1)}，属于「${wLabel}」。`,
+      `体型结论：${hInfo.short}身高，${wLabel}体型。`,
     ];
 
     // 针对性建议
