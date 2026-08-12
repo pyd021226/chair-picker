@@ -5,6 +5,6 @@ export function generateStaticParams() {
   return chairs.map((c) => ({ slug: c.id }));
 }
 
-export default function ChairPage({ params }: { params: Promise<{ slug: string }> }) {
-  return <ChairContent params={params} />;
+export default function ChairPage() {
+  return <ChairContent />;
 }

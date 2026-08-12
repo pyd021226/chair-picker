@@ -1,17 +1,29 @@
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getChairById } from "@/data/chairs";
+import { chairs, getChairById } from "@/data/chairs";
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import DimensionBar from "@/components/visualization/DimensionBar";
 import RadarComparison from "@/components/visualization/RadarComparison";
 import type { BodyDimensions, ChairMatch } from "@/engine/types";
 
-export default function ChairContent({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
-  const chair = getChairById(slug);
+/** 从 URL pathname 解析 slug：/chair-picker/chair/xxx/ → xxx */
+function useSlugFromURL(): string {
+  const [slug, setSlug] = useState("");
+  useEffect(() => {
+    const path = window.location.pathname;
+    // 匹配 /chair/xxx 或 /chair/xxx/
+    const m = path.match(/\/chair\/([^/]+)/);
+    if (m) setSlug(decodeURIComponent(m[1]));
+  }, []);
+  return slug;
+}
+
+export default function ChairContent() {
+  const slug = useSlugFromURL();
+  const chair = slug ? getChairById(slug) : undefined;
 
   // 从 URL 读取 h/w 参数
   const [query, setQuery] = useState({ h: "", w: "" });
