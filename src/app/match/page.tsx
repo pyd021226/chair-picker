@@ -7,7 +7,7 @@ import { matchAllChairs } from "@/engine/matcher";
 import { calculateBodyDimensions } from "@/engine/formulas";
 import type { ChairMatch, BodyDimensions } from "@/engine/types";
 import Link from "next/link";
-import ComparisonView from "@/components/visualization/ComparisonView";
+import RadarComparison from "@/components/visualization/RadarComparison";
 import DimensionBar from "@/components/visualization/DimensionBar";
 
 function useQueryParams() {
@@ -105,7 +105,7 @@ function ChairCard({ match, rank, body, userHeight }: { match: ChairMatch; rank:
           <button onClick={() => setExpanded(!expanded)} className="ml-auto text-xs text-blue-600 hover:text-blue-800 font-medium">{expanded?"收起对比 ▲":"查看对比 ▼"}</button>
         </div>
       </div>
-      {expanded && <div className="border-t border-neutral-100 p-4 space-y-4 bg-neutral-50/50"><div className="space-y-2"><h4 className="text-sm font-semibold text-neutral-700">📐 尺寸匹配详情</h4>{coreDims.map(d => <DimensionBar key={d.key} dimKey={d.key} label={d.label} userMin={d.userIdeal.min} userMax={d.userIdeal.max} chairMin={d.chairRange.min} chairMax={d.chairRange.max} coverage={d.coverage} status={d.status} />)}</div><ComparisonView body={body} chair={chair} dimensions={dimensions} userHeight={userHeight} /></div>}
+      {expanded && <div className="border-t border-neutral-100 p-4 space-y-4 bg-neutral-50/50"><div className="space-y-2"><h4 className="text-sm font-semibold text-neutral-700">📐 尺寸匹配详情</h4>{coreDims.map(d => <DimensionBar key={d.key} dimKey={d.key} label={d.label} userMin={d.userIdeal.min} userMax={d.userIdeal.max} chairMin={d.chairRange.min} chairMax={d.chairRange.max} coverage={d.coverage} status={d.status} />)}</div><RadarComparison body={body} chair={chair} dimensions={dimensions} /></div>}
     </div>
   );
 }
