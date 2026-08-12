@@ -104,6 +104,70 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
   );
 }
 
+/* 分组堆叠：默认只显示最低价卡片，点击展开全部（每排最多3个） */
+function GroupStack({ list, sitLong, color }: { list: any[]; sitLong: boolean; color: string }) {
+  const [expanded, setExpanded] = useState(false);
+
+  // 按价格排序，最低价放最前面
+  const sorted = [...list].sort((a, b) => (a.chair.price ?? Infinity) - (b.chair.price ?? Infinity));
+  const front = sorted[0];
+  const rest = sorted.slice(1);
+
+  if (!expanded) {
+    // 堆叠态：只显示一张 + 后面几张的边角
+    return (
+      <div
+        className="relative cursor-pointer"
+        onClick={() => setExpanded(true)}
+        style={{ height: "210px" }}
+      >
+        {/* 后面的卡片角（视觉堆叠） */}
+        {rest.slice(0, 2).map((m, i) => (
+          <div
+            key={m.chair.id}
+            className="absolute inset-x-0 rounded-2xl border border-neutral-200 bg-neutral-50"
+            style={{
+              top: (i + 1) * 8,
+              transform: `scale(${1 - (i + 1) * 0.03})`,
+              height: "100%",
+              opacity: 0.5,
+            }}
+          />
+        ))}
+        {/* 前面卡片 */}
+        <div className="absolute inset-0" style={{ zIndex: 3 }}>
+          <ChairCard match={front} sitLong={sitLong} />
+        </div>
+        {/* 数量徽章 */}
+        {list.length > 1 && (
+          <div
+            className="absolute -top-2 -right-2 z-20 text-white text-xs font-bold rounded-full flex items-center justify-center"
+            style={{ backgroundColor: color, width: "28px", height: "28px", boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}
+          >
+            +{list.length - 1}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 展开态：每排最多3个
+  return (
+    <div className="space-y-2">
+      <button onClick={() => setExpanded(false)} className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors mb-2">
+        收起
+      </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {list.map((m, i) => (
+          <div key={m.chair.id} style={{ animation: `fade-up 0.3s cubic-bezier(0.16,1,0.3,1) both ${i * 0.04}s` }}>
+            <ChairCard match={m} sitLong={sitLong} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* 主页面 */
 export default function MatchPage() {
   const { h: hStr, w: wStr, sit: sitStr } = useQueryParams();
@@ -163,25 +227,10 @@ export default function MatchPage() {
               {g.label}
               <span className="text-neutral-400 font-normal text-xs ml-1">({g.list.length})</span>
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {g.list.slice(0, 3).map((m, i) => (
-                <div key={m.chair.id} style={{ animation: `fade-up 0.35s cubic-bezier(0.16,1,0.3,1) both ${i * 0.06}s` }}>
-                  <ChairCard match={m} sitLong={sitLong} />
-                </div>
-              ))}
-            </div>
-            {g.list.length > 3 && (
-              <details className="mt-4">
-                <summary className="text-xs text-neutral-400 cursor-pointer hover:text-neutral-600">展开剩余 {g.list.length - 3} 款</summary>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                  {g.list.slice(3).map((m, i) => (
-                    <div key={m.chair.id} style={{ animation: `fade-up 0.35s cubic-bezier(0.16,1,0.3,1) both ${i * 0.04}s` }}>
-                      <ChairCard match={m} sitLong={sitLong} />
-                    </div>
-                  ))}
-                </div>
-              </details>
-            )}
+            <GroupStack list={g.list} sitLong={sitLong} color={g.color} />
+          </div>
+        );
+      })}
           </div>
         );
       })}
