@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "GITHUB_PAGES=true next build && git checkout --orphan gh-pages-temp && git rm -rf --cached . && git clean -fdx --exclude=out --exclude=.git --exclude=node_modules && cp -r out/* . && touch .nojekyll && git add -A && git commit -m \"Deploy\" && git push origin gh-pages-temp:gh-pages --force && git checkout main --force && git branch -D gh-pages-temp && echo \"✅ 部署完成！https://pyd021226.github.io/chair-picker/\""
   },
   "dependencies": {
     "next": "16.3.0",
