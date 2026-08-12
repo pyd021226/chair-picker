@@ -61,12 +61,19 @@ export default function DimensionBar(p: Props) {
 
   // ====== 坐高 / 坐深：范围重叠型 ======
   const isSeatDepth = dimKey === "seatDepth";
+  const cSingle = cm === cM;
   const allMin = Math.min(um, cm), allMax = Math.max(uM, cM);
   const span = allMax - allMin || 1;
-  const pad = span * 0.35;
+  // 固定值椅子给予更大的视觉宽度
+  const pad = span * 0.4;
   const vMin = allMin - pad, vMax = allMax + pad, vS = vMax - vMin || 1;
   const L = (v: number) => ((v - vMin) / vS) * 100;
-  const W = (a: number, b: number) => Math.max(2, Math.abs(b - a) / vS * 100);
+  // 固定值至少占视觉宽度12%，范围值至少2%
+  const W = (a: number, b: number) => Math.max(cSingle ? 12 : 2, Math.abs(b - a) / vS * 100);
+
+  // 固定值时，L稍微左移使条居中（因为条有最小宽度）
+  const chairL = cSingle ? L(cm) - W(cm, cM) / 2 : L(cm);
+  const chairW = W(cm, cM);
   const oMin = Math.max(um, cm), oMax = Math.min(uM, cM);
   const hasOverlap = oMin < oMax;
   const gap = hasOverlap ? 0 : um > cM ? um - cM : cm - uM;
@@ -81,10 +88,10 @@ export default function DimensionBar(p: Props) {
       <div className="relative mx-2" style={{ height: 52, marginBottom: 22 }}>
         {/* 椅子完整范围 — 灰色条 */}
         <div className="absolute rounded border-2 border-neutral-400 bg-neutral-200/70 flex items-center justify-center"
-          style={{ left: `${L(cm)}%`, width: `${W(cm, cM)}%`, top: 0, height: 40 }}>
-          {W(cm, cM) > 12 && (
+          style={{ left: `${chairL}%`, width: `${chairW}%`, top: 0, height: 40 }}>
+          {chairW > 8 && (
             <span className="text-[10px] text-neutral-600 font-medium truncate px-1">
-              椅子 {f(cm)}{cm === cM ? "" : `-${f(cM)}`}
+              椅子 {f(cm)}{cSingle ? "" : `-${f(cM)}`}
             </span>
           )}
         </div>
