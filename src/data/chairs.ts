@@ -32,7 +32,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "5D腰托（上下/前后/左右/旋转多维调节）",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": true,
     "armrestHeight": {
       "min": 65,
@@ -45,7 +45,7 @@ export const chairs: Chair[] = [
       "max": 20
     },
     "headrestWidth": 36,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（20cm × 36cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 112,
@@ -56,7 +56,7 @@ export const chairs: Chair[] = [
     "baseType": "蝴蝶底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 130,
     "tags": [
       "网布",
       "多维护腰",
@@ -92,7 +92,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "5D大腰托（加宽加厚，多维调节）",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": true,
     "armrestHeight": {
       "min": 66.5,
@@ -105,7 +105,7 @@ export const chairs: Chair[] = [
       "max": 20
     },
     "headrestWidth": 36,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（20cm × 36cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 112,
@@ -116,7 +116,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维护腰",
@@ -148,7 +148,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": 66.5,
     "lumbarHeight": null,
     "lumbarFunc": "AI智能追腰（自适应随动）",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 63,
@@ -161,18 +161,18 @@ export const chairs: Chair[] = [
       "max": 19.5
     },
     "headrestWidth": 40.5,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（19.5cm × 40.5cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 105,
       "max": 135
     },
     "reclineAngle": "140°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应底盘",
     "gasCylinder": "四级",
     "baseMaterial": "铝合金",
-    "maxWeight": null,
+    "maxWeight": 150,
     "tags": [
       "网布",
       "AI追腰",
@@ -203,7 +203,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "4D腰托（多维调节）",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": true,
     "armrestHeight": {
       "min": 64,
@@ -216,7 +216,7 @@ export const chairs: Chair[] = [
       "max": 17
     },
     "headrestWidth": 36,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（17cm × 36cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 113,
@@ -227,7 +227,7 @@ export const chairs: Chair[] = [
     "baseType": "钢制底盘",
     "gasCylinder": null,
     "baseMaterial": "尼龙",
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维护腰",
@@ -258,7 +258,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": 61.5,
     "lumbarHeight": 26.5,
     "lumbarFunc": "3区AI追腰（随动贴合）",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 69.5,
@@ -271,18 +271,18 @@ export const chairs: Chair[] = [
       "max": 19.5
     },
     "headrestWidth": 41,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（19.5cm × 41cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116,
       "max": 132.5
     },
     "reclineAngle": "150°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应底盘",
     "gasCylinder": "四级",
     "baseMaterial": "钢制五爪",
-    "maxWeight": null,
+    "maxWeight": 150,
     "tags": [
       "网布",
       "AI追腰",
@@ -313,7 +313,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "5维撑腰",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 64,
@@ -326,7 +326,7 @@ export const chairs: Chair[] = [
       "max": 17
     },
     "headrestWidth": 33.5,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（17cm × 33.5cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 112,
@@ -337,7 +337,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 150,
     "tags": [
       "网布",
       "多维扶手",
@@ -371,7 +371,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "4D腰托（多维调节）",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": true,
     "armrestHeight": {
       "min": 67.5,
@@ -384,7 +384,7 @@ export const chairs: Chair[] = [
       "max": 20
     },
     "headrestWidth": 36,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（20cm × 36cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 106,
@@ -395,7 +395,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": "尼龙",
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维护腰",
@@ -426,7 +426,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": 61.5,
     "lumbarHeight": 26.5,
     "lumbarFunc": "3区云翼随动追腰",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 66,
@@ -439,18 +439,18 @@ export const chairs: Chair[] = [
       "max": 19.5
     },
     "headrestWidth": 41,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（19.5cm × 41cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116,
       "max": 132.5
     },
     "reclineAngle": "140°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应底盘",
     "gasCylinder": "四级",
     "baseMaterial": "钢制",
-    "maxWeight": null,
+    "maxWeight": 150,
     "tags": [
       "网布",
       "大角度后仰",
@@ -481,7 +481,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": 61.5,
     "lumbarHeight": 26.5,
     "lumbarFunc": "3区腰托 + 按摩热敷",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 69.5,
@@ -494,18 +494,18 @@ export const chairs: Chair[] = [
       "max": 19.5
     },
     "headrestWidth": 41,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（19.5cm × 41cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116,
       "max": 132.5
     },
     "reclineAngle": "140°（四档）",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应底盘",
     "gasCylinder": "四级",
     "baseMaterial": "钢制五爪",
-    "maxWeight": null,
+    "maxWeight": 150,
     "tags": [
       "网布",
       "大角度后仰",
@@ -539,7 +539,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "四维旋转腰靠",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 64.5,
@@ -552,7 +552,7 @@ export const chairs: Chair[] = [
       "max": 10.5
     },
     "headrestWidth": 36,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（10.5cm × 36cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 111,
@@ -563,7 +563,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "大角度后仰",
@@ -597,7 +597,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "四维旋转腰靠",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 64.5,
@@ -610,7 +610,7 @@ export const chairs: Chair[] = [
       "max": 10.5
     },
     "headrestWidth": 36,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（10.5cm × 36cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 111,
@@ -621,7 +621,7 @@ export const chairs: Chair[] = [
     "baseType": "双柄无级底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "入门款"
@@ -664,7 +664,7 @@ export const chairs: Chair[] = [
       "max": 10.5
     },
     "headrestWidth": 36,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（10.5cm × 36cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116.5,
@@ -675,7 +675,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "真皮"
     ]
@@ -717,7 +717,7 @@ export const chairs: Chair[] = [
       "max": 10.5
     },
     "headrestWidth": 36,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（10.5cm × 36cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116.5,
@@ -728,7 +728,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "真皮"
     ]
@@ -781,7 +781,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布"
     ]
@@ -819,7 +819,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "大角度后仰"
     ]
@@ -857,7 +857,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "大角度后仰"
     ]
@@ -910,7 +910,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手",
@@ -966,7 +966,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 130,
     "tags": [
       "网布",
       "大角度后仰",
@@ -1015,7 +1015,7 @@ export const chairs: Chair[] = [
     "baseType": "曲木板底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "中端"
@@ -1063,7 +1063,7 @@ export const chairs: Chair[] = [
     "baseType": "曲木板底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "中端"
@@ -1111,7 +1111,7 @@ export const chairs: Chair[] = [
     "baseType": "360°旋转底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "中端"
@@ -1159,7 +1159,7 @@ export const chairs: Chair[] = [
     "baseType": "360°旋转底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "中端"
@@ -1205,7 +1205,7 @@ export const chairs: Chair[] = [
       "max": 20.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（20.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 107.5,
@@ -1216,7 +1216,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "入门款"
@@ -1249,7 +1249,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "6D腰托",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 64.5,
@@ -1262,18 +1262,18 @@ export const chairs: Chair[] = [
       "max": 22.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（22.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 118,
       "max": 133.5
     },
     "reclineAngle": "140°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手",
@@ -1307,7 +1307,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "6D腰托",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 64.5,
@@ -1320,18 +1320,18 @@ export const chairs: Chair[] = [
       "max": 22.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（22.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 118,
       "max": 133.5
     },
     "reclineAngle": "140°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手",
@@ -1378,7 +1378,7 @@ export const chairs: Chair[] = [
       "max": 20.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（20.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 107.5,
@@ -1389,7 +1389,7 @@ export const chairs: Chair[] = [
     "baseType": "钢制底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手",
@@ -1423,7 +1423,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "腰托随背联动",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 66.5,
@@ -1436,18 +1436,18 @@ export const chairs: Chair[] = [
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（21.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 110,
       "max": 142
     },
     "reclineAngle": "140°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应四档阻尼底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手",
@@ -1481,7 +1481,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "腰托随背联动",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 66.5,
@@ -1494,18 +1494,18 @@ export const chairs: Chair[] = [
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（21.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 110,
       "max": 142
     },
     "reclineAngle": "140°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应四档阻尼底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手",
@@ -1539,7 +1539,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "腰托随背联动",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 65.5,
@@ -1552,18 +1552,18 @@ export const chairs: Chair[] = [
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（21.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 109.5,
       "max": 132.5
     },
     "reclineAngle": "135°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手"
@@ -1596,7 +1596,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "腰托随背联动",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 65.5,
@@ -1609,18 +1609,18 @@ export const chairs: Chair[] = [
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（21.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 109.5,
       "max": 132.5
     },
     "reclineAngle": "135°",
-    "reclineTensionAdjustable": false,
+    "reclineTensionAdjustable": true,
     "baseType": "重力感应底盘",
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手"
@@ -1666,7 +1666,7 @@ export const chairs: Chair[] = [
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（21.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 109.5,
@@ -1677,7 +1677,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手",
@@ -1724,7 +1724,7 @@ export const chairs: Chair[] = [
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": null,
+    "headrestFunc": "固定头枕（21.5cm × 38cm）",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 109.5,
@@ -1735,7 +1735,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "多维扶手",
@@ -1769,7 +1769,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "20°悬浮腰托",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 67,
@@ -1782,7 +1782,7 @@ export const chairs: Chair[] = [
       "max": 29.5
     },
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "可调头枕（高22-29.5cm）",
     "headrestAdjustable": true,
     "totalHeight": {
       "min": 113,
@@ -1793,7 +1793,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "大角度后仰",
@@ -1827,7 +1827,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "20°悬浮腰托",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 67,
@@ -1840,7 +1840,7 @@ export const chairs: Chair[] = [
       "max": 29.5
     },
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "可调头枕（高22-29.5cm）",
     "headrestAdjustable": true,
     "totalHeight": {
       "min": 113,
@@ -1851,7 +1851,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "大角度后仰",
@@ -1885,7 +1885,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "20°悬浮腰托",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 67,
@@ -1898,7 +1898,7 @@ export const chairs: Chair[] = [
       "max": 29.5
     },
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "可调头枕（高22-29.5cm）",
     "headrestAdjustable": true,
     "totalHeight": {
       "min": 113,
@@ -1909,7 +1909,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "大角度后仰"
@@ -1942,7 +1942,7 @@ export const chairs: Chair[] = [
     "lumbarWidth": null,
     "lumbarHeight": null,
     "lumbarFunc": "20°悬浮腰托",
-    "lumbarDepth": null,
+    "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
       "min": 67,
@@ -1955,7 +1955,7 @@ export const chairs: Chair[] = [
       "max": 29.5
     },
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "可调头枕（高22-29.5cm）",
     "headrestAdjustable": true,
     "totalHeight": {
       "min": 113,
@@ -1966,7 +1966,7 @@ export const chairs: Chair[] = [
     "baseType": null,
     "gasCylinder": null,
     "baseMaterial": null,
-    "maxWeight": null,
+    "maxWeight": 110,
     "tags": [
       "网布",
       "大角度后仰"

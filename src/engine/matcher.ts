@@ -19,6 +19,7 @@ import {
   scoreSeatHeight,
   scoreSeatDepth,
 } from "./formulas";
+import { DEFAULT_CONFIG, type FormulaConfig } from "./config";
 
 // ---- 默认权重 ----
 // 核心尺寸权重高，功能/偏好维度权重低
@@ -78,11 +79,12 @@ function scoreByDeviation(
 interface ScoreContext {
   body: BodyDimensions;
   chair: Chair;
+  cfg: FormulaConfig;
 }
 
 function scoreSeatWidth(ctx: ScoreContext): DimensionResult {
   const userIdeal = ctx.body.seatWidth;
-  const effectiveWidth = getEffectiveSeatWidth(ctx.chair);
+  const effectiveWidth = getEffectiveSeatWidth(ctx.chair, ctx.cfg);
   const chairRange: Range = effectiveWidth !== null
     ? { min: effectiveWidth, max: effectiveWidth }
     : { min: 0, max: 0 };
@@ -328,10 +330,11 @@ export function matchChair(
   chair: Chair,
   H: number,
   W: number,
-  weights: WeightConfig = DEFAULT_WEIGHTS
+  weights: WeightConfig = DEFAULT_WEIGHTS,
+  cfg: FormulaConfig = DEFAULT_CONFIG
 ): ChairMatch {
-  const body = calculateBodyDimensions(H, W);
-  const ctx: ScoreContext = { body, chair };
+  const body = calculateBodyDimensions(H, W, cfg);
+  const ctx: ScoreContext = { body, chair, cfg };
 
   // 坐高 — 使用特殊评分规则
   const sh = (() => {
@@ -415,10 +418,11 @@ export function matchAllChairs(
   chairs: Chair[],
   H: number,
   W: number,
-  weights?: WeightConfig
+  weights?: WeightConfig,
+  cfg?: FormulaConfig
 ): ChairMatch[] {
   const validChairs = chairs.filter((c) => c.seatHeight !== null || c.seatDepth !== null);
   return validChairs
-    .map((c) => matchChair(c, H, W, weights))
+    .map((c) => matchChair(c, H, W, weights, cfg))
     .sort((a, b) => b.overallScore - a.overallScore);
 }

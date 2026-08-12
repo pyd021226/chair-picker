@@ -138,76 +138,102 @@ function ChairCard({
     (d) => ["seatHeight", "seatDepth", "seatWidth", "backHeight", "armrestHeight"].includes(d.key) && !d.chairDataMissing
   );
 
+  const scoreColor =
+    overallScore >= 85 ? "bg-emerald-500" : overallScore >= 70 ? "bg-amber-500" : "bg-red-500";
+
   return (
-    <div className="border border-neutral-200 rounded-xl hover:border-neutral-300 hover:shadow-sm transition-all overflow-hidden">
-      {/* Header — clickable */}
+    <div className="border border-neutral-200 rounded-xl hover:border-neutral-300 hover:shadow-md transition-all overflow-hidden bg-white">
+      {/* Top: Image section */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left p-4 cursor-pointer"
+        className="w-full text-left cursor-pointer group"
       >
-        <div className="flex items-start gap-3">
-          {/* Chair image */}
-          <div className="flex-shrink-0 w-14 h-14 rounded-lg bg-neutral-100 overflow-hidden">
-            {chair.imageUrl ? (
-              <img src={chair.imageUrl} alt={chair.name} className="w-full h-full object-cover" loading="lazy" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-xl">🪑</div>
-            )}
-          </div>
-          <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-neutral-100 flex flex-col items-center justify-center">
-            <span className="text-xs text-neutral-400">#{rank}</span>
-            <span className="text-lg font-bold text-neutral-900">{overallScore}%</span>
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-semibold text-neutral-900 truncate">{chair.name}</h4>
-              <span className="text-xs text-neutral-400">{chair.brand}</span>
+        <div className="relative aspect-[3/1] bg-neutral-100 overflow-hidden">
+          {chair.imageUrl ? (
+            <img
+              src={chair.imageUrl}
+              alt={chair.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-200 text-neutral-300">
+              <span className="text-5xl">🪑</span>
+              <span className="text-xs mt-2 text-neutral-400">暂无图片</span>
             </div>
+          )}
 
-            <div className="mt-2 space-y-1">
-              {topDimensions.map((dim) => (
-                <div key={dim.key} className="flex items-center gap-2 text-xs">
-                  <span className="w-10 text-neutral-400 flex-shrink-0">{dim.label}</span>
-                  <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        dim.status === "good"
-                          ? "bg-emerald-500"
-                          : dim.status === "marginal"
-                            ? "bg-amber-400"
-                            : "bg-red-400"
-                      }`}
-                      style={{ width: `${Math.round(dim.coverage * 100)}%` }}
-                    />
-                  </div>
-                  <span className="w-8 text-right text-neutral-500">{Math.round(dim.coverage * 100)}%</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-1.5 flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-neutral-500">{summary}</span>
-              {chair.price !== null && <span className="text-xs font-semibold text-blue-600">¥{chair.price}</span>}
-              {chair.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">
-                  {tag}
-                </span>
-              ))}
+          {/* Score badge overlaid */}
+          <div className="absolute top-3 right-3">
+            <div className={`${scoreColor} text-white rounded-full w-14 h-14 flex flex-col items-center justify-center shadow-lg`}>
+              <span className="text-lg font-bold leading-tight">{overallScore}</span>
+              <span className="text-[9px] leading-tight opacity-90">分</span>
             </div>
           </div>
 
-          {/* Expand indicator */}
-          <div className="flex-shrink-0 text-neutral-300 text-sm mt-1">{expanded ? "▲" : "▼"}</div>
+          {/* Rank badge */}
+          <div className="absolute top-3 left-3 bg-black/60 text-white text-xs rounded-full w-7 h-7 flex items-center justify-center backdrop-blur-sm">
+            {rank}
+          </div>
+
+          {/* Bottom gradient overlay with name */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-8">
+            <h4 className="font-bold text-white text-base truncate">{chair.name}</h4>
+            <span className="text-white/70 text-xs">{chair.brand}</span>
+          </div>
         </div>
       </button>
+
+      {/* Bottom: Info bar */}
+      <div className="px-4 py-3 space-y-2">
+        {/* Mini dimension bars */}
+        <div className="flex gap-2">
+          {topDimensions.map((dim) => (
+            <div key={dim.key} className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] text-neutral-400">{dim.label}</span>
+                <span className={`text-[10px] font-medium ${
+                  dim.status === "good" ? "text-emerald-600" : dim.status === "marginal" ? "text-amber-600" : "text-red-500"
+                }`}>
+                  {Math.round(dim.coverage * 100)}%
+                </span>
+              </div>
+              <div className="h-1 bg-neutral-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${
+                    dim.status === "good" ? "bg-emerald-500" : dim.status === "marginal" ? "bg-amber-400" : "bg-red-400"
+                  }`}
+                  style={{ width: `${Math.round(dim.coverage * 100)}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tags + Price + Expand */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {chair.price !== null && (
+            <span className="text-sm font-bold text-blue-600">¥{chair.price}</span>
+          )}
+          {chair.tags.slice(0, 3).map((tag) => (
+            <span key={tag} className="text-[10px] bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded-full">
+              {tag}
+            </span>
+          ))}
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="ml-auto text-xs text-blue-600 hover:text-blue-800 font-medium"
+          >
+            {expanded ? "收起对比 ▲" : "查看对比 ▼"}
+          </button>
+        </div>
+      </div>
 
       {/* Expanded detail */}
       {expanded && (
         <div className="border-t border-neutral-100 p-4 space-y-4 bg-neutral-50/50">
-          {/* Dimension bars */}
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-neutral-700">尺寸匹配详情</h4>
+            <h4 className="text-sm font-semibold text-neutral-700">📐 尺寸匹配详情</h4>
             {coreDimensions.map((dim) => (
               <DimensionBar
                 key={dim.key}
@@ -221,8 +247,6 @@ function ChairCard({
               />
             ))}
           </div>
-
-          {/* SVG comparison */}
           <ComparisonView body={body} chair={chair} dimensions={dimensions} userHeight={userHeight} />
         </div>
       )}

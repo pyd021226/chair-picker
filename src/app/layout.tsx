@@ -19,7 +19,7 @@ export default function RootLayout({
         <footer className="text-center text-xs text-neutral-400 py-6 mt-auto space-y-1">
           <p>
             <a
-              href="https://space.bilibili.com/"
+              href="https://space.bilibili.com/941799"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-blue-500 transition-colors"
