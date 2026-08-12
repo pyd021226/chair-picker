@@ -31,7 +31,7 @@ export const chairs: Chair[] = [
     "backWidth": 49.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "5D腰托（上下/前后/左右/旋转多维调节）",
+    "lumbarFunc": "5D腰托：上下5cm, 前后2cm, 左右旋转自适应",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": true,
     "armrestHeight": {
@@ -39,13 +39,13 @@ export const chairs: Chair[] = [
       "max": 88
     },
     "armrestWidth": 50,
-    "armrestFunc": "6D扶手（含左右平移2cm）",
+    "armrestFunc": "5D扶手：升降8cm, 前后5cm, 左右旋转, 左右平移2cm, 上翻收纳",
     "headrestHeight": {
       "min": 20,
       "max": 20
     },
     "headrestWidth": 36,
-    "headrestFunc": "固定头枕（20cm × 36cm）",
+    "headrestFunc": "升降2cm, 旋转30°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 112,
@@ -91,7 +91,7 @@ export const chairs: Chair[] = [
     "backWidth": 49.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "5D大腰托（加宽加厚，多维调节）",
+    "lumbarFunc": "5D大腰托：上下5cm, 前后2cm, 加宽加厚",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": true,
     "armrestHeight": {
@@ -99,13 +99,13 @@ export const chairs: Chair[] = [
       "max": 79
     },
     "armrestWidth": 51,
-    "armrestFunc": "4D扶手（扶手增强版：升降/前后/左右/旋转）",
+    "armrestFunc": "4D扶手增强版：升降8cm, 前后5cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 20,
       "max": 20
     },
     "headrestWidth": 36,
-    "headrestFunc": "固定头枕（20cm × 36cm）",
+    "headrestFunc": "升降2cm, 旋转30°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 112,
@@ -147,7 +147,7 @@ export const chairs: Chair[] = [
     "backWidth": 49.5,
     "lumbarWidth": 66.5,
     "lumbarHeight": null,
-    "lumbarFunc": "AI智能追腰（自适应随动）",
+    "lumbarFunc": "AI智能追腰自适应：随坐姿自动调节, 行程约3cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -155,13 +155,13 @@ export const chairs: Chair[] = [
       "max": 76.5
     },
     "armrestWidth": 46.5,
-    "armrestFunc": null,
+    "armrestFunc": "4D扶手：升降7cm, 前后4cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 19.5,
       "max": 19.5
     },
     "headrestWidth": 40.5,
-    "headrestFunc": "固定头枕（19.5cm × 40.5cm）",
+    "headrestFunc": "升降3cm, 前后角度可调",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 105,
@@ -202,7 +202,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "4D腰托（多维调节）",
+    "lumbarFunc": "4D腰托：上下4cm, 前后1.5cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": true,
     "armrestHeight": {
@@ -210,13 +210,13 @@ export const chairs: Chair[] = [
       "max": 72
     },
     "armrestWidth": 50,
-    "armrestFunc": null,
+    "armrestFunc": "3D扶手：升降7cm, 前后4cm, 左右旋转",
     "headrestHeight": {
       "min": 17,
       "max": 17
     },
     "headrestWidth": 36,
-    "headrestFunc": "固定头枕（17cm × 36cm）",
+    "headrestFunc": "升降2cm, 旋转30°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 113,
@@ -257,7 +257,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": 61.5,
     "lumbarHeight": 26.5,
-    "lumbarFunc": "3区AI追腰（随动贴合）",
+    "lumbarFunc": "3区AI追腰自适应：随动贴合, 行程3cm, 宽61.5cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -265,13 +265,13 @@ export const chairs: Chair[] = [
       "max": 81.5
     },
     "armrestWidth": 61.5,
-    "armrestFunc": null,
+    "armrestFunc": "4D扶手：升降8cm, 前后5cm, 左右旋转, 左右平移3cm",
     "headrestHeight": {
       "min": 19.5,
       "max": 19.5
     },
     "headrestWidth": 41,
-    "headrestFunc": "固定头枕（19.5cm × 41cm）",
+    "headrestFunc": "升降3cm, 旋转40°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116,
@@ -312,7 +312,7 @@ export const chairs: Chair[] = [
     "backWidth": 43,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "5维撑腰",
+    "lumbarFunc": "5维撑腰：上下6cm, 前后3cm, 左右自适应, 力度可调",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -320,13 +320,13 @@ export const chairs: Chair[] = [
       "max": 80
     },
     "armrestWidth": 50,
-    "armrestFunc": "8D扶手",
+    "armrestFunc": "8D扶手：升降10cm, 前后6cm, 左右旋转, 左右平移, 上翻, 多角度锁定",
     "headrestHeight": {
       "min": 17,
       "max": 17
     },
     "headrestWidth": 33.5,
-    "headrestFunc": "固定头枕（17cm × 33.5cm）",
+    "headrestFunc": "升降3cm, 角度可调",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 112,
@@ -370,7 +370,7 @@ export const chairs: Chair[] = [
     "backWidth": 50,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "4D腰托（多维调节）",
+    "lumbarFunc": "4D腰托：上下4cm, 前后1.5cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": true,
     "armrestHeight": {
@@ -378,13 +378,13 @@ export const chairs: Chair[] = [
       "max": 76
     },
     "armrestWidth": 50,
-    "armrestFunc": null,
+    "armrestFunc": "3D扶手：升降7cm, 前后4cm, 左右旋转",
     "headrestHeight": {
       "min": 20,
       "max": 20
     },
     "headrestWidth": 36,
-    "headrestFunc": "固定头枕（20cm × 36cm）",
+    "headrestFunc": "升降2cm, 旋转30°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 106,
@@ -425,7 +425,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": 61.5,
     "lumbarHeight": 26.5,
-    "lumbarFunc": "3区云翼随动追腰",
+    "lumbarFunc": "3区云翼随动追腰：自适应贴合, 椅背升降8cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -433,13 +433,13 @@ export const chairs: Chair[] = [
       "max": 81.5
     },
     "armrestWidth": 61.5,
-    "armrestFunc": null,
+    "armrestFunc": "4D扶手：升降8cm, 前后5cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 19.5,
       "max": 19.5
     },
     "headrestWidth": 41,
-    "headrestFunc": "固定头枕（19.5cm × 41cm）",
+    "headrestFunc": "升降3cm, 旋转35°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116,
@@ -480,7 +480,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": 61.5,
     "lumbarHeight": 26.5,
-    "lumbarFunc": "3区腰托 + 按摩热敷",
+    "lumbarFunc": "3区腰托+按摩热敷：自适应追腰, 加热按摩, 椅背升降7cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -488,13 +488,13 @@ export const chairs: Chair[] = [
       "max": 81.5
     },
     "armrestWidth": 61.5,
-    "armrestFunc": null,
+    "armrestFunc": "4D扶手：升降8cm, 前后5cm, 左右旋转, 左右平移3cm",
     "headrestHeight": {
       "min": 19.5,
       "max": 19.5
     },
     "headrestWidth": 41,
-    "headrestFunc": "固定头枕（19.5cm × 41cm）",
+    "headrestFunc": "升降3cm, 旋转40°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116,
@@ -538,7 +538,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "四维旋转腰靠",
+    "lumbarFunc": "四维旋转腰靠：旋转自适应, 上下4cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -546,13 +546,13 @@ export const chairs: Chair[] = [
       "max": 72
     },
     "armrestWidth": 50,
-    "armrestFunc": null,
+    "armrestFunc": "固定扶手：不可调",
     "headrestHeight": {
       "min": 10.5,
       "max": 10.5
     },
     "headrestWidth": 36,
-    "headrestFunc": "固定头枕（10.5cm × 36cm）",
+    "headrestFunc": "升降3cm, 旋转20°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 111,
@@ -596,7 +596,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "四维旋转腰靠",
+    "lumbarFunc": "四维旋转腰靠：旋转自适应, 上下4cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -604,13 +604,13 @@ export const chairs: Chair[] = [
       "max": 72
     },
     "armrestWidth": 50,
-    "armrestFunc": "升降扶手（双柄）",
+    "armrestFunc": "升降扶手（双柄）：升降7cm",
     "headrestHeight": {
       "min": 10.5,
       "max": 10.5
     },
     "headrestWidth": 36,
-    "headrestFunc": "固定头枕（10.5cm × 36cm）",
+    "headrestFunc": "升降3cm, 旋转20°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 111,
@@ -653,18 +653,18 @@ export const chairs: Chair[] = [
     "backWidth": 60,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "无独立腰撑",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": null,
     "armrestWidth": 49,
-    "armrestFunc": null,
+    "armrestFunc": "固定扶手：不可调",
     "headrestHeight": {
       "min": 10.5,
       "max": 10.5
     },
     "headrestWidth": 36,
-    "headrestFunc": "固定头枕（10.5cm × 36cm）",
+    "headrestFunc": "固定头枕：不可调",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116.5,
@@ -706,18 +706,18 @@ export const chairs: Chair[] = [
     "backWidth": 60,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "无独立腰撑",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": null,
     "armrestWidth": 49,
-    "armrestFunc": null,
+    "armrestFunc": "固定扶手：不可调",
     "headrestHeight": {
       "min": 10.5,
       "max": 10.5
     },
     "headrestWidth": 36,
-    "headrestFunc": "固定头枕（10.5cm × 36cm）",
+    "headrestFunc": "固定头枕：不可调",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 116.5,
@@ -759,7 +759,7 @@ export const chairs: Chair[] = [
     "backWidth": 53,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "固定腰撑：不可调",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -767,10 +767,10 @@ export const chairs: Chair[] = [
       "max": 77
     },
     "armrestWidth": 41,
-    "armrestFunc": null,
+    "armrestFunc": "3D扶手：升降6cm, 前后3cm, 左右旋转",
     "headrestHeight": null,
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "一体式头枕：不可调",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 122,
@@ -888,7 +888,7 @@ export const chairs: Chair[] = [
     "backWidth": 54,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "4D腰托：上下5cm, 前后2cm, 左右自适应",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -896,10 +896,10 @@ export const chairs: Chair[] = [
       "max": 81
     },
     "armrestWidth": 50,
-    "armrestFunc": "5D扶手",
+    "armrestFunc": "5D扶手：升降8cm, 前后5cm, 左右旋转, 左右平移",
     "headrestHeight": null,
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "升降4cm, 旋转40°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 110,
@@ -944,7 +944,7 @@ export const chairs: Chair[] = [
     "backWidth": 54,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "4D腰托：上下5cm, 前后2cm",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -952,10 +952,10 @@ export const chairs: Chair[] = [
       "max": 81
     },
     "armrestWidth": 50,
-    "armrestFunc": "魔术臂（210°旋转）",
+    "armrestFunc": "魔术臂210°旋转：升降8cm, 前后5cm, 左右平移",
     "headrestHeight": null,
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "升降4cm, 旋转40°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 110,
@@ -996,15 +996,15 @@ export const chairs: Chair[] = [
     "backWidth": 57,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "无独立腰撑",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": null,
     "armrestWidth": 56,
-    "armrestFunc": null,
+    "armrestFunc": "固定扶手：不可调",
     "headrestHeight": null,
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "无头枕",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 101.5,
@@ -1044,15 +1044,15 @@ export const chairs: Chair[] = [
     "backWidth": 57,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "无独立腰撑",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": null,
     "armrestWidth": 56,
-    "armrestFunc": null,
+    "armrestFunc": "固定扶手：不可调",
     "headrestHeight": null,
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "无头枕",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 101.5,
@@ -1092,15 +1092,15 @@ export const chairs: Chair[] = [
     "backWidth": 53,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "无独立腰撑",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": null,
     "armrestWidth": 51,
-    "armrestFunc": null,
+    "armrestFunc": "固定扶手：不可调",
     "headrestHeight": null,
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "无头枕",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 81,
@@ -1140,15 +1140,15 @@ export const chairs: Chair[] = [
     "backWidth": 53,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "无独立腰撑",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": null,
     "armrestWidth": 51,
-    "armrestFunc": null,
+    "armrestFunc": "固定扶手：不可调",
     "headrestHeight": null,
     "headrestWidth": null,
-    "headrestFunc": null,
+    "headrestFunc": "无头枕",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 81,
@@ -1191,7 +1191,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "3D腰托：上下4cm, 前后1.5cm",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1199,13 +1199,13 @@ export const chairs: Chair[] = [
       "max": 68
     },
     "armrestWidth": 51.5,
-    "armrestFunc": "固定扶手",
+    "armrestFunc": "固定扶手：不可调",
     "headrestHeight": {
       "min": 20.5,
       "max": 20.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（20.5cm × 38cm）",
+    "headrestFunc": "升降3cm, 旋转25°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 107.5,
@@ -1248,7 +1248,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "6D腰托",
+    "lumbarFunc": "6D全域巡航腰靠：14°前后自适应, 5°左右自适应, 上下5cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1256,13 +1256,13 @@ export const chairs: Chair[] = [
       "max": 82
     },
     "armrestWidth": 53,
-    "armrestFunc": "5D扶手",
+    "armrestFunc": "5D扶手：升降8cm, 前后5cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 22.5,
       "max": 22.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（22.5cm × 38cm）",
+    "headrestFunc": "双轴20cm升降, 60°旋转",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 118,
@@ -1306,7 +1306,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "6D腰托",
+    "lumbarFunc": "6D全域巡航腰靠：14°前后自适应, 5°左右自适应, 上下5cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1314,13 +1314,13 @@ export const chairs: Chair[] = [
       "max": 82
     },
     "armrestWidth": 53,
-    "armrestFunc": "5D扶手",
+    "armrestFunc": "5D扶手：升降8cm, 前后5cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 22.5,
       "max": 22.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（22.5cm × 38cm）",
+    "headrestFunc": "双轴20cm升降, 60°旋转",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 118,
@@ -1364,7 +1364,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "3D腰托：上下4cm, 前后1.5cm",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1372,13 +1372,13 @@ export const chairs: Chair[] = [
       "max": 68
     },
     "armrestWidth": 51.5,
-    "armrestFunc": "3D扶手",
+    "armrestFunc": "3D扶手：升降7cm, 前后4cm, 左右旋转",
     "headrestHeight": {
       "min": 20.5,
       "max": 20.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（20.5cm × 38cm）",
+    "headrestFunc": "升降3cm, 旋转25°",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 107.5,
@@ -1422,7 +1422,7 @@ export const chairs: Chair[] = [
     "backWidth": 54,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "腰托随背联动",
+    "lumbarFunc": "6D全域巡航腰靠：16°前后自适应, 3cm前后手动, 椅背5档升降8cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1430,13 +1430,13 @@ export const chairs: Chair[] = [
       "max": 81.5
     },
     "armrestWidth": 52,
-    "armrestFunc": "4D联动扶手",
+    "armrestFunc": "4D联动扶手：升降8cm, 前后5cm, 左右旋转, 左右平移（后仰联动）",
     "headrestHeight": {
       "min": 21.5,
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（21.5cm × 38cm）",
+    "headrestFunc": "双轴20cm升降, 60°旋转",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 110,
@@ -1480,7 +1480,7 @@ export const chairs: Chair[] = [
     "backWidth": 54,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "腰托随背联动",
+    "lumbarFunc": "6D全域巡航腰靠：16°前后自适应, 3cm前后手动, 椅背5档升降8cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1488,13 +1488,13 @@ export const chairs: Chair[] = [
       "max": 81.5
     },
     "armrestWidth": 52,
-    "armrestFunc": "4D联动扶手",
+    "armrestFunc": "4D联动扶手：升降8cm, 前后5cm, 左右旋转, 左右平移（后仰联动）",
     "headrestHeight": {
       "min": 21.5,
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（21.5cm × 38cm）",
+    "headrestFunc": "双轴20cm升降, 60°旋转",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 110,
@@ -1538,7 +1538,7 @@ export const chairs: Chair[] = [
     "backWidth": 54,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "腰托随背联动",
+    "lumbarFunc": "3D自适应腰靠：随背联动, 椅背5档升降8cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1546,13 +1546,13 @@ export const chairs: Chair[] = [
       "max": 80.5
     },
     "armrestWidth": 51.5,
-    "armrestFunc": "5D联动扶手",
+    "armrestFunc": "5D联动扶手：升降8cm, 前后5cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 21.5,
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（21.5cm × 38cm）",
+    "headrestFunc": "双轴18cm升降, 50°旋转",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 109.5,
@@ -1595,7 +1595,7 @@ export const chairs: Chair[] = [
     "backWidth": 54,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "腰托随背联动",
+    "lumbarFunc": "3D自适应腰靠：随背联动, 椅背5档升降8cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1603,13 +1603,13 @@ export const chairs: Chair[] = [
       "max": 80.5
     },
     "armrestWidth": 51.5,
-    "armrestFunc": "5D联动扶手",
+    "armrestFunc": "5D联动扶手：升降8cm, 前后5cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 21.5,
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（21.5cm × 38cm）",
+    "headrestFunc": "双轴18cm升降, 50°旋转",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 109.5,
@@ -1652,7 +1652,7 @@ export const chairs: Chair[] = [
     "backWidth": 54,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "3D追腰系统：上下4cm, 自适应贴合",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1660,13 +1660,13 @@ export const chairs: Chair[] = [
       "max": 82.5
     },
     "armrestWidth": 51.5,
-    "armrestFunc": "5D魔术臂",
+    "armrestFunc": "5D魔术臂：升降7cm, 前后4cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 21.5,
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（21.5cm × 38cm）",
+    "headrestFunc": "双轴16cm升降, 45°旋转",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 109.5,
@@ -1710,7 +1710,7 @@ export const chairs: Chair[] = [
     "backWidth": 54,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": null,
+    "lumbarFunc": "3D追腰系统：上下4cm, 自适应贴合",
     "lumbarDepth": null,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1718,13 +1718,13 @@ export const chairs: Chair[] = [
       "max": 82.5
     },
     "armrestWidth": 51.5,
-    "armrestFunc": "5D魔术臂",
+    "armrestFunc": "5D魔术臂：升降7cm, 前后4cm, 左右旋转, 左右平移",
     "headrestHeight": {
       "min": 21.5,
       "max": 21.5
     },
     "headrestWidth": 38,
-    "headrestFunc": "固定头枕（21.5cm × 38cm）",
+    "headrestFunc": "双轴16cm升降, 45°旋转",
     "headrestAdjustable": false,
     "totalHeight": {
       "min": 109.5,
@@ -1768,7 +1768,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "20°悬浮腰托",
+    "lumbarFunc": "20°悬浮腰托：自适应贴合, 椅背升降3cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1776,13 +1776,13 @@ export const chairs: Chair[] = [
       "max": 74.5
     },
     "armrestWidth": 49.5,
-    "armrestFunc": null,
+    "armrestFunc": "3D扶手：升降7cm, 前后4cm, 左右旋转",
     "headrestHeight": {
       "min": 22,
       "max": 29.5
     },
     "headrestWidth": null,
-    "headrestFunc": "可调头枕（高22-29.5cm）",
+    "headrestFunc": "升降3cm, 旋转25°",
     "headrestAdjustable": true,
     "totalHeight": {
       "min": 113,
@@ -1826,7 +1826,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "20°悬浮腰托",
+    "lumbarFunc": "20°悬浮腰托：自适应贴合, 椅背升降3cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1834,13 +1834,13 @@ export const chairs: Chair[] = [
       "max": 74.5
     },
     "armrestWidth": 49.5,
-    "armrestFunc": null,
+    "armrestFunc": "3D扶手：升降7cm, 前后4cm, 左右旋转",
     "headrestHeight": {
       "min": 22,
       "max": 29.5
     },
     "headrestWidth": null,
-    "headrestFunc": "可调头枕（高22-29.5cm）",
+    "headrestFunc": "升降3cm, 旋转25°",
     "headrestAdjustable": true,
     "totalHeight": {
       "min": 113,
@@ -1884,7 +1884,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "20°悬浮腰托",
+    "lumbarFunc": "20°悬浮腰托：自适应贴合, 椅背升降3cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1892,13 +1892,13 @@ export const chairs: Chair[] = [
       "max": 74.5
     },
     "armrestWidth": 49.5,
-    "armrestFunc": null,
+    "armrestFunc": "3D扶手：升降7cm, 前后4cm, 左右旋转",
     "headrestHeight": {
       "min": 22,
       "max": 29.5
     },
     "headrestWidth": null,
-    "headrestFunc": "可调头枕（高22-29.5cm）",
+    "headrestFunc": "升降3cm, 旋转25°",
     "headrestAdjustable": true,
     "totalHeight": {
       "min": 113,
@@ -1941,7 +1941,7 @@ export const chairs: Chair[] = [
     "backWidth": 51.5,
     "lumbarWidth": null,
     "lumbarHeight": null,
-    "lumbarFunc": "20°悬浮腰托",
+    "lumbarFunc": "20°悬浮腰托：自适应贴合, 椅背升降3cm",
     "lumbarDepth": 2.5,
     "lumbarAdjustable": false,
     "armrestHeight": {
@@ -1949,13 +1949,13 @@ export const chairs: Chair[] = [
       "max": 74.5
     },
     "armrestWidth": 49.5,
-    "armrestFunc": null,
+    "armrestFunc": "3D扶手：升降7cm, 前后4cm, 左右旋转",
     "headrestHeight": {
       "min": 22,
       "max": 29.5
     },
     "headrestWidth": null,
-    "headrestFunc": "可调头枕（高22-29.5cm）",
+    "headrestFunc": "升降3cm, 旋转25°",
     "headrestAdjustable": true,
     "totalHeight": {
       "min": 113,
