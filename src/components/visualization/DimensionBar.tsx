@@ -28,14 +28,13 @@ export default function DimensionBar(p: Props) {
   const um = userMin, uM = userMax, cm = chairMin, cM = chairMax;
   const uSingle = um === uM, cSingle = cm === cM;
 
-  // 计算坐标
+  // 计算坐标 — 按实际比例，左右各留3cm边距
   const allMin = Math.min(um, cm), allMax = Math.max(uM, cM);
   const span = allMax - allMin || 1;
-  const pad = span * 0.45;
-  const vMin = allMin - pad, vMax = allMax + pad, vS = vMax - vMin || 1;
+  const margin = Math.max(3, span * 0.1); // 至少3cm边距
+  const vMin = allMin - margin, vMax = allMax + margin, vS = vMax - vMin || 1;
   const L = (v: number) => ((v - vMin) / vS) * 100;
-  const rawW = (a: number, b: number) => Math.abs(b - a) / vS * 100;
-  const barW = (a: number, b: number) => Math.max(cSingle ? 10 : 3, rawW(a, b));
+  const W = (a: number, b: number) => Math.abs(b - a) / vS * 100; // 真实比例宽度
 
   // 重叠
   const oMin = Math.max(um, cm), oMax = Math.min(uM, cM);
@@ -71,13 +70,13 @@ export default function DimensionBar(p: Props) {
         {/* ===== 灰色椅子条 ===== */}
         <div
           className="absolute rounded-md border-2 border-neutral-300 bg-neutral-200/80"
-          style={{ left: `${L(cm)}%`, width: `${barW(cm, cM)}%`, top: 16, height: 20 }}
+          style={{ left: `${L(cm)}%`, width: `${W(cm, cM)}%`, top: 16, height: 20 }}
         />
 
         {/* ===== 彩色用户条 ===== */}
         <div
           className="absolute rounded-md"
-          style={{ left: `${L(um)}%`, width: `${barW(um, uM)}%`, top: 40, height: 20, backgroundColor: c.bar }}
+          style={{ left: `${L(um)}%`, width: `${W(um, uM)}%`, top: 40, height: 20, backgroundColor: c.bar }}
         />
 
         {/* ===== 用户标签（下方） ===== */}
@@ -90,14 +89,14 @@ export default function DimensionBar(p: Props) {
 
         {/* ===== 重叠区/间隙 ===== */}
         {hasOverlap && (
-          <div className="absolute flex items-center justify-center" style={{ left: `${L(oMin)}%`, width: `${Math.max(3, rawW(oMin, oMax))}%`, top: 28, height: 12 }}>
+          <div className="absolute flex items-center justify-center" style={{ left: `${L(oMin)}%`, width: `${Math.max(3, W(oMin, oMax))}%`, top: 28, height: 12 }}>
             <div className="w-full h-full rounded-sm border border-white/60"
               style={{ backgroundColor: isPerfect ? "rgba(59,130,246,0.2)" : "rgba(255,255,255,0.3)" }} />
           </div>
         )}
 
         {!hasOverlap && (
-          <div className="absolute flex items-center" style={{ left: `${L(Math.min(uM, cM))}%`, width: `${Math.max(2, rawW(Math.min(uM, cM), Math.max(um, cm)))}%`, top: 28, height: 12 }}>
+          <div className="absolute flex items-center" style={{ left: `${L(Math.min(uM, cM))}%`, width: `${Math.max(2, W(Math.min(uM, cM), Math.max(um, cm)))}%`, top: 28, height: 12 }}>
             <div className="w-full h-0.5 bg-red-400 rounded-full" />
             <span className="absolute text-[9px] text-red-500 font-semibold whitespace-nowrap"
               style={{ left: "50%", transform: "translateX(-50%)", top: 6 }}>
