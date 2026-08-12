@@ -103,16 +103,14 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
 }
 
 /* 分组堆叠：微信照片式，默认显示最低价，点击展开 */
-function GroupStack({ list, sitLong, color }: { list: any[]; sitLong: boolean; color: string }) {
-  const [expanded, setExpanded] = useState(false);
-
+function GroupStack({ list, sitLong, color, expanded, onToggle }: { list: any[]; sitLong: boolean; color: string; expanded: boolean; onToggle: () => void }) {
   const sorted = [...list].sort((a, b) => (a.chair.price ?? Infinity) - (b.chair.price ?? Infinity));
   const front = sorted[0];
   const rest = sorted.slice(1);
 
   if (!expanded) {
     return (
-      <div className="relative cursor-pointer select-none" style={{ height: "220px" }} onClick={() => setExpanded(true)}>
+      <div className="relative cursor-pointer select-none" style={{ height: "220px" }} onClick={onToggle}>
         {/* 后面的卡片：微信式 轻微旋转+偏移 */}
         {rest.slice(0, 3).reverse().map((m, i) => {
           const depth = rest.slice(0, 3).length - i; // 3,2,1
@@ -153,7 +151,7 @@ function GroupStack({ list, sitLong, color }: { list: any[]; sitLong: boolean; c
 
   return (
     <div className="space-y-2">
-      <button onClick={() => setExpanded(false)} className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors mb-2">
+      <button onClick={onToggle} className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors mb-2">
         收起
       </button>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -190,6 +188,16 @@ export default function MatchPage() {
   if (!isValid) return <div className="flex flex-col items-center justify-center py-24 gap-3"><p className="text-neutral-400">参数不完整</p><Link href="/" className="text-blue-600 text-sm hover:underline">返回首页</Link></div>;
   if (!body) return null;
 
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (key: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
   const groups = [
     { key: "perfect", label: "完美契合", icon: "P", color: "#2563eb", list: matches.filter(m => m.overallScore === 100) },
     { key: "good", label: "合适", icon: "G", color: "#16a34a", list: matches.filter(m => m.overallScore >= 95 && m.overallScore < 100) },
@@ -216,12 +224,17 @@ export default function MatchPage() {
         if (g.list.length === 0) return null;
         return (
           <div key={g.key} className="mb-10">
-            <h3 className="flex items-center gap-2 text-sm font-bold mb-4" style={{ color: g.color }}>
+            <h3
+              className="flex items-center gap-2 text-sm font-bold mb-4 cursor-pointer select-none"
+              style={{ color: g.color }}
+              onClick={() => toggleGroup(g.key)}
+            >
               <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold" style={{ backgroundColor: g.color }}>{g.icon}</span>
               {g.label}
               <span className="text-neutral-400 font-normal text-xs ml-1">({g.list.length})</span>
+              <span className="ml-auto text-xs text-neutral-300">{expandedGroups.has(g.key) ? "收起 ▲" : "展开 ▼"}</span>
             </h3>
-            <GroupStack list={g.list} sitLong={sitLong} color={g.color} />
+            <GroupStack list={g.list} sitLong={sitLong} color={g.color} expanded={expandedGroups.has(g.key)} onToggle={() => toggleGroup(g.key)} />
           </div>
         );
       })}
