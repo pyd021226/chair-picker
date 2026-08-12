@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -131,7 +132,12 @@ export default function Home() {
         ))}
       </div>
 
-      <p className="mt-8 text-xs text-neutral-400">已收录 36 款工学椅 · 持续更新中</p>
+      <p className="mt-8 text-xs text-neutral-400">
+        已收录 36 款工学椅 · 持续更新中 ·{" "}
+        <Link href="/admin" className="text-blue-500 hover:underline">
+          ⚙️ 公式管理
+        </Link>
+      </p>
     </main>
   );
 }
