@@ -57,10 +57,24 @@ export default function ChairContent() {
         ← {hasUser ? "返回匹配列表" : "返回首页"}
       </Link>
 
-      {/* 标题 */}
-      <div className="mt-4">
-        <span className="text-xs text-neutral-400">{chair.brand}</span>
-        <h1 className="text-xl font-bold mt-1">{chair.name}</h1>
+      {/* 标题 + 图片 */}
+      <div className="flex gap-4 mt-4">
+        {/* 椅子图片 2:3 */}
+        <div className="flex-shrink-0 w-40 h-60 rounded-xl bg-neutral-100 overflow-hidden">
+          {chair.imageUrl ? (
+            <img src={chair.imageUrl} alt={chair.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-5xl text-neutral-300 bg-gradient-to-br from-neutral-50 to-neutral-100">
+              🪑<span className="text-xs mt-2 text-neutral-400">暂无图片</span>
+            </div>
+          )}
+        </div>
+        <div className="flex-1">
+          <span className="text-xs text-neutral-400">{chair.brand}</span>
+          <h1 className="text-xl font-bold mt-1">{chair.name}</h1>
+      </div>
+
+        </div>
       </div>
 
       {/* 匹配评分（如果有用户数据） */}

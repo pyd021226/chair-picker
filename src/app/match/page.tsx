@@ -78,6 +78,14 @@ export default function MatchPage() {
                   className="block border border-neutral-200 rounded-xl hover:border-neutral-300 hover:shadow-sm transition-all overflow-hidden bg-white"
                 >
                   <div className="flex items-center gap-3 p-3">
+                    {/* Chair image 2:3 */}
+                    <div className="flex-shrink-0 w-16 h-24 rounded-lg bg-neutral-100 overflow-hidden">
+                      {m.chair.imageUrl ? (
+                        <img src={m.chair.imageUrl} alt={m.chair.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-2xl text-neutral-300">🪑</div>
+                      )}
+                    </div>
                     {/* Score badge */}
                     <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center text-white ${
                       m.overallScore === 100 ? "bg-blue-500" :
