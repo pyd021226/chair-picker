@@ -404,90 +404,152 @@ function AddChairTab() {
 }
 // ====== 椅子列表（按品牌分类） ======
 function ChairsTableTab() {
-  const customChairs = loadCustomChairs();
+  const [customChairs, setCustomChairs] = useState<Chair[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Chair>>({});
+  const [expandedBrand, setExpandedBrand] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => { setCustomChairs(loadCustomChairs()); }, []);
+
+  const refresh = () => setCustomChairs(loadCustomChairs());
   const allChairs = [...chairs, ...customChairs];
 
-  // 按品牌分组
   const grouped: Record<string, Chair[]> = {};
   for (const c of allChairs) {
     if (!grouped[c.brand]) grouped[c.brand] = [];
     grouped[c.brand].push(c);
   }
 
-  const [expandedBrand, setExpandedBrand] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-
   const brands = Object.keys(grouped).sort();
   const filteredBrands = search
     ? brands.filter(b => b.includes(search) || grouped[b].some(c => c.name.includes(search)))
     : brands;
 
+  const startEdit = (c: Chair) => {
+    setEditId(c.id);
+    setEditForm({
+      brand: c.brand, name: c.name, price: c.price, surface: c.surface,
+      seatHeight: c.seatHeight, seatDepth: c.seatDepth, seatWidth: c.seatWidth,
+      headrestFunc: c.headrestFunc, armrestFunc: c.armrestFunc, lumbarFunc: c.lumbarFunc,
+    });
+  };
+
+  const saveEdit = () => {
+    if (!editId) return;
+    const chairs = loadCustomChairs();
+    const idx = chairs.findIndex(c => c.id === editId);
+    if (idx < 0) return;
+    const orig = chairs[idx];
+    const updated: Chair = {
+      ...orig,
+      brand: editForm.brand || orig.brand,
+      name: editForm.name || orig.name,
+      price: editForm.price ?? orig.price,
+      surface: (editForm.surface as any) || orig.surface,
+      seatHeight: editForm.seatHeight || orig.seatHeight,
+      seatDepth: editForm.seatDepth || orig.seatDepth,
+      seatWidth: editForm.seatWidth ?? orig.seatWidth,
+      seatWidthEffective: editForm.seatWidth != null ? (editForm.surface === "mesh" ? editForm.seatWidth - 5 : editForm.seatWidth - 1) : orig.seatWidthEffective,
+      headrestFunc: editForm.headrestFunc ?? orig.headrestFunc,
+      armrestFunc: editForm.armrestFunc ?? orig.armrestFunc,
+      lumbarFunc: editForm.lumbarFunc ?? orig.lumbarFunc,
+    };
+    chairs[idx] = updated;
+    saveCustomChairs(chairs);
+    setEditId(null);
+    refresh();
+  };
+
   return (
     <div className="space-y-4">
-      {/* 搜索 */}
       <div className="flex gap-3 items-center">
         <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="搜索品牌或椅子名..."
-          className="flex-1 px-3 py-2 border rounded-lg text-sm" />
+          placeholder="搜索品牌或椅子名..." className="flex-1 px-3 py-2 border rounded-lg text-sm" />
         <span className="text-xs text-neutral-400">{customChairs.length > 0 ? `含${customChairs.length}把自定义` : ""}</span>
       </div>
+
+      {/* 编辑器弹窗 */}
+      {editId && (
+        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-2xl">
+            <h3 className="font-bold text-lg mb-4">✏️ 编辑椅子</h3>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div><label className="text-xs text-neutral-500">品牌</label><input value={editForm.brand||""} onChange={e=>setEditForm({...editForm,brand:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">名称</label><input value={editForm.name||""} onChange={e=>setEditForm({...editForm,name:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">价格¥</label><input type="number" value={editForm.price??""} onChange={e=>setEditForm({...editForm,price:parseFloat(e.target.value)||null})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">材质</label><select value={editForm.surface||"mesh"} onChange={e=>setEditForm({...editForm,surface:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"><option value="mesh">网布</option><option value="sponge">海绵</option><option value="leather">真皮</option></select></div>
+              <div><label className="text-xs text-neutral-500">坐高min</label><input type="number" value={editForm.seatHeight?.min??""} onChange={e=>setEditForm({...editForm,seatHeight:{min:parseFloat(e.target.value)||0,max:editForm.seatHeight?.max??0}})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">坐高max</label><input type="number" value={editForm.seatHeight?.max??""} onChange={e=>setEditForm({...editForm,seatHeight:{min:editForm.seatHeight?.min??0,max:parseFloat(e.target.value)||0}})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">坐深min</label><input type="number" value={editForm.seatDepth?.min??""} onChange={e=>setEditForm({...editForm,seatDepth:{min:parseFloat(e.target.value)||0,max:editForm.seatDepth?.max??0}})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">坐深max</label><input type="number" value={editForm.seatDepth?.max??""} onChange={e=>setEditForm({...editForm,seatDepth:{min:editForm.seatDepth?.min??0,max:parseFloat(e.target.value)||0}})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">坐宽</label><input type="number" value={editForm.seatWidth??""} onChange={e=>setEditForm({...editForm,seatWidth:parseFloat(e.target.value)||null})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+            </div>
+            <div className="mt-3 space-y-2">
+              <div><label className="text-xs text-neutral-500">头枕功能</label><input value={editForm.headrestFunc||""} onChange={e=>setEditForm({...editForm,headrestFunc:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">扶手功能</label><input value={editForm.armrestFunc||""} onChange={e=>setEditForm({...editForm,armrestFunc:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+              <div><label className="text-xs text-neutral-500">腰撑功能</label><input value={editForm.lumbarFunc||""} onChange={e=>setEditForm({...editForm,lumbarFunc:e.target.value})} className="w-full px-2 py-1.5 border rounded mt-0.5"/></div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={saveEdit} className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">保存</button>
+              <button onClick={()=>setEditId(null)} className="flex-1 py-2 bg-neutral-100 rounded-lg text-sm">取消</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 品牌分组表格 */}
       {filteredBrands.map(brand => {
         const brandChairs = grouped[brand];
         const isExpanded = expandedBrand === brand || !!search;
-
         return (
           <div key={brand} className="border rounded-xl overflow-hidden">
-            {/* 品牌头 */}
-            <button
-              onClick={() => setExpandedBrand(isExpanded ? null : brand)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-neutral-50 hover:bg-neutral-100 text-left"
-            >
-              <span className="font-semibold text-sm">
-                {brand} <span className="text-neutral-400 font-normal text-xs">({brandChairs.length}款)</span>
-              </span>
+            <button onClick={() => setExpandedBrand(isExpanded ? null : brand)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-neutral-50 hover:bg-neutral-100 text-left">
+              <span className="font-semibold text-sm">{brand} <span className="text-neutral-400 font-normal text-xs">({brandChairs.length}款)</span></span>
               <span className="text-xs text-neutral-400">{isExpanded ? "收起 ▲" : "展开 ▼"}</span>
             </button>
-
-            {/* 表格 */}
             {isExpanded && (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
-                  <thead>
-                    <tr className="bg-neutral-100/50 text-neutral-500">
-                      <th className="text-left px-3 py-2 font-medium">产品名</th>
-                      <th className="text-right px-2 py-2 font-medium w-16">价格</th>
-                      <th className="text-center px-2 py-2 font-medium w-20">坐高(cm)</th>
-                      <th className="text-center px-2 py-2 font-medium w-20">坐深(cm)</th>
-                      <th className="text-center px-2 py-2 font-medium w-14">坐宽</th>
-                      <th className="text-center px-2 py-2 font-medium w-12">材质</th>
-                      <th className="text-left px-2 py-2 font-medium">头枕功能</th>
-                      <th className="text-left px-2 py-2 font-medium">扶手功能</th>
-                      <th className="text-left px-2 py-2 font-medium">腰撑功能</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {brandChairs.map(c => {
-                      const isCustom = customChairs.some(x => x.id === c.id);
-                      return (
-                        <tr key={c.id} className={`border-t border-neutral-100 hover:bg-neutral-50 ${isCustom ? "bg-blue-50/30" : ""}`}>
-                          <td className="px-3 py-2">
-                            <span className="font-medium">{c.name}</span>
-                            {isCustom && <span className="ml-1 text-[10px] bg-blue-100 text-blue-600 px-1 rounded">自建</span>}
-                          </td>
-                          <td className="px-2 py-2 text-right font-mono">{c.price ? `¥${c.price}` : "-"}</td>
-                          <td className="px-2 py-2 text-center font-mono">{c.seatHeight ? `${c.seatHeight.min}-${c.seatHeight.max}` : "-"}</td>
-                          <td className="px-2 py-2 text-center font-mono">{c.seatDepth ? `${c.seatDepth.min}-${c.seatDepth.max}` : "-"}</td>
-                          <td className="px-2 py-2 text-center font-mono">{c.seatWidth ?? "-"}</td>
-                          <td className="px-2 py-2 text-center">{c.surface === "mesh" ? "网布" : c.surface === "sponge" ? "海绵" : c.surface === "leather" ? "真皮" : "-"}</td>
-                          <td className="px-2 py-2 max-w-48 truncate" title={c.headrestFunc || ""}>{c.headrestFunc || "-"}</td>
-                          <td className="px-2 py-2 max-w-56 truncate" title={c.armrestFunc || ""}>{c.armrestFunc || "-"}</td>
-                          <td className="px-2 py-2 max-w-48 truncate" title={c.lumbarFunc || ""}>{c.lumbarFunc || "-"}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
+                  <thead><tr className="bg-neutral-100/50 text-neutral-500">
+                    <th className="text-left px-3 py-2 font-medium">产品名</th>
+                    <th className="text-right px-2 py-2 font-medium w-16">价格</th>
+                    <th className="text-center px-2 py-2 font-medium w-20">坐高</th>
+                    <th className="text-center px-2 py-2 font-medium w-20">坐深</th>
+                    <th className="text-center px-2 py-2 font-medium w-14">坐宽</th>
+                    <th className="text-center px-2 py-2 font-medium w-12">材质</th>
+                    <th className="text-left px-2 py-2 font-medium">头枕功能</th>
+                    <th className="text-left px-2 py-2 font-medium">扶手功能</th>
+                    <th className="text-left px-2 py-2 font-medium">腰撑功能</th>
+                    <th className="text-center px-2 py-2 font-medium w-16">操作</th>
+                  </tr></thead>
+                  <tbody>{brandChairs.map(c => {
+                    const isCustom = customChairs.some(x => x.id === c.id);
+                    return (
+                      <tr key={c.id} className={`border-t border-neutral-100 hover:bg-neutral-50 ${isCustom ? "bg-blue-50/30" : ""}`}>
+                        <td className="px-3 py-2"><span className="font-medium">{c.name}</span>{isCustom && <span className="ml-1 text-[10px] bg-blue-100 text-blue-600 px-1 rounded">自建</span>}</td>
+                        <td className="px-2 py-2 text-right font-mono">{c.price ? `¥${c.price}` : "-"}</td>
+                        <td className="px-2 py-2 text-center font-mono">{c.seatHeight ? `${c.seatHeight.min}-${c.seatHeight.max}` : "-"}</td>
+                        <td className="px-2 py-2 text-center font-mono">{c.seatDepth ? `${c.seatDepth.min}-${c.seatDepth.max}` : "-"}</td>
+                        <td className="px-2 py-2 text-center font-mono">{c.seatWidth ?? "-"}</td>
+                        <td className="px-2 py-2 text-center">{c.surface==="mesh"?"网布":c.surface==="sponge"?"海绵":c.surface==="leather"?"真皮":"-"}</td>
+                        <td className="px-2 py-2 max-w-48 truncate" title={c.headrestFunc||""}>{c.headrestFunc||"-"}</td>
+                        <td className="px-2 py-2 max-w-56 truncate" title={c.armrestFunc||""}>{c.armrestFunc||"-"}</td>
+                        <td className="px-2 py-2 max-w-48 truncate" title={c.lumbarFunc||""}>{c.lumbarFunc||"-"}</td>
+                        <td className="px-2 py-2 text-center">
+                          {isCustom ? (
+                            <div className="flex gap-1 justify-center">
+                              <button onClick={()=>startEdit(c)} className="text-xs text-blue-500 hover:text-blue-700">编辑</button>
+                              <button onClick={()=>{removeCustomChair(c.id);refresh();}} className="text-xs text-red-400 hover:text-red-600">删除</button>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-neutral-300">内置</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}</tbody>
                 </table>
               </div>
             )}
