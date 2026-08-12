@@ -14,7 +14,8 @@ export default function Home() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [sitLong, setSitLong] = useState<boolean | null>(null);
-  const [budget, setBudget] = useState("");
+  const [budgetMin, setBudgetMin] = useState("");
+  const [budgetMax, setBudgetMax] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   function validateStep(s: number): boolean {
@@ -33,9 +34,11 @@ export default function Home() {
     }
     if (s === 5 && sitLong === null) e.sitLong = "请选择";
     if (s === 6) {
-      const b = parseFloat(budget);
-      if (!budget || isNaN(b)) e.budget = "请输入预算";
-      else if (b < 100) e.budget = "预算至少100元";
+      const bMin = parseFloat(budgetMin);
+      const bMax = parseFloat(budgetMax);
+      if (!budgetMin || isNaN(bMin)) e.budgetMin = "请输入最低预算";
+      if (!budgetMax || isNaN(bMax)) e.budgetMax = "请输入最高预算";
+      else if (bMin >= bMax) e.budgetMax = "最高预算须大于最低";
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -49,8 +52,9 @@ export default function Home() {
     if (!validateStep(6)) return;
     const h = parseFloat(height);
     const w = parseFloat(weight);
-    const b = parseFloat(budget);
-    router.push(`/match?h=${h}&w=${w}&budget=${b}`);
+    const bMin = parseFloat(budgetMin);
+    const bMax = parseFloat(budgetMax);
+    router.push(`/match?h=${h}&w=${w}&bmin=${bMin}&bmax=${bMax}`);
   }
 
   function progress() {
@@ -184,25 +188,38 @@ export default function Home() {
           </div>
         )}
 
-        {/* Step 6: 预算 */}
+        {/* Step 6: 预算区间 */}
         {step === 6 && (
           <div className="space-y-4">
-            <label className="block text-lg font-semibold text-neutral-800">你的预算？</label>
+            <label className="block text-lg font-semibold text-neutral-800">你的预算范围？</label>
             <p className="text-xs text-neutral-400">帮你筛选价格合适的椅子</p>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">¥</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                value={budget}
-                onChange={(e) => { setBudget(e.target.value); if (errors.budget) setErrors({}); }}
-                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                placeholder="1000"
-                autoFocus
-                className="w-full pl-8 pr-4 py-3 rounded-xl border border-neutral-200 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">¥</span>
+                <input
+                  type="number" inputMode="numeric"
+                  value={budgetMin}
+                  onChange={(e) => { setBudgetMin(e.target.value); if (errors.budgetMin) setErrors({}); }}
+                  placeholder="500"
+                  autoFocus
+                  className="w-full pl-7 pr-3 py-3 rounded-xl border border-neutral-200 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <span className="text-neutral-400 font-medium">—</span>
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">¥</span>
+                <input
+                  type="number" inputMode="numeric"
+                  value={budgetMax}
+                  onChange={(e) => { setBudgetMax(e.target.value); if (errors.budgetMax) setErrors({}); }}
+                  placeholder="2000"
+                  className="w-full pl-7 pr-3 py-3 rounded-xl border border-neutral-200 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
-            {errors.budget && <p className="text-red-500 text-xs">{errors.budget}</p>}
+            {(errors.budgetMin || errors.budgetMax) && (
+              <p className="text-red-500 text-xs">{errors.budgetMin || errors.budgetMax}</p>
+            )}
           </div>
         )}
       </div>
