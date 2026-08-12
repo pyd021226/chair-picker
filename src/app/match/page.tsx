@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { chairs } from "@/data/chairs";
 import { matchAllChairs } from "@/engine/matcher";
@@ -26,67 +26,51 @@ const accentColor = (s: number) => s === 100 ? "#2563eb" : s >= 95 ? "#16a34a" :
 /* 单张椅子卡片 */
 function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
   const { chair, overallScore } = match;
-  const [expanded, setExpanded] = useState(false);
-  const [imgPeek, setImgPeek] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  // 监听滚动：向下滚过卡片时收起图片
-  useEffect(() => {
-    const onScroll = () => {
-      if (!cardRef.current) return;
-      const rect = cardRef.current.getBoundingClientRect();
-      if (rect.bottom < 100 && expanded) setExpanded(false);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [expanded]);
+  const [peek, setPeek] = useState(false);
+  const linkRef = useRef<HTMLAnchorElement>(null);
 
   const dims = match.dimensions.filter((d: any) => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key));
 
+  // 触屏：第一次点击显示照片，第二次才跳转
+  const handleClick = (e: React.MouseEvent) => {
+    if (!peek && window.matchMedia("(pointer: coarse)").matches) {
+      e.preventDefault();
+      setPeek(true);
+    }
+  };
+
   return (
-    <div ref={cardRef} className="relative group">
-      {/* 椅子照片 — 从背后探出 */}
+    <div className="relative group">
+      {/* 照片 — 悬停/触屏首次点击后从背后探出 */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 rounded-2xl overflow-hidden bg-neutral-100 shadow-lg transition-all duration-500 ease-out z-0"
+        className="absolute left-1/2 -translate-x-1/2 rounded-2xl overflow-hidden bg-neutral-100 shadow-lg transition-all duration-400 ease-out z-0 pointer-events-none"
         style={{
-          width: expanded ? "200px" : imgPeek ? "160px" : "120px",
-          height: expanded ? "260px" : imgPeek ? "200px" : "140px",
-          bottom: expanded ? "60px" : imgPeek ? "50px" : "40px",
-          opacity: imgPeek || expanded ? 1 : 0.3,
-          transform: `translateX(-50%) translateY(${imgPeek || expanded ? "-20px" : "0"})`,
+          width: peek ? "150px" : "100px",
+          height: peek ? "200px" : "120px",
+          bottom: peek ? "55px" : "35px",
+          opacity: peek ? 1 : 0.25,
+          transform: `translateX(-50%) translateY(${peek ? "-28px" : "0"})`,
         }}
       >
         {chair.imageUrl ? (
-          <img src={chair.imageUrl} alt={chair.name} className="w-full h-full object-cover" />
+          <img src={chair.imageUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200 text-4xl text-neutral-300 select-none">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 text-3xl text-neutral-300 select-none">
             {chair.name.slice(0, 1)}
           </div>
         )}
-        {/* 关闭按钮（展开时） */}
-        {expanded && (
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExpanded(false); }}
-            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white text-xs flex items-center justify-center hover:bg-black/70 z-10"
-          >x</button>
-        )}
       </div>
 
-      {/* 卡片主体 */}
+      {/* 卡片 */}
       <Link
+        ref={linkRef}
         href={"/chair/" + chair.id + "?h=" + match.h + "&w=" + match.w + (sitLong ? "&sit=1" : "")}
-        className="relative z-10 block bg-white border border-neutral-200 rounded-2xl p-4 transition-all duration-300"
+        onClick={handleClick}
+        className="relative z-10 block bg-white border border-neutral-200 rounded-2xl p-4 transition-all duration-300 hover:shadow-md"
         style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
-        onMouseEnter={() => setImgPeek(true)}
-        onMouseLeave={() => { if (!expanded) setImgPeek(false); }}
-        onClick={(e) => {
-          if (!expanded) {
-            e.preventDefault();
-            setExpanded(true);
-          }
-        }}
+        onMouseEnter={() => setPeek(true)}
+        onMouseLeave={() => setPeek(false)}
       >
-        {/* 分数 */}
         <div className="flex items-start justify-between mb-3">
           <div className="min-w-0">
             <p className="text-[10px] text-neutral-400 uppercase tracking-wider">{chair.brand}</p>
@@ -96,8 +80,6 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
             {overallScore}
           </span>
         </div>
-
-        {/* 维度条 */}
         <div className="space-y-1.5">
           {dims.map((d: any) => (
             <div key={d.key} className="flex items-center gap-2 text-xs">
@@ -109,8 +91,6 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
             </div>
           ))}
         </div>
-
-        {/* 底部 meta */}
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100">
           {chair.price && <span className="text-sm font-bold text-blue-600">{chair.price}</span>}
           {sitLong && (
@@ -118,9 +98,6 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
               功能 {countFeatures(chair)}/3
             </span>
           )}
-          <span className="text-[10px] text-neutral-400 ml-auto group-hover:text-neutral-600 transition-colors">
-            {expanded ? "再点一次看详情" : "点击看大图"}
-          </span>
         </div>
       </Link>
     </div>
