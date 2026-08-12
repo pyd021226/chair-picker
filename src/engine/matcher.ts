@@ -388,20 +388,17 @@ export function matchChair(
     scoreLumbarDepth(ctx),
   ];
 
-  // 计算加权总分
-  let totalWeight = 0;
-  let weightedSum = 0;
+  // 计算总分：坐高、坐深、坐宽三个维度的平均覆盖度
+  const coreKeys = ["seatHeight", "seatDepth", "seatWidth"];
+  let dimCount = 0;
+  let dimSum = 0;
   for (const dim of dimensions) {
-    const w = weights[dim.key] ?? 0;
-    // 缺失数据的维度跳过，不参与加权
+    if (!coreKeys.includes(dim.key)) continue;
     if (dim.chairDataMissing) continue;
-    weightedSum += dim.coverage * w;
-    totalWeight += w;
+    dimSum += dim.coverage;
+    dimCount++;
   }
-
-  const overallScore = totalWeight > 0
-    ? Math.round((weightedSum / totalWeight) * 100)
-    : 0;
+  const overallScore = dimCount > 0 ? Math.round((dimSum / dimCount) * 100) : 0;
 
   // 生成总结
   const goodDims = dimensions.filter(d => d.status === "good").length;
