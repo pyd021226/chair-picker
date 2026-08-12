@@ -69,9 +69,12 @@ export default function Home() {
     const wLabel = weightLabel(bmi);
     const gLabel = gender === "male" ? "男性" : "女性";
 
+    const pctDisplay = (hInfo.label === "迷你" || hInfo.label === "大高个")
+      ? hPct.toFixed(3) : hPct.toFixed(1);
+
     const lines: string[] = [
       `${nickname || "朋友"}，根据你的数据（${gLabel}，${h}cm/${w}kg），分析如下：`,
-      `你的身高在${gLabel}中超过 ${hPct}% 的人，属于「${hInfo.label}」。`,
+      `你的身高在${gLabel}中超过 ${pctDisplay}% 的人，属于「${hInfo.label}」。`,
       `你的 BMI 为 ${bmi.toFixed(1)}，属于「${wLabel}」。`,
       `体型结论：${hInfo.short}身高，${wLabel}体型。`,
     ];
