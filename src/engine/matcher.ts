@@ -358,19 +358,24 @@ export function matchChair(
     };
   })();
 
-  // 坐深 — 使用特殊评分规则
+  // 坐深 — 椅子有效范围 = [坐深×2/3, 坐深]（人可前坐）
   const sd = (() => {
-    const chairRange = chair.seatDepth;
-    if (!chairRange) return missingDim("seatDepth", "坐深", "cm", 2, ctx);
-    const result = scoreSeatDepth(body.seatDepth, chairRange);
+    const rawRange = chair.seatDepth;
+    if (!rawRange) return missingDim("seatDepth", "坐深", "cm", 2, ctx);
+    // 扩展为容纳范围：min×2/3 到 max
+    const expandedRange: Range = {
+      min: rawRange.min * (2 / 3),
+      max: rawRange.max,
+    };
+    const result = scoreSeatDepth(body.seatDepth, expandedRange);
     return {
       key: "seatDepth" as DimensionKey,
       label: "坐深",
       unit: "cm",
       userIdeal: body.seatDepth,
-      chairRange,
+      chairRange: expandedRange,
       coverage: result.coverage,
-      status: coverageToStatus(result.coverage),
+      status: coverageToStatus(result.coverage, ctx.rules),
       explanation: result.explanation,
       priority: 2,
       chairDataMissing: false,

@@ -60,7 +60,6 @@ export default function DimensionBar(p: Props) {
   }
 
   // ====== 坐高 / 坐深：范围重叠型 ======
-  const isSeatDepth = dimKey === "seatDepth";
   const cSingle = cm === cM;
   const allMin = Math.min(um, cm), allMax = Math.max(uM, cM);
   const span = allMax - allMin || 1;
@@ -95,15 +94,6 @@ export default function DimensionBar(p: Props) {
             </span>
           )}
         </div>
-
-        {/* 坐深专用：2/3有效区（浅黄底色） */}
-        {isSeatDepth && effectiveMin !== undefined && (
-          <div className="absolute rounded-r"
-            style={{ left: `${L(effectiveMin)}%`, width: `${W(effectiveMin, cM)}%`, top: 0, height: 40,
-              backgroundColor: "rgba(251,191,36,0.12)", borderRight: "2px dashed rgba(251,191,36,0.5)" }}>
-            <span className="absolute -top-4 right-1 text-[8px] text-amber-500 whitespace-nowrap">2/3有效区</span>
-          </div>
-        )}
 
         {/* 你的需求 — 彩色条 */}
         <div className="absolute rounded flex items-center justify-center"
@@ -145,7 +135,6 @@ export default function DimensionBar(p: Props) {
         {status === "good" && !hasOverlap && "✅ 条件满足"}
         {status === "marginal" && `⚠️ 偏差${gapLabel}${unit}，勉强可用`}
         {status === "poor" && `❌ 偏差${gapLabel}${unit}，不建议`}
-        {isSeatDepth && ` · 有效覆盖区：${effectiveMin !== undefined ? f(effectiveMin) : "?"}-${f(cM)}${unit}`}
       </p>
     </div>
   );
