@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { recordUsage } from "@/engine/storage";
 
 const TOTAL_STEPS = 6;
 
@@ -54,6 +55,8 @@ export default function Home() {
     const w = parseFloat(weight);
     const bMin = parseFloat(budgetMin);
     const bMax = parseFloat(budgetMax);
+    // 记录使用数据
+    recordUsage({ nickname, gender, height: h, weight: w, sitLong: sitLong ?? false, budgetMin: bMin, budgetMax: bMax });
     router.push(`/match?h=${h}&w=${w}&bmin=${bMin}&bmax=${bMax}&sit=${sitLong ? "1" : "0"}`);
   }
 

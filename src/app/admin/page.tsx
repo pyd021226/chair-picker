@@ -5,6 +5,8 @@ import { DEFAULT_CONFIG, loadConfig, saveConfig, resetConfig, exportConfig, DEFA
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import { chairs } from "@/data/chairs";
+import { getUsageStats, clearUsageRecords, loadCustomChairs, addCustomChair, removeCustomChair } from "@/engine/storage";
+import type { Chair } from "@/engine/types";
 import Link from "next/link";
 
 export default function AdminPage() {
@@ -14,7 +16,7 @@ export default function AdminPage() {
   const [testH, setTestH] = useState("175");
   const [testW, setTestW] = useState("70");
   const [saveMsg, setSaveMsg] = useState("");
-  const [tab, setTab] = useState<"formula" | "rules">("formula");
+  const [tab, setTab] = useState<"formula" | "rules" | "dashboard" | "addchair">("formula");
 
   useEffect(() => { setConfig(loadConfig()); setRules(loadMatchRules()); setLoaded(true); }, []);
 
@@ -158,6 +160,8 @@ export default function AdminPage() {
       <div className="flex gap-2 mb-4">
         <button onClick={() => setTab("formula")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "formula" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📐 公式系数</button>
         <button onClick={() => setTab("rules")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "rules" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📋 匹配规则</button>
+        <button onClick={() => setTab("dashboard")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "dashboard" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📊 数据看板</button>
+        <button onClick={() => setTab("addchair")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "addchair" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>➕ 录入椅子</button>
       </div>
 
       {/* 系数编辑 */}
@@ -231,6 +235,12 @@ export default function AdminPage() {
       </div>
       )}
 
+      {/* 数据看板 */}
+      {tab === "dashboard" && <DashboardTab />}
+
+      {/* 录入椅子 */}
+      {tab === "addchair" && <AddChairTab />}
+
       {/* 匹配预览 */}
       <details className="mt-6 border border-neutral-200 rounded-xl overflow-hidden">
         <summary className="px-4 py-3 bg-neutral-50 cursor-pointer text-sm font-semibold hover:bg-neutral-100">
@@ -247,6 +257,186 @@ export default function AdminPage() {
           ))}
         </div>
       </details>
+    </div>
+  );
+}
+
+// ====== 数据看板 ======
+function DashboardTab() {
+  const stats = getUsageStats();
+  const customChairs = loadCustomChairs();
+
+  if (stats.total === 0) {
+    return (
+      <div className="text-center py-12 text-neutral-400">
+        <p className="text-4xl mb-3">📊</p>
+        <p className="font-medium">暂无使用数据</p>
+        <p className="text-xs mt-1">当用户通过首页表单使用工具后，数据会出现在这里</p>
+      </div>
+    );
+  }
+
+  const maxH = Math.max(...stats.heightDist.map(d => d.count), 1);
+  const maxW = Math.max(...stats.weightDist.map(d => d.count), 1);
+
+  return (
+    <div className="space-y-6">
+      {/* 概览卡片 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-blue-50 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+          <div className="text-xs text-neutral-500">总使用次数</div>
+        </div>
+        <div className="bg-emerald-50 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-emerald-600">{stats.gender.male + stats.gender.female}</div>
+          <div className="text-xs text-neutral-500">男女比 {stats.gender.male}:{stats.gender.female}</div>
+        </div>
+        <div className="bg-amber-50 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-amber-600">{stats.sitLongPct}%</div>
+          <div className="text-xs text-neutral-500">久坐超过6小时</div>
+        </div>
+        <div className="bg-purple-50 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-purple-600">¥{stats.budgetAvg}</div>
+          <div className="text-xs text-neutral-500">平均预算</div>
+        </div>
+      </div>
+
+      {/* 身高分布 */}
+      <div className="border rounded-xl p-4">
+        <h3 className="text-sm font-semibold mb-3">📏 身高分布（每5cm一组）</h3>
+        <div className="space-y-1">
+          {stats.heightDist.map(d => (
+            <div key={d.label} className="flex items-center gap-2 text-xs">
+              <span className="w-16 text-right text-neutral-500">{d.label}cm</span>
+              <div className="flex-1 h-5 bg-neutral-100 rounded relative">
+                <div className="h-full bg-blue-400 rounded" style={{width: `${(d.count/maxH)*100}%`}}/>
+                <span className="absolute left-1 top-1/2 -translate-y-1/2 text-white text-[10px] font-medium">{d.count}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 体重分布 */}
+      <div className="border rounded-xl p-4">
+        <h3 className="text-sm font-semibold mb-3">⚖️ 体重分布（每5kg一组）</h3>
+        <div className="space-y-1">
+          {stats.weightDist.map(d => (
+            <div key={d.label} className="flex items-center gap-2 text-xs">
+              <span className="w-16 text-right text-neutral-500">{d.label}kg</span>
+              <div className="flex-1 h-5 bg-neutral-100 rounded relative">
+                <div className="h-full bg-emerald-400 rounded" style={{width: `${(d.count/maxW)*100}%`}}/>
+                <span className="absolute left-1 top-1/2 -translate-y-1/2 text-white text-[10px] font-medium">{d.count}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 自定义椅子数量 */}
+      <div className="border rounded-xl p-4">
+        <h3 className="text-sm font-semibold mb-2">🪑 已录入自定义椅子</h3>
+        <p className="text-2xl font-bold text-neutral-700">{customChairs.length} 把</p>
+      </div>
+
+      <button onClick={() => { if(confirm("确定清空所有使用数据？")) clearUsageRecords(); window.location.reload(); }}
+        className="text-xs text-red-400 hover:text-red-600">清空使用数据</button>
+    </div>
+  );
+}
+
+// ====== 录入椅子 ======
+function AddChairTab() {
+  const [customChairs, setCustomChairs] = useState<Chair[]>([]);
+  const [msg, setMsg] = useState("");
+  const [form, setForm] = useState({
+    brand: "", name: "", price: "", seatHeightMin: "", seatHeightMax: "",
+    seatDepthMin: "", seatDepthMax: "", seatWidth: "", surface: "mesh",
+    headrestFunc: "", armrestFunc: "", lumbarFunc: "",
+  });
+
+  useEffect(() => { setCustomChairs(loadCustomChairs()); }, []);
+
+  const handleAdd = () => {
+    if (!form.brand || !form.name) { setMsg("品牌和名称必填"); return; }
+    const shMin = parseFloat(form.seatHeightMin) || 0;
+    const shMax = parseFloat(form.seatHeightMax) || shMin;
+    const sdMin = parseFloat(form.seatDepthMin) || 0;
+    const sdMax = parseFloat(form.seatDepthMax) || sdMin;
+    const sw = parseFloat(form.seatWidth) || 0;
+    const price = parseFloat(form.price) || null;
+
+    const id = form.brand + "-" + form.name + "-" + Date.now();
+    const newChair: Chair = {
+      id: id.replace(/\s+/g, "-").toLowerCase(),
+      brand: form.brand, name: form.name, sku: null, imageUrl: null,
+      price, priceWithFootrest: null,
+      surface: form.surface as any,
+      seatHeight: shMin > 0 ? { min: shMin, max: shMax } : null,
+      seatDepth: sdMin > 0 ? { min: sdMin, max: sdMax } : null,
+      seatWidth: sw > 0 ? sw : null,
+      seatWidthEffective: sw > 0 ? (form.surface === "mesh" ? sw - 5 : sw - 1) : null,
+      backHeight: null, backWidth: null,
+      lumbarWidth: null, lumbarHeight: null,
+      lumbarFunc: form.lumbarFunc || null, lumbarDepth: null, lumbarAdjustable: !!(form.lumbarFunc && form.lumbarFunc.includes("可调")),
+      armrestHeight: null, armrestWidth: null, armrestFunc: form.armrestFunc || null,
+      headrestHeight: null, headrestWidth: null, headrestFunc: form.headrestFunc || null, headrestAdjustable: !!(form.headrestFunc && form.headrestFunc.includes("升降")),
+      totalHeight: null, reclineAngle: null, reclineTensionAdjustable: false,
+      baseType: null, gasCylinder: null, baseMaterial: null, maxWeight: null, tags: [],
+    };
+    addCustomChair(newChair);
+    setCustomChairs(loadCustomChairs());
+    setMsg("✅ 已添加！去匹配页刷新即可看到");
+    setForm({ brand: "", name: "", price: "", seatHeightMin: "", seatHeightMax: "", seatDepthMin: "", seatDepthMax: "", seatWidth: "", surface: "mesh", headrestFunc: "", armrestFunc: "", lumbarFunc: "" });
+  };
+
+  const handleDelete = (id: string) => {
+    removeCustomChair(id);
+    setCustomChairs(loadCustomChairs());
+    setMsg("已删除");
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* 录入表单 */}
+      <div className="border rounded-xl p-4">
+        <h3 className="text-sm font-semibold mb-3">➕ 录入新椅子</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <div><label className="text-[11px] text-neutral-500">品牌 *</label><input value={form.brand} onChange={e=>setForm({...form,brand:e.target.value})} placeholder="如 黑白调" className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">产品名 *</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="如 P2 Ultra" className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">价格 ¥</label><input type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="1059" className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">表面材质</label><select value={form.surface} onChange={e=>setForm({...form,surface:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5">
+            <option value="mesh">网布</option><option value="sponge">海绵</option><option value="leather">真皮</option></select></div>
+          <div><label className="text-[11px] text-neutral-500">坐高最小(cm)</label><input type="number" value={form.seatHeightMin} onChange={e=>setForm({...form,seatHeightMin:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">坐高最大(cm)</label><input type="number" value={form.seatHeightMax} onChange={e=>setForm({...form,seatHeightMax:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">坐深最小(cm)</label><input type="number" value={form.seatDepthMin} onChange={e=>setForm({...form,seatDepthMin:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">坐深最大(cm)</label><input type="number" value={form.seatDepthMax} onChange={e=>setForm({...form,seatDepthMax:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">坐宽(cm)</label><input type="number" value={form.seatWidth} onChange={e=>setForm({...form,seatWidth:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 mt-3">
+          <div><label className="text-[11px] text-neutral-500">头枕功能（如：升降3cm, 旋转30°）</label><input value={form.headrestFunc} onChange={e=>setForm({...form,headrestFunc:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">扶手功能（如：4D扶手：升降8cm, 前后5cm）</label><input value={form.armrestFunc} onChange={e=>setForm({...form,armrestFunc:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+          <div><label className="text-[11px] text-neutral-500">腰撑功能（如：4D腰托：上下5cm, 前后2cm）</label><input value={form.lumbarFunc} onChange={e=>setForm({...form,lumbarFunc:e.target.value})} className="w-full px-2 py-1.5 border rounded text-sm mt-0.5"/></div>
+        </div>
+        <button onClick={handleAdd} className="mt-3 px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">添加椅子</button>
+        {msg && <p className={`text-xs mt-2 ${msg.includes("✅")?"text-green-600":"text-red-500"}`}>{msg}</p>}
+      </div>
+
+      {/* 已录入列表 */}
+      {customChairs.length > 0 && (
+        <div className="border rounded-xl p-4">
+          <h3 className="text-sm font-semibold mb-2">📋 已录入 ({customChairs.length} 把)</h3>
+          <div className="space-y-1">
+            {customChairs.map(c => (
+              <div key={c.id} className="flex items-center justify-between text-sm py-1 border-b last:border-0">
+                <span>{c.brand} {c.name}</span>
+                <span className="text-xs text-neutral-400">{c.price ? `¥${c.price}` : "-"}</span>
+                <button onClick={()=>handleDelete(c.id)} className="text-xs text-red-400 hover:text-red-600">删除</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
