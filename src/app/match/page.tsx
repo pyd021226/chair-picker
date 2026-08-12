@@ -6,7 +6,7 @@ import Link from "next/link";
 import { chairs } from "@/data/chairs";
 import { matchAllChairs } from "@/engine/matcher";
 import { calculateBodyDimensions } from "@/engine/formulas";
-import { loadCustomChairs } from "@/engine/storage";
+import { loadCustomChairs, applyOverrides } from "@/engine/storage";
 import type { ChairMatch, BodyDimensions } from "@/engine/types";
 
 function useQueryParams() {
@@ -47,7 +47,7 @@ export default function MatchPage() {
   const sitLong = sitStr === "1";
 
   const body = useMemo(() => isValid ? calculateBodyDimensions(H, W) : null, [H, W, isValid]);
-  const allChairs = useMemo(() => [...chairs, ...loadCustomChairs()], []);
+  const allChairs = useMemo(() => applyOverrides([...chairs, ...loadCustomChairs()]), []);
   const matches = useMemo(() => {
     if (!isValid) return [];
     let result = matchAllChairs(allChairs, H, W);

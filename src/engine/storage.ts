@@ -139,3 +139,39 @@ export function removeCustomChair(id: string): void {
   const chairs = loadCustomChairs().filter(c => c.id !== id);
   saveCustomChairs(chairs);
 }
+
+// ---- 内置椅子数据覆盖（编辑内置椅子时使用） ----
+
+const OVERRIDES_KEY = "chair-picker-overrides";
+
+/** 加载所有覆盖数据 */
+export function loadOverrides(): Record<string, Partial<Chair>> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(OVERRIDES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+/** 保存覆盖数据 */
+export function saveOverrides(overrides: Record<string, Partial<Chair>>): void {
+  localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
+}
+
+/** 更新单把椅子的覆盖数据 */
+export function updateChairOverride(id: string, data: Partial<Chair>): void {
+  const overrides = loadOverrides();
+  overrides[id] = { ...overrides[id], ...data };
+  saveOverrides(overrides);
+}
+
+/** 将覆盖数据应用到椅子列表 */
+export function applyOverrides(chairs: Chair[]): Chair[] {
+  const overrides = loadOverrides();
+  return chairs.map(c => {
+    if (overrides[c.id]) {
+      return { ...c, ...overrides[c.id] } as Chair;
+    }
+    return c;
+  });
+}

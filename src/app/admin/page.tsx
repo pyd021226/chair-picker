@@ -5,7 +5,7 @@ import { DEFAULT_CONFIG, loadConfig, saveConfig, resetConfig, exportConfig, DEFA
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import { chairs } from "@/data/chairs";
-import { getUsageStats, clearUsageRecords, loadCustomChairs, addCustomChair, removeCustomChair, saveCustomChairs } from "@/engine/storage";
+import { getUsageStats, clearUsageRecords, loadCustomChairs, addCustomChair, removeCustomChair, saveCustomChairs, updateChairOverride, loadOverrides } from "@/engine/storage";
 import type { Chair } from "@/engine/types";
 import Link from "next/link";
 
@@ -409,11 +409,23 @@ function ChairsTableTab() {
   const [editForm, setEditForm] = useState<Partial<Chair>>({});
   const [expandedBrand, setExpandedBrand] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [overrides, setOverrides] = useState<Record<string, Partial<Chair>>>({});
 
-  useEffect(() => { setCustomChairs(loadCustomChairs()); }, []);
+  useEffect(() => {
+    setCustomChairs(loadCustomChairs());
+    setOverrides(loadOverrides());
+  }, []);
 
-  const refresh = () => setCustomChairs(loadCustomChairs());
-  const allChairs = [...chairs, ...customChairs];
+  const refresh = () => {
+    setCustomChairs(loadCustomChairs());
+    setOverrides(loadOverrides());
+  };
+
+  // 应用覆盖 + 合并自定义
+  const allChairs = [
+    ...chairs.map(c => overrides[c.id] ? { ...c, ...overrides[c.id] } as Chair : c),
+    ...customChairs,
+  ];
 
   const grouped: Record<string, Chair[]> = {};
   for (const c of allChairs) {
@@ -437,26 +449,31 @@ function ChairsTableTab() {
 
   const saveEdit = () => {
     if (!editId) return;
-    const chairs = loadCustomChairs();
-    const idx = chairs.findIndex(c => c.id === editId);
-    if (idx < 0) return;
-    const orig = chairs[idx];
-    const updated: Chair = {
-      ...orig,
-      brand: editForm.brand || orig.brand,
-      name: editForm.name || orig.name,
-      price: editForm.price ?? orig.price,
-      surface: (editForm.surface as Chair["surface"]) || orig.surface,
-      seatHeight: editForm.seatHeight || orig.seatHeight,
-      seatDepth: editForm.seatDepth || orig.seatDepth,
-      seatWidth: editForm.seatWidth ?? orig.seatWidth,
-      seatWidthEffective: editForm.seatWidth != null ? (editForm.surface === "mesh" ? editForm.seatWidth - 5 : editForm.seatWidth - 1) : orig.seatWidthEffective,
-      headrestFunc: editForm.headrestFunc ?? orig.headrestFunc,
-      armrestFunc: editForm.armrestFunc ?? orig.armrestFunc,
-      lumbarFunc: editForm.lumbarFunc ?? orig.lumbarFunc,
+    const editData: Partial<Chair> = {
+      brand: editForm.brand, name: editForm.name,
+      price: editForm.price ?? undefined,
+      surface: editForm.surface as Chair["surface"],
+      seatHeight: editForm.seatHeight || undefined,
+      seatDepth: editForm.seatDepth || undefined,
+      seatWidth: editForm.seatWidth ?? undefined,
+      seatWidthEffective: editForm.seatWidth != null ? ((editForm.surface as string) === "mesh" ? editForm.seatWidth - 5 : editForm.seatWidth - 1) : undefined,
+      headrestFunc: editForm.headrestFunc ?? undefined,
+      armrestFunc: editForm.armrestFunc ?? undefined,
+      lumbarFunc: editForm.lumbarFunc ?? undefined,
     };
-    chairs[idx] = updated;
-    saveCustomChairs(chairs);
+
+    const isCustom = customChairs.some(c => c.id === editId);
+    if (isCustom) {
+      const clist = loadCustomChairs();
+      const idx = clist.findIndex(c => c.id === editId);
+      if (idx >= 0) {
+        const orig = clist[idx];
+        clist[idx] = { ...orig, ...editData } as Chair;
+        saveCustomChairs(clist);
+      }
+    } else {
+      updateChairOverride(editId, editData);
+    }
     setEditId(null);
     refresh();
   };
@@ -538,14 +555,10 @@ function ChairsTableTab() {
                         <td className="px-2 py-2 max-w-56 truncate" title={c.armrestFunc||""}>{c.armrestFunc||"-"}</td>
                         <td className="px-2 py-2 max-w-48 truncate" title={c.lumbarFunc||""}>{c.lumbarFunc||"-"}</td>
                         <td className="px-2 py-2 text-center">
-                          {isCustom ? (
-                            <div className="flex gap-1 justify-center">
-                              <button onClick={()=>startEdit(c)} className="text-xs text-blue-500 hover:text-blue-700">编辑</button>
-                              <button onClick={()=>{removeCustomChair(c.id);refresh();}} className="text-xs text-red-400 hover:text-red-600">删除</button>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-neutral-300">内置</span>
-                          )}
+                          <div className="flex gap-1 justify-center">
+                            <button onClick={()=>startEdit(c)} className="text-xs text-blue-500 hover:text-blue-700">编辑</button>
+                            {isCustom && <button onClick={()=>{removeCustomChair(c.id);refresh();}} className="text-xs text-red-400 hover:text-red-600">删除</button>}
+                          </div>
                         </td>
                       </tr>
                     );
