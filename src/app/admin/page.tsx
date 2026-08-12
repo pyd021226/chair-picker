@@ -144,7 +144,7 @@ export default function AdminPage() {
           <span className="text-neutral-300">|</span>
           <span className="text-xs">坐高 <b className="text-blue-600">{body.seatHeight.min}-{body.seatHeight.max}</b></span>
           <span className="text-xs">坐深 <b className="text-blue-600">{body.seatDepth.min}-{body.seatDepth.max}</b></span>
-          <span className="text-xs">坐宽 <b className="text-blue-600">{body.seatWidth}</b></span>
+          <span className="text-xs">坐宽 <b className="text-blue-600">{body.seatWidth.min}-{body.seatWidth.max}</b></span>
           <span className="text-xs">背高 <b className="text-blue-600">{body.backHeight.min}-{body.backHeight.max}</b></span>
           <span className="text-neutral-300">|</span>
           <span className="text-xs">Top1: <b className="text-green-600">{matches[0]?.chair.name.slice(0, 10)}</b> {matches[0]?.overallScore}%</span>
