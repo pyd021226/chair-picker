@@ -182,18 +182,15 @@ export function scoreSeatHeight(userIdeal: Range, chairRange: Range): { coverage
 }
 
 export function scoreSeatDepth(userIdeal: Range, chairRange: Range): { coverage: number; explanation: string } {
-  const twoThirdsPos = chairRange.min + (chairRange.max - chairRange.min) * (2 / 3);
-  const upperOk = userIdeal.max <= chairRange.max;
-  const lowerOk = userIdeal.min >= twoThirdsPos;
-
-  if (upperOk && lowerOk) {
-    return { coverage: 1, explanation: "完全匹配，坐深范围理想" };
-  }
-  let coverage = 1;
-  const issues: string[] = [];
-  if (!upperOk) { const excess = userIdeal.max - chairRange.max; coverage -= clamp(excess / 5, 0, 0.5); issues.push(`偏长约${excess.toFixed(0)}cm`); }
-  if (!lowerOk) { const shortage = twoThirdsPos - userIdeal.min; coverage -= clamp(shortage / 5, 0, 0.5); issues.push(`偏短约${shortage.toFixed(0)}cm`); }
-  coverage = clamp(coverage, 0, 1);
-  const status = coverage >= 0.9 ? "合适" : coverage >= 0.7 ? "一般" : "不合适";
-  return { coverage, explanation: `覆盖度${(coverage * 100).toFixed(0)}%，${status}，${issues.join("，")}` };
+  // 椅子2/3有效区 = 可调范围上方2/3（理论能照顾的最大最小范围）
+  const cs = chairRange.max - chairRange.min;
+  const effMin = chairRange.min + cs * (1 / 3);
+  const effRange: Range = { min: effMin, max: chairRange.max };
+  const coverage = computeCoverage(userIdeal, effRange);
+  const status = coverage >= 1 ? "量身定做" : coverage >= 0.9 ? "合适" : coverage >= 0.7 ? "一般" : "不合适";
+  const midU = (userIdeal.min + userIdeal.max) / 2;
+  const midC = (effRange.min + effRange.max) / 2;
+  const d = midC - midU;
+  const dir = d > 1 ? `偏短${d.toFixed(0)}cm` : d < -1 ? `偏长${Math.abs(d).toFixed(0)}cm` : "";
+  return { coverage, explanation: `有效区${effMin.toFixed(0)}-${chairRange.max.toFixed(0)}cm，${(coverage*100).toFixed(0)}%，${status}${dir?"，"+dir:""}` };
 }
