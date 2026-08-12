@@ -22,6 +22,7 @@ function countFeatures(chair: any): number {
 }
 
 const accentColor = (s: number) => s === 100 ? "#2563eb" : s >= 95 ? "#16a34a" : s >= 80 ? "#ca8a04" : "#dc2626";
+const dimColor = (status: string) => status === "good" ? "#16a34a" : status === "marginal" ? "#ca8a04" : "#dc2626";
 
 /* 卡片内容（不带链接壳） */
 function CardContent({ match, sitLong }: { match: any; sitLong: boolean }) {
@@ -44,7 +45,7 @@ function CardContent({ match, sitLong }: { match: any; sitLong: boolean }) {
           <div key={d.key} className="flex items-center gap-2 text-xs">
             <span className="w-8 text-neutral-400">{d.label}</span>
             <div className="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: accentColor(overallScore) }} />
+              <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: dimColor(d.status) }} />
             </div>
             <span className="w-7 text-right font-medium text-neutral-600">{Math.round(d.coverage * 100)}%</span>
           </div>
