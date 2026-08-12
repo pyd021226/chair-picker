@@ -110,14 +110,14 @@ function GroupStack({ list, sitLong, color, expanded, onToggle }: { list: any[];
 
   if (!expanded) {
     // 以左上角为圆心，右下角逐渐下沉，最多堆8张
-    const backCards = rest.slice(0, 7); // 前面1张 + 后面最多7张 = 8张
+    const backCards = rest.slice(0, 7); // 第2张~第8张（按价格排序）
     return (
       <div className="relative cursor-pointer select-none" style={{ height: "240px" }} onClick={onToggle}>
-        {/* 后面的卡片：绕左上角旋转，右下角下沉 */}
-        {backCards.reverse().map((m, i) => {
-          const depth = backCards.length - i; // 越靠后 depth 越大
-          const angle = depth * 0.6; // 每张多转0.6度
-          const drop = depth * 3; // 右下角下沉
+        {/* 后面的卡片：第2张最小偏移，越往后偏移越大 */}
+        {backCards.map((m, i) => {
+          const angle = (i + 1) * 0.6;   // 第2张0.6° → 第8张4.2°
+          const drop = (i + 1) * 3;       // 右下角逐张下沉
+          const zIndex = backCards.length - i; // 第2张最高，第8张最低
           return (
             <div
               key={m.chair.id}
@@ -130,7 +130,7 @@ function GroupStack({ list, sitLong, color, expanded, onToggle }: { list: any[];
                 transform: `rotate(${angle}deg) translateY(${drop}px)`,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
                 opacity: 0.75,
-                zIndex: depth,
+                zIndex: zIndex,
               }}
             />
           );
