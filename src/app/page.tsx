@@ -4,139 +4,230 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+const TOTAL_STEPS = 6;
+
 export default function Home() {
   const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [nickname, setNickname] = useState("");
+  const [gender, setGender] = useState<"male" | "female" | null>(null);
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [errors, setErrors] = useState<{ height?: string; weight?: string }>({});
+  const [sitLong, setSitLong] = useState<boolean | null>(null);
+  const [budget, setBudget] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  function validate(): boolean {
-    const errs: typeof errors = {};
-    const h = parseFloat(height);
-    const w = parseFloat(weight);
-
-    if (!height || isNaN(h)) errs.height = "请输入身高";
-    else if (h < 130 || h > 220) errs.height = "身高范围 130-220cm";
-
-    if (!weight || isNaN(w)) errs.weight = "请输入体重";
-    else if (w < 30 || w > 150) errs.weight = "体重范围 30-150kg";
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+  function validateStep(s: number): boolean {
+    const e: Record<string, string> = {};
+    if (s === 1 && !nickname.trim()) e.nickname = "请输入昵称";
+    if (s === 2 && !gender) e.gender = "请选择性别";
+    if (s === 3) {
+      const h = parseFloat(height);
+      if (!height || isNaN(h)) e.height = "请输入身高";
+      else if (h < 130 || h > 220) e.height = "130-220cm";
+    }
+    if (s === 4) {
+      const w = parseFloat(weight);
+      if (!weight || isNaN(w)) e.weight = "请输入体重";
+      else if (w < 30 || w > 150) e.weight = "30-150kg";
+    }
+    if (s === 5 && sitLong === null) e.sitLong = "请选择";
+    if (s === 6) {
+      const b = parseFloat(budget);
+      if (!budget || isNaN(b)) e.budget = "请输入预算";
+      else if (b < 100) e.budget = "预算至少100元";
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validate()) return;
+  function next() {
+    if (validateStep(step)) setStep(step + 1);
+  }
+
+  function handleSubmit() {
+    if (!validateStep(6)) return;
     const h = parseFloat(height);
     const w = parseFloat(weight);
-    router.push(`/match?h=${h}&w=${w}`);
+    const b = parseFloat(budget);
+    router.push(`/match?h=${h}&w=${w}&budget=${b}`);
+  }
+
+  function progress() {
+    return (step / TOTAL_STEPS) * 100;
   }
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 max-w-lg mx-auto w-full">
-      {/* Hero */}
-      <div className="text-center mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-          🪑 找到适合你的工学椅
-        </h1>
-        <p className="text-neutral-500 text-base leading-relaxed">
-          输入身高体重，基于中国人人体数据标准，
-          <br className="hidden sm:block" />
-          科学匹配最适合你的椅子，告别凭感觉选购。
-        </p>
-        <p className="mt-3 text-sm text-blue-600 font-medium">
-          野生的装机宅 · B站百万粉椅子评测
-        </p>
-      </div>
+    <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-md mx-auto w-full">
+      <h1 className="text-2xl font-bold mb-1">🪑 找到你的工学椅</h1>
+      <p className="text-sm text-neutral-400 mb-6">野生的装机宅 · 智能匹配</p>
 
-      {/* Input Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="w-full bg-neutral-50 border border-neutral-200 rounded-2xl p-6 sm:p-8 space-y-5"
-      >
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <label htmlFor="height" className="block text-sm font-medium text-neutral-600 mb-1.5">
-              身高
-            </label>
+      {/* 进度条 */}
+      <div className="w-full h-1.5 bg-neutral-100 rounded-full mb-8">
+        <div className="h-full bg-blue-500 rounded-full transition-all duration-300" style={{ width: `${progress()}%` }} />
+      </div>
+      <div className="text-xs text-neutral-400 mb-6">第 {step} / {TOTAL_STEPS} 步</div>
+
+      <div className="w-full min-h-[240px] flex flex-col justify-center">
+        {/* Step 1: 昵称 */}
+        {step === 1 && (
+          <div className="space-y-4">
+            <label className="block text-lg font-semibold text-neutral-800">怎么称呼你？</label>
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => { setNickname(e.target.value); if (errors.nickname) setErrors({}); }}
+              onKeyDown={(e) => e.key === "Enter" && next()}
+              placeholder="输入昵称"
+              autoFocus
+              className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.nickname && <p className="text-red-500 text-xs">{errors.nickname}</p>}
+          </div>
+        )}
+
+        {/* Step 2: 性别 */}
+        {step === 2 && (
+          <div className="space-y-4">
+            <label className="block text-lg font-semibold text-neutral-800">你的性别？</label>
+            <p className="text-xs text-neutral-400">用于更精准的人体数据推算</p>
+            <div className="flex gap-3">
+              {[
+                { key: "male" as const, label: "🙋 男", desc: "男性" },
+                { key: "female" as const, label: "🙋‍♀️ 女", desc: "女性" },
+              ].map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => { setGender(opt.key); setErrors({}); }}
+                  className={`flex-1 py-4 rounded-xl border-2 text-center font-medium transition-all ${
+                    gender === opt.key
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
+                  }`}
+                >
+                  <div className="text-lg">{opt.label}</div>
+                  <div className="text-xs mt-0.5">{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+            {errors.gender && <p className="text-red-500 text-xs">{errors.gender}</p>}
+          </div>
+        )}
+
+        {/* Step 3: 身高 */}
+        {step === 3 && (
+          <div className="space-y-4">
+            <label className="block text-lg font-semibold text-neutral-800">你的身高？</label>
             <div className="relative">
               <input
-                id="height"
                 type="number"
                 inputMode="decimal"
-                placeholder="175"
                 value={height}
-                onChange={(e) => {
-                  setHeight(e.target.value);
-                  if (errors.height) setErrors((p) => ({ ...p, height: undefined }));
-                }}
-                className={`w-full px-4 py-3 rounded-xl border text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                  errors.height ? "border-red-400" : "border-neutral-200"
-                }`}
+                onChange={(e) => { setHeight(e.target.value); if (errors.height) setErrors({}); }}
+                onKeyDown={(e) => e.key === "Enter" && next()}
+                placeholder="175"
+                autoFocus
+                className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400 pointer-events-none">
-                cm
-              </span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400">cm</span>
             </div>
-            {errors.height && <p className="text-red-500 text-xs mt-1">{errors.height}</p>}
+            {errors.height && <p className="text-red-500 text-xs">{errors.height}</p>}
           </div>
+        )}
 
-          <div className="flex-1">
-            <label htmlFor="weight" className="block text-sm font-medium text-neutral-600 mb-1.5">
-              体重
-            </label>
+        {/* Step 4: 体重 */}
+        {step === 4 && (
+          <div className="space-y-4">
+            <label className="block text-lg font-semibold text-neutral-800">你的体重？</label>
             <div className="relative">
               <input
-                id="weight"
                 type="number"
                 inputMode="decimal"
-                placeholder="70"
                 value={weight}
-                onChange={(e) => {
-                  setWeight(e.target.value);
-                  if (errors.weight) setErrors((p) => ({ ...p, weight: undefined }));
-                }}
-                className={`w-full px-4 py-3 rounded-xl border text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                  errors.weight ? "border-red-400" : "border-neutral-200"
-                }`}
+                onChange={(e) => { setWeight(e.target.value); if (errors.weight) setErrors({}); }}
+                onKeyDown={(e) => e.key === "Enter" && next()}
+                placeholder="70"
+                autoFocus
+                className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400 pointer-events-none">
-                kg
-              </span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400">kg</span>
             </div>
-            {errors.weight && <p className="text-red-500 text-xs mt-1">{errors.weight}</p>}
+            {errors.weight && <p className="text-red-500 text-xs">{errors.weight}</p>}
           </div>
-        </div>
+        )}
 
-        <button
-          type="submit"
-          className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl text-lg transition-colors cursor-pointer"
-        >
-          开始匹配
-        </button>
-      </form>
-
-      {/* How it works */}
-      <div className="mt-12 grid grid-cols-3 gap-4 text-center w-full">
-        {[
-          { step: "①", title: "输入身高体重", desc: "只需两项数据" },
-          { step: "②", title: "推算身体尺寸", desc: "基于国标公式" },
-          { step: "③", title: "智能匹配椅子", desc: "按贴合度排序" },
-        ].map((item) => (
-          <div key={item.step}>
-            <div className="text-2xl mb-1">{item.step}</div>
-            <div className="text-sm font-medium text-neutral-800">{item.title}</div>
-            <div className="text-xs text-neutral-400 mt-0.5">{item.desc}</div>
+        {/* Step 5: 坐姿时间 */}
+        {step === 5 && (
+          <div className="space-y-4">
+            <label className="block text-lg font-semibold text-neutral-800">每天坐姿超过 6 小时？</label>
+            <p className="text-xs text-neutral-400">长时间久坐对椅子支撑要求更高</p>
+            <div className="flex gap-3">
+              {[
+                { key: true, label: "✅ 是", desc: "超过6小时" },
+                { key: false, label: "❌ 否", desc: "6小时以内" },
+              ].map((opt) => (
+                <button
+                  key={String(opt.key)}
+                  onClick={() => { setSitLong(opt.key); setErrors({}); }}
+                  className={`flex-1 py-4 rounded-xl border-2 text-center font-medium transition-all ${
+                    sitLong === opt.key
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
+                  }`}
+                >
+                  <div className="text-lg">{opt.label}</div>
+                  <div className="text-xs mt-0.5">{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+            {errors.sitLong && <p className="text-red-500 text-xs">{errors.sitLong}</p>}
           </div>
-        ))}
+        )}
+
+        {/* Step 6: 预算 */}
+        {step === 6 && (
+          <div className="space-y-4">
+            <label className="block text-lg font-semibold text-neutral-800">你的预算？</label>
+            <p className="text-xs text-neutral-400">帮你筛选价格合适的椅子</p>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">¥</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={budget}
+                onChange={(e) => { setBudget(e.target.value); if (errors.budget) setErrors({}); }}
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                placeholder="1000"
+                autoFocus
+                className="w-full pl-8 pr-4 py-3 rounded-xl border border-neutral-200 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            {errors.budget && <p className="text-red-500 text-xs">{errors.budget}</p>}
+          </div>
+        )}
       </div>
 
-      <p className="mt-8 text-xs text-neutral-400">
-        已收录 36 款工学椅 · 持续更新中 ·{" "}
-        <Link href="/admin" className="text-blue-500 hover:underline">
-          ⚙️ 公式管理
-        </Link>
+      {/* 按钮 */}
+      <div className="w-full mt-8 flex gap-3">
+        {step > 1 && (
+          <button onClick={() => setStep(step - 1)} className="px-5 py-3 border border-neutral-200 rounded-xl text-neutral-600 font-medium hover:bg-neutral-50 transition-colors">
+            ← 上一步
+          </button>
+        )}
+        {step < TOTAL_STEPS ? (
+          <button onClick={next} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
+            下一步
+          </button>
+        ) : (
+          <button onClick={handleSubmit} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
+            🔍 开始匹配
+          </button>
+        )}
+      </div>
+
+      <p className="mt-6 text-xs text-neutral-400">
+        已收录 36 款工学椅 ·{" "}
+        <Link href="/admin" className="text-blue-500 hover:underline">⚙️ 公式管理</Link>
       </p>
     </main>
   );
