@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { chairs } from "@/data/chairs";
 import { matchAllChairs } from "@/engine/matcher";
@@ -23,121 +23,121 @@ function countFeatures(chair: any): number {
 
 const accentColor = (s: number) => s === 100 ? "#2563eb" : s >= 95 ? "#16a34a" : s >= 80 ? "#ca8a04" : "#dc2626";
 
-/* 单张椅子卡片 */
-function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
+/* 卡片内容（不带链接壳） */
+function CardContent({ match, sitLong }: { match: any; sitLong: boolean }) {
   const { chair, overallScore } = match;
-  const [peek, setPeek] = useState(false);
-  const linkRef = useRef<HTMLAnchorElement>(null);
-
   const dims = match.dimensions.filter((d: any) => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key));
 
-  // 触屏：第一次点击显示照片，第二次才跳转
-  const handleClick = (e: React.MouseEvent) => {
-    if (!peek && window.matchMedia("(pointer: coarse)").matches) {
-      e.preventDefault();
-      setPeek(true);
-    }
-  };
+  return (
+    <>
+      <div className="flex items-start justify-between mb-3">
+        <div className="min-w-0 min-h-[40px]">
+          <p className="text-[10px] text-neutral-400 uppercase tracking-wider">{chair.brand}</p>
+          <h3 className="font-semibold text-neutral-900 text-sm mt-0.5 line-clamp-2">{chair.name}</h3>
+        </div>
+        <span className="flex-shrink-0 ml-2 text-2xl font-bold tracking-tighter" style={{ color: accentColor(overallScore) }}>
+          {overallScore}
+        </span>
+      </div>
+      <div className="space-y-1.5" style={{ minHeight: "54px" }}>
+        {dims.map((d: any) => (
+          <div key={d.key} className="flex items-center gap-2 text-xs">
+            <span className="w-8 text-neutral-400">{d.label}</span>
+            <div className="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: accentColor(overallScore) }} />
+            </div>
+            <span className="w-7 text-right font-medium text-neutral-600">{Math.round(d.coverage * 100)}%</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between mt-auto pt-3 border-t border-neutral-100" style={{ minHeight: "32px" }}>
+        {chair.price ? <span className="text-sm font-bold text-blue-600">{chair.price}</span> : <span />}
+        {sitLong && (
+          <span className="text-[10px] font-medium" style={{ color: countFeatures(chair) >= 3 ? "#16a34a" : countFeatures(chair) >= 2 ? "#ca8a04" : "#dc2626" }}>
+            功能 {countFeatures(chair)}/3
+          </span>
+        )}
+      </div>
+    </>
+  );
+}
+
+/* 可点击卡片（展开态用） */
+function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
+  const { chair } = match;
+  const [peek, setPeek] = useState(false);
+
+  const href = "/chair/" + chair.id + "?h=" + match.h + "&w=" + match.w + (sitLong ? "&sit=1" : "");
 
   return (
     <div className="relative group">
-      {/* 照片 — 悬停/触屏首次点击后从背后探出 */}
+      {/* 照片探出 */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 rounded-2xl overflow-hidden bg-neutral-100 shadow-lg transition-all duration-400 ease-out z-0 pointer-events-none"
+        className="absolute left-1/2 -translate-x-1/2 rounded-2xl overflow-hidden bg-neutral-100 shadow-lg transition-all duration-300 ease-out z-0 pointer-events-none"
         style={{
-          width: peek ? "150px" : "100px",
-          height: peek ? "200px" : "120px",
-          bottom: peek ? "55px" : "35px",
-          opacity: peek ? 1 : 0.25,
-          transform: `translateX(-50%) translateY(${peek ? "-28px" : "0"})`,
+          width: peek ? "150px" : "90px",
+          height: peek ? "200px" : "110px",
+          bottom: peek ? "55px" : "30px",
+          opacity: peek ? 1 : 0.2,
+          transform: `translateX(-50%) translateY(${peek ? "-24px" : "0"})`,
         }}
       >
         {chair.imageUrl ? (
           <img src={chair.imageUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 text-3xl text-neutral-300 select-none">
-            {chair.name.slice(0, 1)}
-          </div>
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 text-3xl text-neutral-300 select-none">{chair.name.slice(0, 1)}</div>
         )}
       </div>
 
-      {/* 卡片 */}
       <Link
-        ref={linkRef}
-        href={"/chair/" + chair.id + "?h=" + match.h + "&w=" + match.w + (sitLong ? "&sit=1" : "")}
-        onClick={handleClick}
+        href={href}
         className="relative z-10 flex flex-col bg-white border border-neutral-200 rounded-2xl p-4 transition-all duration-300 hover:shadow-md h-full"
         style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)", minHeight: "200px" }}
         onMouseEnter={() => setPeek(true)}
         onMouseLeave={() => setPeek(false)}
       >
-        <div className="flex items-start justify-between mb-3">
-          <div className="min-w-0 min-h-[40px]">
-            <p className="text-[10px] text-neutral-400 uppercase tracking-wider">{chair.brand}</p>
-            <h3 className="font-semibold text-neutral-900 text-sm mt-0.5 line-clamp-2">{chair.name}</h3>
-          </div>
-          <span className="flex-shrink-0 ml-2 text-2xl font-bold tracking-tighter" style={{ color: accentColor(overallScore) }}>
-            {overallScore}
-          </span>
-        </div>
-        <div className="space-y-1.5" style={{ minHeight: "54px" }}>
-          {dims.map((d: any) => (
-            <div key={d.key} className="flex items-center gap-2 text-xs">
-              <span className="w-8 text-neutral-400">{d.label}</span>
-              <div className="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: accentColor(overallScore) }} />
-              </div>
-              <span className="w-7 text-right font-medium text-neutral-600">{Math.round(d.coverage * 100)}%</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-neutral-100" style={{ minHeight: "32px" }}>
-          {chair.price ? <span className="text-sm font-bold text-blue-600">{chair.price}</span> : <span />}
-          {sitLong && (
-            <span className="text-[10px] font-medium" style={{ color: countFeatures(chair) >= 3 ? "#16a34a" : countFeatures(chair) >= 2 ? "#ca8a04" : "#dc2626" }}>
-              功能 {countFeatures(chair)}/3
-            </span>
-          )}
-        </div>
+        <CardContent match={match} sitLong={sitLong} />
       </Link>
     </div>
   );
 }
 
-/* 分组堆叠：默认只显示最低价卡片，点击展开全部（每排最多3个） */
+/* 分组堆叠：微信照片式，默认显示最低价，点击展开 */
 function GroupStack({ list, sitLong, color }: { list: any[]; sitLong: boolean; color: string }) {
   const [expanded, setExpanded] = useState(false);
 
-  // 按价格排序，最低价放最前面
   const sorted = [...list].sort((a, b) => (a.chair.price ?? Infinity) - (b.chair.price ?? Infinity));
   const front = sorted[0];
   const rest = sorted.slice(1);
 
   if (!expanded) {
-    // 堆叠态：只显示一张 + 后面几张的边角
     return (
-      <div
-        className="relative cursor-pointer"
-        onClick={() => setExpanded(true)}
-        style={{ height: "210px" }}
-      >
-        {/* 后面的卡片角（视觉堆叠） */}
-        {rest.slice(0, 2).map((m, i) => (
-          <div
-            key={m.chair.id}
-            className="absolute inset-x-0 rounded-2xl border border-neutral-200 bg-neutral-50"
-            style={{
-              top: (i + 1) * 8,
-              transform: `scale(${1 - (i + 1) * 0.03})`,
-              height: "100%",
-              opacity: 0.5,
-            }}
-          />
-        ))}
-        {/* 前面卡片 */}
-        <div className="absolute inset-0" style={{ zIndex: 3 }}>
-          <ChairCard match={front} sitLong={sitLong} />
+      <div className="relative cursor-pointer select-none" style={{ height: "220px" }} onClick={() => setExpanded(true)}>
+        {/* 后面的卡片：微信式 轻微旋转+偏移 */}
+        {rest.slice(0, 3).reverse().map((m, i) => {
+          const depth = rest.slice(0, 3).length - i; // 3,2,1
+          return (
+            <div
+              key={m.chair.id}
+              className="absolute inset-x-0 rounded-2xl border border-neutral-200 bg-neutral-50"
+              style={{
+                height: "100%",
+                top: 0,
+                transform: `rotate(${(depth - 1) * 0.8}deg) translateY(${depth * 6}px)`,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                opacity: 0.85,
+              }}
+            />
+          );
+        })}
+
+        {/* 前面卡片（不可点击，点击触发展开） */}
+        <div className="absolute inset-0" style={{ zIndex: 5 }}>
+          <div className="relative z-10 flex flex-col bg-white border border-neutral-200 rounded-2xl p-4 h-full" style={{ boxShadow: "0 4px 16px rgba(0,0,0,0.08)", minHeight: "200px" }}>
+            <CardContent match={front} sitLong={sitLong} />
+          </div>
         </div>
+
         {/* 数量徽章 */}
         {list.length > 1 && (
           <div
@@ -151,7 +151,6 @@ function GroupStack({ list, sitLong, color }: { list: any[]; sitLong: boolean; c
     );
   }
 
-  // 展开态：每排最多3个
   return (
     <div className="space-y-2">
       <button onClick={() => setExpanded(false)} className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors mb-2">
@@ -168,7 +167,6 @@ function GroupStack({ list, sitLong, color }: { list: any[]; sitLong: boolean; c
   );
 }
 
-/* 主页面 */
 export default function MatchPage() {
   const { h: hStr, w: wStr, sit: sitStr } = useQueryParams();
   const [loaded, setLoaded] = useState(false);
@@ -184,7 +182,6 @@ export default function MatchPage() {
     if (!isValid) return [];
     let r = matchAllChairs(allChairs, H, W);
     if (sitLong) r = r.map(m => ({ ...m, overallScore: Math.round(m.overallScore * 0.75 + (countFeatures(m.chair) / 3) * 25) }));
-    // 注入 h, w 参数给每个 match，方便卡片构建链接
     r = r.map(m => ({ ...m, h: H, w: W }));
     return r.sort((a, b) => b.overallScore - a.overallScore);
   }, [H, W, isValid, allChairs, sitLong]);
@@ -202,13 +199,11 @@ export default function MatchPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      {/* Nav */}
       <Link href="/" className="inline-flex items-center text-sm text-neutral-400 hover:text-neutral-600 transition-colors duration-200 mb-6">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="mr-1"><path d="M10 3L5 8l5 5"/></svg>
         返回修改
       </Link>
 
-      {/* Body badge */}
       <div className="inline-flex flex-wrap items-center gap-3 px-4 py-2 bg-white border border-neutral-200 rounded-xl mb-8 text-xs">
         <span className="text-neutral-700 font-medium">{H}cm / {W}kg{sitLong ? " / 久坐" : ""}</span>
         <span className="text-neutral-200">|</span>
@@ -217,7 +212,6 @@ export default function MatchPage() {
         <span className="text-neutral-400">坐宽 <b className="text-neutral-800">{body.seatWidth.min}-{body.seatWidth.max}cm</b></span>
       </div>
 
-      {/* 分组 */}
       {groups.map(g => {
         if (g.list.length === 0) return null;
         return (
