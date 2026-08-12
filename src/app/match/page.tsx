@@ -59,19 +59,19 @@ function BodyCard({ body }: { body: BodyDimensions }) {
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5 sm:p-6">
       <h3 className="text-sm font-semibold text-blue-800 mb-3">📐 你的估算身体数据</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+      <div className="grid grid-cols-3 gap-3 text-sm">
         <div><span className="text-neutral-400">坐高需求</span><p className="font-semibold text-neutral-900">{body.seatHeight.min}-{body.seatHeight.max}cm</p></div>
         <div><span className="text-neutral-400">坐深需求</span><p className="font-semibold text-neutral-900">{body.seatDepth.min}-{body.seatDepth.max}cm</p></div>
         <div><span className="text-neutral-400">坐宽需求</span><p className="font-semibold text-neutral-900">{body.seatWidth.min}-{body.seatWidth.max}cm</p></div>
-        <div><span className="text-neutral-400">背高需求</span><p className="font-semibold text-neutral-900">{body.backHeight.min}-{body.backHeight.max}cm</p></div>
       </div>
-      <details className="mt-3 text-xs text-neutral-500">
-        <summary className="cursor-pointer hover:text-neutral-700">查看更多推算数据</summary>
+      <details className="mt-3 text-xs text-neutral-400">
+        <summary className="cursor-pointer hover:text-neutral-600">其他维度（暂无公式）</summary>
         <div className="grid grid-cols-2 gap-2 mt-2 p-3 bg-white/60 rounded-lg">
-          <div>扶手高需求: {body.armrestHeight.min}-{body.armrestHeight.max}cm</div><div>扶手宽需求: {body.armrestWidth}cm</div>
-          <div>头枕中心: {body.headrestCenter}cm</div><div>头枕需求: {(body.headrestNeedScore * 100).toFixed(0)}%</div>
-          <div>后仰力度: {body.reclineTension}/10</div><div>坐垫硬度: {body.seatFirmness}/10</div>
-          <div>腰撑位置: {body.lumbarPosition.min}-{body.lumbarPosition.max}cm</div><div>腰撑深度: {body.lumbarDepth}cm</div>
+          <div>背高: 暂无</div><div>背宽: 暂无</div>
+          <div>扶手高: 暂无</div><div>扶手宽: 暂无</div>
+          <div>头枕范围: 暂无</div><div>头枕需求: 暂无</div>
+          <div>后仰力度: 暂无</div><div>坐垫硬度: 暂无</div>
+          <div>腰撑力度: 暂无</div><div>腰撑位置: 暂无</div>
         </div>
       </details>
     </div>
@@ -81,8 +81,8 @@ function BodyCard({ body }: { body: BodyDimensions }) {
 function ChairCard({ match, rank, body, userHeight }: { match: ChairMatch; rank: number; body: BodyDimensions; userHeight: number }) {
   const { chair, overallScore, dimensions } = match;
   const [expanded, setExpanded] = useState(false);
-  const topDims = dimensions.filter(d => !d.chairDataMissing).slice(0, 3);
-  const coreDims = dimensions.filter(d => ["seatHeight","seatDepth","seatWidth","backHeight","armrestHeight"].includes(d.key) && !d.chairDataMissing);
+  const topDims = dimensions.filter(d => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key)).slice(0, 3);
+  const coreDims = dimensions.filter(d => ["seatHeight","seatDepth","seatWidth"].includes(d.key) && !d.chairDataMissing);
   const sc = overallScore >= 85 ? "bg-emerald-500" : overallScore >= 70 ? "bg-amber-500" : "bg-red-500";
 
   return (
