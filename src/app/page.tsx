@@ -5,7 +5,54 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { recordUsage } from "@/engine/storage";
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
+
+// 中国成年人身高/体重参考数据
+const MALE_H = { mean: 169.7, sd: 6.2 };
+const FEMALE_H = { mean: 158.0, sd: 5.5 };
+const MALE_BMI = { mean: 23.1, sd: 3.2 };
+const FEMALE_BMI = { mean: 22.3, sd: 3.0 };
+
+/** 正态分布百分位 */
+function percentile(val: number, mean: number, sd: number): number {
+  const z = (val - mean) / sd;
+  // 近似正态CDF
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989423 * Math.exp(-z * z / 2);
+  const p = 1 - d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return Math.round((z > 0 ? p : 1 - p) * 1000) / 10;
+}
+
+function heightLabel(pct: number): string {
+  // pct = 比多少人高（百分位，90 = 比90%的人高）
+  if (pct >= 99) return "大高个";
+  if (pct >= 90) return "高个子";
+  if (pct >= 70) return "中高";
+  if (pct <= 1) return "迷你";
+  if (pct <= 10) return "小个子";
+  if (pct <= 30) return "中小个子";
+  return "中等";
+}
+
+function bmiLevel(bmi: number, gender: "male" | "female"): string {
+  if (bmi < 18.5) return "偏瘦";
+  if (bmi < 24) return "标准";
+  if (bmi < 28) return "偏胖";
+  return "肥胖";
+}
+
+function bodyType(hPct: number, bmi: number): string {
+  const h = hPct > 90 ? "矮" : hPct > 60 ? "中" : "高";
+  const w = bmi < 18.5 ? "瘦" : bmi < 24 ? "匀称" : bmi < 28 ? "壮" : "胖";
+  if (h === "矮" && w === "胖") return "矮胖";
+  if (h === "矮" && w === "壮") return "矮壮";
+  if (h === "矮" && w === "瘦") return "瘦小";
+  if (h === "高" && w === "胖") return "高胖";
+  if (h === "高" && w === "瘦") return "瘦高";
+  if (h === "高" && w === "壮") return "高大壮实";
+  if (h === "中" && w === "匀称") return "匀称";
+  return `${h}等身材偏${w}`;
+}
 
 export default function Home() {
   const router = useRouter();
@@ -18,6 +65,53 @@ export default function Home() {
   const [budgetMin, setBudgetMin] = useState("");
   const [budgetMax, setBudgetMax] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [summaryLines, setSummaryLines] = useState<string[]>([]);
+  const [typedCount, setTypedCount] = useState(0);
+  const [typingDone, setTypingDone] = useState(false);
+
+  /** 生成身体总结 */
+  function generateSummary(): string[] {
+    if (!gender) return [];
+    const h = parseFloat(height);
+    const w = parseFloat(weight);
+    const bmi = w / ((h / 100) * (h / 100));
+    const hRef = gender === "male" ? MALE_H : FEMALE_H;
+    const bRef = gender === "male" ? MALE_BMI : FEMALE_BMI;
+    const hPct = percentile(h, hRef.mean, hRef.sd);
+    const bmiPct = percentile(bmi, bRef.mean, bRef.sd);
+    const hLabel = heightLabel(hPct);
+    const bLabel = bmiLevel(bmi, gender);
+    const bt = bodyType(hPct, bmi);
+    const gLabel = gender === "male" ? "男性" : "女性";
+
+    const lines: string[] = [
+      `${nickname || "朋友"}，根据你的数据，我们来总结一下：`,
+      `你的身高 ${h}cm，在${gLabel}人群中超过 ${hPct}% 的人，属于「${hLabel}」水平。`,
+      `你的 BMI 为 ${bmi.toFixed(1)}（${bLabel}），体型结论：${bt}。`,
+    ];
+
+    // 针对性建议
+    if (bmi >= 28) {
+      lines.push("由于体重较大，你需要更强的腰部支撑和偏硬的网面坐垫，防止坐骨触底。");
+    } else if (bmi >= 24) {
+      lines.push("你属于偏壮体型，建议选择腰部支撑较强、坐垫中等偏硬的椅子。");
+    } else if (bmi < 18.5) {
+      lines.push("你偏瘦，肌肉量较低，建议选择坐垫偏软、腰撑力度柔和的椅子。");
+    }
+
+    if (gender === "female") {
+      lines.push("女性腰椎曲度通常更大，建议选择腰撑位置可调、能精准对准腰窝的椅子。坐感建议偏软，以适应较低的肌肉量。");
+    }
+
+    if (sitLong) {
+      lines.push("你每天久坐超过6小时，颈部、肩部、腰部长期受压。强烈建议选择带头枕（高度可调）、多维扶手、以及强支撑腰靠的椅子。");
+    } else {
+      lines.push("你每天久坐时间在6小时以内，标准配置的工学椅即可满足需求。");
+    }
+
+    lines.push("接下来，我们将根据你的身体数据和预算，为你匹配最适合的椅子。");
+    return lines;
+  }
 
   function validateStep(s: number): boolean {
     const e: Record<string, string> = {};
@@ -46,7 +140,15 @@ export default function Home() {
   }
 
   function next() {
-    if (validateStep(step)) setStep(step + 1);
+    if (validateStep(step)) {
+      if (step === 6) {
+        // 进入总结步骤，生成总结
+        setSummaryLines(generateSummary());
+        setTypedCount(0);
+        setTypingDone(false);
+      }
+      setStep(step + 1);
+    }
   }
 
   function handleSubmit() {
@@ -59,6 +161,18 @@ export default function Home() {
     recordUsage({ nickname, gender, height: h, weight: w, sitLong: sitLong ?? false, budgetMin: bMin, budgetMax: bMax });
     router.push(`/match?h=${h}&w=${w}&bmin=${bMin}&bmax=${bMax}&sit=${sitLong ? "1" : "0"}`);
   }
+
+  // 打字机动画
+  useEffect(() => {
+    if (step !== 7 || typingDone) return;
+    if (typedCount < summaryLines.length) {
+      const timer = setTimeout(() => setTypedCount(typedCount + 1), 800);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => setTypingDone(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [step, typedCount, summaryLines, typingDone]);
 
   function progress() {
     return (step / TOTAL_STEPS) * 100;
@@ -225,25 +339,56 @@ export default function Home() {
             )}
           </div>
         )}
+
+        {/* Step 7: 身体总结 + 打字动画 */}
+        {step === 7 && (
+          <div className="space-y-3">
+            <label className="block text-lg font-semibold text-neutral-800">📋 你的身体分析报告</label>
+            <div className="bg-white border border-neutral-200 rounded-xl p-5 min-h-[200px] space-y-2 text-sm leading-relaxed">
+              {summaryLines.slice(0, typedCount).map((line, i) => (
+                <p
+                  key={i}
+                  className="text-neutral-700 animate-fadeIn"
+                  style={{
+                    animation: `fadeIn 0.3s ease-out ${i * 0.05}s both`,
+                  }}
+                >
+                  {i === 0 ? <span className="font-semibold text-base">{line}</span> : line}
+                </p>
+              ))}
+              {!typingDone && <span className="inline-block w-2 h-4 bg-blue-500 animate-pulse ml-0.5 align-middle" />}
+            </div>
+            {typingDone && (
+              <button
+                onClick={handleSubmit}
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-lg transition-all animate-fadeIn cursor-pointer"
+              >
+                ✅ 我已了解，开始匹配
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* 按钮 */}
+      {/* 按钮（第7步不显示） */}
+      {step < 7 && (
       <div className="w-full mt-8 flex gap-3">
         {step > 1 && (
           <button onClick={() => setStep(step - 1)} className="px-5 py-3 border border-neutral-200 rounded-xl text-neutral-600 font-medium hover:bg-neutral-50 transition-colors">
             ← 上一步
           </button>
         )}
-        {step < TOTAL_STEPS ? (
+        {step < TOTAL_STEPS - 1 ? (
           <button onClick={next} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
             下一步
           </button>
         ) : (
-          <button onClick={handleSubmit} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
-            🔍 开始匹配
+          <button onClick={next} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
+            生成身体报告
           </button>
         )}
       </div>
+      )}
 
       <p className="mt-6 text-xs text-neutral-400">
         已收录 36 款工学椅 ·{" "}
