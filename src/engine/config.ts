@@ -6,11 +6,14 @@
 export interface FormulaConfig {
   // ...（公式系数同上）
   seatHeight: {
-    coefLow: number; coefHigh: number;
+    coefLow: number; coefHigh: number;  // 矮个系数（<165cm）
     shoeLow: number; shoeHigh: number;
     cylinderLow: number; cylinderHigh: number;
-    tallThreshold: number;
-    tallCoefLow: number; tallCoefHigh: number;
+    shortThreshold: number;         // 矮个阈值 165
+    shortCoefLow: number; shortCoefHigh: number;  // 0.24~0.25
+    midThreshold: number;           // 中等阈值 180
+    midCoefLow: number; midCoefHigh: number;       // 0.25~0.26
+    tallCoefLow: number; tallCoefHigh: number;     // 0.26~0.27 (>180cm)
   };
   seatDepth: {
     coefLow: number; coefHigh: number;
@@ -131,11 +134,14 @@ export const DEFAULT_MATCH_RULES: MatchRules = {
 
 export const DEFAULT_CONFIG: FormulaConfig = {
   seatHeight: {
-    coefLow: 0.235, coefHigh: 0.255,
+    coefLow: 0.24, coefHigh: 0.25,  // <165cm
     shoeLow: 2, shoeHigh: 5,
     cylinderLow: 2, cylinderHigh: 1,
-    tallThreshold: 185,
-    tallCoefLow: 0.25, tallCoefHigh: 0.27,
+    shortThreshold: 165,
+    shortCoefLow: 0.24, shortCoefHigh: 0.25,
+    midThreshold: 180,
+    midCoefLow: 0.25, midCoefHigh: 0.26,
+    tallCoefLow: 0.26, tallCoefHigh: 0.27,
   },
   seatDepth: {
     coefLow: 0.26, coefHigh: 0.29,

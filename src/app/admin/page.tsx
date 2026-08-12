@@ -45,11 +45,14 @@ export default function AdminPage() {
     {
       key: "seatHeight", title: "🪑 坐高",
       fields: [
-        { key: "coefLow", label: "腘窝比下限", min: 0.20, max: 0.30, step: 0.001 },
-        { key: "coefHigh", label: "腘窝比上限", min: 0.20, max: 0.30, step: 0.001 },
-        { key: "tallThreshold", label: "高个阈值(cm)", min: 175, max: 200, step: 1 },
-        { key: "tallCoefLow", label: "高个系数下限", min: 0.20, max: 0.35, step: 0.001 },
-        { key: "tallCoefHigh", label: "高个系数上限", min: 0.20, max: 0.35, step: 0.001 },
+        { key: "coefLow", label: "矮个(<165)下限", min: 0.20, max: 0.30, step: 0.001 },
+        { key: "coefHigh", label: "矮个(<165)上限", min: 0.20, max: 0.30, step: 0.001 },
+        { key: "shortThreshold", label: "矮个/中等分界(cm)", min: 155, max: 175, step: 1 },
+        { key: "midThreshold", label: "中等/高个分界(cm)", min: 170, max: 195, step: 1 },
+        { key: "midCoefLow", label: "中等(165-180)下限", min: 0.20, max: 0.30, step: 0.001 },
+        { key: "midCoefHigh", label: "中等(165-180)上限", min: 0.20, max: 0.30, step: 0.001 },
+        { key: "tallCoefLow", label: "高个(>180)下限", min: 0.20, max: 0.35, step: 0.001 },
+        { key: "tallCoefHigh", label: "高个(>180)上限", min: 0.20, max: 0.35, step: 0.001 },
       ],
     },
     {

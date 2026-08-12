@@ -43,11 +43,12 @@ export function calculateBodyDimensions(
 }
 
 function calcSeatHeight(H: number, c: FormulaConfig): Range {
-  const { seatHeight: s } = c;
-  if (H > s.tallThreshold) {
-    return r(H * s.tallCoefLow + s.shoeLow, H * s.tallCoefHigh + s.shoeHigh - s.cylinderHigh);
-  }
-  return r(H * s.coefLow + s.shoeLow, H * s.coefHigh + s.shoeHigh - s.cylinderHigh);
+  const s = c.seatHeight;
+  let cl = s.coefLow, ch = s.coefHigh;
+  if (H > s.midThreshold) { cl = s.tallCoefLow; ch = s.tallCoefHigh; }        // >180
+  else if (H > s.shortThreshold) { cl = s.midCoefLow; ch = s.midCoefHigh; }   // 165-180
+  // else: <165, use default coefLow/coefHigh
+  return r(H * cl + s.shoeLow, H * ch + s.shoeHigh - s.cylinderHigh);
 }
 
 function calcSeatDepth(H: number, c: FormulaConfig): Range {
