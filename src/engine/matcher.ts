@@ -393,6 +393,8 @@ export function matchChair(
   let weightedSum = 0;
   for (const dim of dimensions) {
     const w = weights[dim.key] ?? 0;
+    // 缺失数据的维度跳过，不参与加权
+    if (dim.chairDataMissing) continue;
     weightedSum += dim.coverage * w;
     totalWeight += w;
   }
