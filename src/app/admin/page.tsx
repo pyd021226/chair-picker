@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { DEFAULT_CONFIG, loadConfig, saveConfig, resetConfig, exportConfig, type FormulaConfig } from "@/engine/config";
+import { DEFAULT_CONFIG, loadConfig, saveConfig, resetConfig, exportConfig, DEFAULT_MATCH_RULES, loadMatchRules, saveMatchRules, resetMatchRules, type FormulaConfig, type MatchRules } from "@/engine/config";
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import { chairs } from "@/data/chairs";
@@ -9,28 +9,35 @@ import Link from "next/link";
 
 export default function AdminPage() {
   const [config, setConfig] = useState<FormulaConfig>(DEFAULT_CONFIG);
+  const [rules, setRules] = useState<MatchRules>(DEFAULT_MATCH_RULES);
   const [loaded, setLoaded] = useState(false);
   const [testH, setTestH] = useState("175");
   const [testW, setTestW] = useState("70");
   const [saveMsg, setSaveMsg] = useState("");
+  const [tab, setTab] = useState<"formula" | "rules">("formula");
 
-  useEffect(() => { setConfig(loadConfig()); setLoaded(true); }, []);
+  useEffect(() => { setConfig(loadConfig()); setRules(loadMatchRules()); setLoaded(true); }, []);
 
   const H = parseFloat(testH) || 175;
   const W = parseFloat(testW) || 70;
   const body = useMemo(() => calculateBodyDimensions(H, W, config), [H, W, config]);
-  const matches = useMemo(() => matchAllChairs(chairs, H, W, undefined, config), [H, W, config]);
+  const matches = useMemo(() => matchAllChairs(chairs, H, W, undefined, config, rules), [H, W, config, rules]);
 
   const set = useCallback((group: string, key: string, value: number) => {
-    setConfig((prev) => {
+    setConfig((prev) => { const next = JSON.parse(JSON.stringify(prev)); next[group][key] = value; return next; });
+  }, []);
+
+  const setRule = useCallback((key: string, value: number) => {
+    setRules((prev) => {
       const next = JSON.parse(JSON.stringify(prev));
-      next[group][key] = value;
+      if (key.includes(".")) { const [a, b] = key.split("."); next[a][b] = value; }
+      else { next[key] = value; }
       return next;
     });
   }, []);
 
-  const handleSave = () => { saveConfig(config); setSaveMsg("✅ 已保存！刷新页面生效"); setTimeout(() => setSaveMsg(""), 3000); };
-  const handleReset = () => { resetConfig(); setConfig(DEFAULT_CONFIG); setSaveMsg("已重置"); setTimeout(() => setSaveMsg(""), 2000); };
+  const handleSave = () => { saveConfig(config); saveMatchRules(rules); setSaveMsg("✅ 已保存！"); setTimeout(() => setSaveMsg(""), 3000); };
+  const handleReset = () => { resetConfig(); resetMatchRules(); setConfig(DEFAULT_CONFIG); setRules(DEFAULT_MATCH_RULES); setSaveMsg("已重置"); setTimeout(() => setSaveMsg(""), 2000); };
   const handleExport = () => exportConfig(config);
 
   // 简化的参数列表：每组只暴露最关键的系数
@@ -144,7 +151,14 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* Tab 切换 */}
+      <div className="flex gap-2 mb-4">
+        <button onClick={() => setTab("formula")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "formula" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📐 公式系数</button>
+        <button onClick={() => setTab("rules")} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${tab === "rules" ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-600"}`}>📋 匹配规则</button>
+      </div>
+
       {/* 系数编辑 */}
+      {tab === "formula" && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {groups.map(g => {
           const groupData = (config as any)[g.key] || {};
@@ -167,6 +181,52 @@ export default function AdminPage() {
           );
         })}
       </div>
+      )}
+
+      {/* 规则编辑 */}
+      {tab === "rules" && (
+      <div className="space-y-4">
+        <div className="border border-neutral-200 rounded-xl p-4">
+          <h3 className="text-sm font-semibold mb-3">📊 评分阈值</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { key: "goodThreshold", label: "优秀线", desc: "≥此值→绿色匹配", min: 0.7, max: 0.99, step: 0.01 },
+              { key: "marginalThreshold", label: "及格线", desc: "≥此值→黄色尚可", min: 0.5, max: 0.9, step: 0.01 },
+              { key: "noOverlapMaxCoverage", label: "无重叠上限", desc: "完全无重叠时最高分", min: 0.3, max: 0.8, step: 0.05 },
+              { key: "noOverlapPenaltyRate", label: "无重叠扣分率", desc: "每单位偏差扣分", min: 0.1, max: 1.5, step: 0.1 },
+            ].map(f => (
+              <div key={f.key}>
+                <label className="text-[11px] text-neutral-500 block">{f.label} <span className="text-neutral-300">({f.desc})</span></label>
+                <input type="number" step={f.step} value={(rules as any)[f.key] ?? 0} onChange={e => setRule(f.key, parseFloat(e.target.value) || 0)}
+                  className="w-full px-2 py-1.5 border rounded text-sm font-mono mt-0.5" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="border border-neutral-200 rounded-xl p-4">
+          <h3 className="text-sm font-semibold mb-3">⚖️ 维度权重（越大越重要）</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { key: "weights.seatHeight", label: "坐高" }, { key: "weights.seatDepth", label: "坐深" },
+              { key: "weights.seatWidth", label: "坐宽" }, { key: "weights.backHeight", label: "背高" },
+              { key: "weights.backWidth", label: "背宽" }, { key: "weights.armrestHeight", label: "扶手高" },
+              { key: "weights.armrestWidth", label: "扶手宽" }, { key: "weights.headrestRange", label: "头枕范围" },
+              { key: "weights.headrestNeed", label: "头枕需求" }, { key: "weights.reclineTension", label: "后仰力度" },
+              { key: "weights.seatFirmness", label: "坐垫软硬" }, { key: "weights.lumbarTension", label: "腰撑力度" },
+              { key: "weights.lumbarPosition", label: "腰撑位置" }, { key: "weights.lumbarDepth", label: "腰撑深度" },
+            ].map(f => (
+              <div key={f.key}>
+                <label className="text-[11px] text-neutral-500 block">{f.label}</label>
+                <input type="number" step="1" min="0" max="30"
+                  value={(() => { const [a, b] = f.key.split("."); return (rules as any)[a]?.[b] ?? 0; })()}
+                  onChange={e => setRule(f.key, parseInt(e.target.value) || 0)}
+                  className="w-full px-2 py-1.5 border rounded text-sm font-mono mt-0.5" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      )}
 
       {/* 匹配预览 */}
       <details className="mt-6 border border-neutral-200 rounded-xl overflow-hidden">

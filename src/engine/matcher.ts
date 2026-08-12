@@ -19,7 +19,7 @@ import {
   scoreSeatHeight,
   scoreSeatDepth,
 } from "./formulas";
-import { DEFAULT_CONFIG, type FormulaConfig } from "./config";
+import { DEFAULT_CONFIG, DEFAULT_MATCH_RULES, type FormulaConfig, type MatchRules } from "./config";
 
 // ---- 默认权重 ----
 // 核心尺寸权重高，功能/偏好维度权重低
@@ -47,9 +47,10 @@ function clamp(v: number, min: number, max: number): number {
 }
 
 /** 将覆盖度转为 FitStatus */
-function coverageToStatus(cov: number): FitStatus {
-  if (cov >= 0.9) return "good";
-  if (cov >= 0.7) return "marginal";
+function coverageToStatus(cov: number, rules?: MatchRules): FitStatus {
+  const r = rules || DEFAULT_MATCH_RULES;
+  if (cov >= r.goodThreshold) return "good";
+  if (cov >= r.marginalThreshold) return "marginal";
   return "poor";
 }
 
@@ -80,6 +81,7 @@ interface ScoreContext {
   body: BodyDimensions;
   chair: Chair;
   cfg: FormulaConfig;
+  rules: MatchRules;
 }
 
 function scoreSeatWidth(ctx: ScoreContext): DimensionResult {
@@ -108,7 +110,7 @@ function scoreSeatWidth(ctx: ScoreContext): DimensionResult {
   // 坐宽是标量（椅子通常固定宽度）
   const coverage = clamp(effectiveWidth! / userIdeal, 0, 1);
   const diff = effectiveWidth! - userIdeal;
-  const status = coverageToStatus(coverage);
+  const status = coverageToStatus(coverage, ctx.rules);
   const direction = diff > 0 ? `宽${diff.toFixed(0)}cm` : `窄${Math.abs(diff).toFixed(0)}cm`;
 
   return {
@@ -132,7 +134,7 @@ function scoreBackHeight(ctx: ScoreContext): DimensionResult {
 
   const userIdeal = ctx.body.backHeight;
   const coverage = computeCoverage(userIdeal, chairRange);
-  const status = coverageToStatus(coverage);
+  const status = coverageToStatus(coverage, ctx.rules);
   const mid = (chairRange.min + chairRange.max) / 2;
   const idealMid = (userIdeal.min + userIdeal.max) / 2;
   const dir = mid > idealMid ? "偏高" : "偏低";
@@ -156,7 +158,7 @@ function scoreBackWidth(ctx: ScoreContext): DimensionResult {
     key, label: "背宽", unit: "cm",
     userIdeal: { min: userVal, max: userVal },
     chairRange: { min: chairVal, max: chairVal },
-    coverage, status: coverageToStatus(coverage),
+    coverage, status: coverageToStatus(coverage, ctx.rules),
     explanation: `用户需要${userVal}cm，椅子${chairVal}cm`,
     priority: 5, chairDataMissing: false,
   };
@@ -172,7 +174,7 @@ function scoreArmrestHeight(ctx: ScoreContext): DimensionResult {
   return {
     key, label: "扶手高", unit: "cm",
     userIdeal, chairRange, coverage,
-    status: coverageToStatus(coverage),
+    status: coverageToStatus(coverage, ctx.rules),
     explanation: `覆盖${(coverage * 100).toFixed(0)}%`,
     priority: 6, chairDataMissing: false,
   };
@@ -199,7 +201,7 @@ function scoreHeadrestRange(ctx: ScoreContext): DimensionResult {
     key, label: "头枕范围", unit: "cm",
     userIdeal: ctx.body.headrestRange,
     chairRange, coverage,
-    status: coverageToStatus(coverage),
+    status: coverageToStatus(coverage, ctx.rules),
     explanation: `头枕中心理想${userCenter}cm，椅子范围${chairRange.min}-${chairRange.max}cm`,
     priority: 8, chairDataMissing: false,
   };
@@ -217,7 +219,7 @@ function scoreHeadrestNeed(ctx: ScoreContext): DimensionResult {
     userIdeal: { min: needScore, max: needScore },
     chairRange: { min: hasHeadrest ? 1 : 0, max: hasHeadrest ? 1 : 0 },
     coverage,
-    status: coverageToStatus(coverage),
+    status: coverageToStatus(coverage, ctx.rules),
     explanation: `用户${needLabel}(指数${(needScore * 100).toFixed(0)}%)，椅子${hasHeadrest ? "有" : "无"}头枕`,
     priority: 9, chairDataMissing: false,
   };
@@ -270,7 +272,7 @@ function scoreLumbarPosition(ctx: ScoreContext): DimensionResult {
   return {
     key, label: "腰撑位置", unit: "cm",
     userIdeal, chairRange, coverage,
-    status: coverageToStatus(coverage),
+    status: coverageToStatus(coverage, ctx.rules),
     explanation: `理想${(userIdeal.min + userIdeal.max) / 2}cm，椅子${chairLumbarH}cm`,
     priority: 13, chairDataMissing: false,
   };
@@ -317,7 +319,7 @@ function scoreScalar(
     key, label, unit,
     userIdeal: { min: userVal, max: userVal },
     chairRange: { min: chairVal, max: chairVal },
-    coverage, status: coverageToStatus(coverage),
+    coverage, status: coverageToStatus(coverage, ctx.rules),
     explanation: `用户${userVal}，椅子${chairVal}，偏差${dev.toFixed(1)}${unit}`,
     priority, chairDataMissing: false,
   };
@@ -331,10 +333,11 @@ export function matchChair(
   H: number,
   W: number,
   weights: WeightConfig = DEFAULT_WEIGHTS,
-  cfg: FormulaConfig = DEFAULT_CONFIG
+  cfg: FormulaConfig = DEFAULT_CONFIG,
+  rules: MatchRules = DEFAULT_MATCH_RULES
 ): ChairMatch {
   const body = calculateBodyDimensions(H, W, cfg);
-  const ctx: ScoreContext = { body, chair, cfg };
+  const ctx: ScoreContext = { body, chair, cfg, rules };
 
   // 坐高 — 使用特殊评分规则
   const sh = (() => {
@@ -419,10 +422,11 @@ export function matchAllChairs(
   H: number,
   W: number,
   weights?: WeightConfig,
-  cfg?: FormulaConfig
+  cfg?: FormulaConfig,
+  rules?: MatchRules
 ): ChairMatch[] {
   const validChairs = chairs.filter((c) => c.seatHeight !== null || c.seatDepth !== null);
   return validChairs
-    .map((c) => matchChair(c, H, W, weights, cfg))
+    .map((c) => matchChair(c, H, W, weights, cfg, rules))
     .sort((a, b) => b.overallScore - a.overallScore);
 }

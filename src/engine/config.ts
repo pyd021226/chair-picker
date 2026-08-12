@@ -4,129 +4,130 @@
 // ============================================================
 
 export interface FormulaConfig {
-  // 坐高 (Seat Height)
+  // ...（公式系数同上）
   seatHeight: {
-    coefLow: number;    // 默认 0.235
-    coefHigh: number;   // 默认 0.255
-    shoeLow: number;    // 鞋底最低 cm
-    shoeHigh: number;   // 鞋底最高 cm
-    cylinderLow: number;  // 气杆最大压缩 cm
-    cylinderHigh: number; // 气杆最小压缩 cm
-    tallThreshold: number;  // 身高阈值 cm
-    tallCoefLow: number;
-    tallCoefHigh: number;
+    coefLow: number; coefHigh: number;
+    shoeLow: number; shoeHigh: number;
+    cylinderLow: number; cylinderHigh: number;
+    tallThreshold: number;
+    tallCoefLow: number; tallCoefHigh: number;
   };
-  // 坐深 (Seat Depth)
   seatDepth: {
-    coefLow: number;
-    coefHigh: number;
-    postureMin: number;  // 最小姿势调整 cm
-    postureMax: number;  // 最大姿势调整 cm
-    gap: number;         // 膝盖窝间距 cm
+    coefLow: number; coefHigh: number;
+    postureMin: number; postureMax: number;
+    gap: number;
     tallThreshold: number;
-    tallCoefLow: number;
-    tallCoefHigh: number;
+    tallCoefLow: number; tallCoefHigh: number;
     shortThreshold: number;
-    shortCoefLow: number;
-    shortCoefHigh: number;
-    matchTwoThirdsRatio: number; // 2/3 边界比例
+    shortCoefLow: number; shortCoefHigh: number;
+    matchTwoThirdsRatio: number;
   };
-  // 坐宽 (Seat Width)
   seatWidth: {
-    intercept: number;   // 回归截距 mm
-    coefH: number;       // 身高系数
-    coefW: number;       // 体重系数
-    activityLow: number; // 最小活动空间 cm
-    activityHigh: number;// 最大活动空间 cm
-    meshDeduction: number;   // 网布椅扣减 cm
-    spongeDeduction: number; // 海绵椅扣减 cm
+    intercept: number; coefH: number; coefW: number;
+    activityLow: number; activityHigh: number;
+    meshDeduction: number; spongeDeduction: number;
   };
-  // 背高 (Back Height)
   backHeight: {
-    coefLow: number;
-    coefHigh: number;
+    coefLow: number; coefHigh: number;
     tallThreshold: number;
-    tallCoefLow: number;
-    tallCoefHigh: number;
+    tallCoefLow: number; tallCoefHigh: number;
     shortThreshold: number;
-    shortCoefLow: number;
-    shortCoefHigh: number;
+    shortCoefLow: number; shortCoefHigh: number;
   };
-  // 背宽 (Back Width)
   backWidth: {
     coef: number;
     weightThreshold: number;
     weightBonus: number;
   };
-  // 扶手高 (Armrest Height)
   armrestHeight: {
-    coefLow: number;
-    coefHigh: number;
+    coefLow: number; coefHigh: number;
     offset: number;
     tallThreshold: number;
-    tallCoefLow: number;
-    tallCoefHigh: number;
+    tallCoefLow: number; tallCoefHigh: number;
     shortThreshold: number;
-    shortCoefLow: number;
-    shortCoefHigh: number;
+    shortCoefLow: number; shortCoefHigh: number;
   };
-  // 扶手宽 (Armrest Width)
   armrestWidth: {
-    coefH: number;
-    coefW: number;
-    offset: number;
+    coefH: number; coefW: number; offset: number;
   };
-  // 头枕 (Headrest)
   headrest: {
-    coefCenter: number;
-    coefLow: number;
-    coefHigh: number;
+    coefCenter: number; coefLow: number; coefHigh: number;
     tallThreshold: number;
-    tallCenter: number;
-    tallLow: number;
-    tallHigh: number;
+    tallCenter: number; tallLow: number; tallHigh: number;
     shortThreshold: number;
-    shortCenter: number;
-    shortLow: number;
-    shortHigh: number;
-    needBase: number;     // 需求公式基准 cm
-    needDivisor: number;  // 需求公式除数
+    shortCenter: number; shortLow: number; shortHigh: number;
+    needBase: number; needDivisor: number;
   };
-  // 后仰力度 (Recline Tension)
   reclineTension: {
     divisor: number;
-    tallThreshold: number;
-    tallWeightMultiplier: number;
-    shortThreshold: number;
-    shortWeightMultiplier: number;
+    tallThreshold: number; tallWeightMultiplier: number;
+    shortThreshold: number; shortWeightMultiplier: number;
   };
-  // 坐垫软硬 (Seat Firmness)
   seatFirmness: {
-    base: number;
-    divisor: number;
+    base: number; divisor: number;
   };
-  // 腰撑力度 (Lumbar Tension)
   lumbarTension: {
-    base: number;
-    divisor: number;
-    heightRef: number;
+    base: number; divisor: number; heightRef: number;
   };
-  // 腰撑位置 (Lumbar Position)
   lumbarPosition: {
-    coef: number;
-    rangeHalf: number;
-    tallThreshold: number;
-    tallCoef: number;
-    shortThreshold: number;
-    shortCoef: number;
+    coef: number; rangeHalf: number;
+    tallThreshold: number; tallCoef: number;
+    shortThreshold: number; shortCoef: number;
   };
-  // 腰撑深度 (Lumbar Depth)
   lumbarDepth: {
-    base: number;
-    weightThreshold: number;
-    weightMultiplier: number;
+    base: number; weightThreshold: number; weightMultiplier: number;
   };
 }
+
+/** 匹配规则 — 控制打分逻辑的参数 */
+export interface MatchRules {
+  /** 评分等级阈值 */
+  goodThreshold: number;    // ≥ 此值 → good（默认 0.90）
+  marginalThreshold: number; // ≥ 此值 → marginal，否则 poor（默认 0.70）
+  /** 无重叠时的最高覆盖度 */
+  noOverlapMaxCoverage: number;  // 默认 0.65
+  noOverlapPenaltyRate: number;  // 每单位间距的扣分率 默认 0.5
+  /** 维度权重（总和不必为100，按比例分配） */
+  weights: {
+    seatHeight: number;
+    seatDepth: number;
+    seatWidth: number;
+    backHeight: number;
+    backWidth: number;
+    armrestHeight: number;
+    armrestWidth: number;
+    headrestRange: number;
+    headrestNeed: number;
+    reclineTension: number;
+    seatFirmness: number;
+    lumbarTension: number;
+    lumbarPosition: number;
+    lumbarDepth: number;
+  };
+}
+
+export const DEFAULT_MATCH_RULES: MatchRules = {
+  goodThreshold: 0.90,
+  marginalThreshold: 0.70,
+  noOverlapMaxCoverage: 0.65,
+  noOverlapPenaltyRate: 0.5,
+  weights: {
+    seatHeight: 18,
+    seatDepth: 16,
+    seatWidth: 12,
+    backHeight: 8,
+    backWidth: 6,
+    armrestHeight: 8,
+    armrestWidth: 6,
+    headrestRange: 6,
+    headrestNeed: 2,
+    reclineTension: 4,
+    seatFirmness: 4,
+    lumbarTension: 4,
+    lumbarPosition: 4,
+    lumbarDepth: 2,
+  },
+};
 
 export const DEFAULT_CONFIG: FormulaConfig = {
   seatHeight: {
@@ -204,6 +205,7 @@ export const DEFAULT_CONFIG: FormulaConfig = {
 };
 
 const STORAGE_KEY = "chair-picker-formula-config";
+const RULES_STORAGE_KEY = "chair-picker-match-rules";
 
 /** 从 localStorage 加载用户修改过的配置 */
 export function loadConfig(): FormulaConfig {
@@ -251,4 +253,26 @@ function deepMerge<T extends Record<string, any>>(base: T, overlay: Partial<T>):
     }
   }
   return result;
+}
+
+/** 加载匹配规则 */
+export function loadMatchRules(): MatchRules {
+  if (typeof window === "undefined") return DEFAULT_MATCH_RULES;
+  try {
+    const raw = localStorage.getItem(RULES_STORAGE_KEY);
+    if (!raw) return DEFAULT_MATCH_RULES;
+    return { ...DEFAULT_MATCH_RULES, ...JSON.parse(raw) };
+  } catch { return DEFAULT_MATCH_RULES; }
+}
+
+/** 保存匹配规则 */
+export function saveMatchRules(rules: MatchRules): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(RULES_STORAGE_KEY, JSON.stringify(rules));
+}
+
+/** 重置匹配规则 */
+export function resetMatchRules(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(RULES_STORAGE_KEY);
 }
