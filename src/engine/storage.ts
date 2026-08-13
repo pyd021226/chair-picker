@@ -41,6 +41,26 @@ export async function clearUsageRecords(): Promise<void> {
   } catch { /* 静默失败 */ }
 }
 
+// ---- 椅子点击追踪（销量榜/收益数据来源） ----
+
+/** 记录一次椅子点击（用户点进某把椅子的详情） */
+export async function recordChairClick(chairId: string, chairName: string, chairPrice: number | null, gender: "male" | "female" | null): Promise<void> {
+  try {
+    await getSupabase().from("chair_clicks").insert({
+      chair_id: chairId, chair_name: chairName, chair_price: chairPrice, gender,
+    });
+  } catch { /* 静默失败 */ }
+}
+
+/** 获取所有椅子点击记录（仅管理员） */
+export async function getChairClicks(): Promise<any[]> {
+  try {
+    const { data, error } = await getSupabase().from("chair_clicks").select("*").order("created_at", { ascending: false }).limit(1000);
+    if (error) return [];
+    return data || [];
+  } catch { return []; }
+}
+
 // ---- 使用统计 ----
 
 export interface UsageStats {

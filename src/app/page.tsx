@@ -109,7 +109,7 @@ export default function Home() {
     const h = parseFloat(height); const w = parseFloat(weight);
     const bMin = parseFloat(budgetMin); const bMax = parseFloat(budgetMax);
     recordUsage({ nickname, gender, height: h, weight: w, sitLong: sitLong ?? false, budgetMin: bMin, budgetMax: bMax });
-    router.push("/match?h=" + h + "&w=" + w + "&bmin=" + bMin + "&bmax=" + bMax + "&sit=" + (sitLong ? "1" : "0"));
+    router.push("/match?h=" + h + "&w=" + w + "&bmin=" + bMin + "&bmax=" + bMax + "&sit=" + (sitLong ? "1" : "0") + "&g=" + (gender || ""));
   }
 
   useEffect(() => {

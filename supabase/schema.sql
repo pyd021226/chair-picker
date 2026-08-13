@@ -56,3 +56,17 @@ create policy "auth write app_config" on app_config
 create policy "public insert usage" on usage_records for insert with check (true);
 create policy "auth read usage" on usage_records for select using (auth.role() = 'authenticated');
 create policy "auth delete usage" on usage_records for delete using (auth.role() = 'authenticated');
+
+-- 5. 椅子点击追踪（销量榜/收益数据来源）
+create table if not exists chair_clicks (
+  id bigint generated always as identity primary key,
+  chair_id text not null,
+  chair_name text,
+  chair_price numeric,
+  gender text,
+  created_at timestamptz not null default now()
+);
+
+alter table chair_clicks enable row level security;
+create policy "public insert chair_clicks" on chair_clicks for insert with check (true);
+create policy "auth read chair_clicks" on chair_clicks for select using (auth.role() = 'authenticated');

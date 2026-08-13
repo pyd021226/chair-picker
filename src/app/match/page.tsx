@@ -5,12 +5,12 @@ import Link from "next/link";
 import { chairs } from "@/data/chairs";
 import { matchAllChairs } from "@/engine/matcher";
 import { calculateBodyDimensions } from "@/engine/formulas";
-import { loadCustomChairs, loadOverrides, applyOverrides } from "@/engine/storage";
+import { loadCustomChairs, loadOverrides, applyOverrides, recordChairClick } from "@/engine/storage";
 import { loadConfig, loadMatchRules, DEFAULT_CONFIG, DEFAULT_MATCH_RULES, type FormulaConfig, type MatchRules } from "@/engine/config";
 
 function useQueryParams() {
-  const [p, setP] = useState({ h: "", w: "", sit: "" });
-  useEffect(() => { const sp = new URLSearchParams(window.location.search); setP({ h: sp.get("h") || "", w: sp.get("w") || "", sit: sp.get("sit") || "" }); }, []);
+  const [p, setP] = useState({ h: "", w: "", sit: "", g: "" });
+  useEffect(() => { const sp = new URLSearchParams(window.location.search); setP({ h: sp.get("h") || "", w: sp.get("w") || "", sit: sp.get("sit") || "", g: sp.get("g") || "" }); }, []);
   return p;
 }
 
@@ -25,13 +25,14 @@ function countFeatures(chair: any): number {
 const scoreColor = (v: number) => v >= 100 ? "#2563eb" : v >= 95 ? "#16a34a" : v >= 80 ? "#ca8a04" : "#dc2626";
 
 /* 电商商品卡：顶部大照片 + 下方信息 */
-function ChairCard({ match, sitLong, hero }: { match: any; sitLong: boolean; hero?: boolean }) {
+function ChairCard({ match, sitLong, hero, gender }: { match: any; sitLong: boolean; hero?: boolean; gender: "male" | "female" | null }) {
   const { chair, overallScore } = match;
   const dims = match.dimensions.filter((d: any) => !d.chairDataMissing && ["seatHeight", "seatDepth", "seatWidth"].includes(d.key));
 
   return (
     <Link
       href={"/chair/" + chair.id + "?h=" + match.h + "&w=" + match.w + (sitLong ? "&sit=1" : "")}
+      onClick={() => recordChairClick(chair.id, chair.name, chair.price, gender)}
       className={`card-lift flex flex-col bg-white border border-neutral-100 rounded-2xl overflow-hidden h-full ${hero ? "shadow-hero" : "shadow-float"}`}
     >
       {/* 顶部大照片 */}
@@ -92,7 +93,7 @@ function ChairCard({ match, sitLong, hero }: { match: any; sitLong: boolean; her
 }
 
 /* 分组区块：满分区默认展开，其他默认收起 */
-function GroupSection({ group, sitLong, expanded, onToggle }: { group: any; sitLong: boolean; expanded: boolean; onToggle: () => void }) {
+function GroupSection({ group, sitLong, expanded, onToggle, gender }: { group: any; sitLong: boolean; expanded: boolean; onToggle: () => void; gender: "male" | "female" | null }) {
   if (group.list.length === 0) return null;
 
   return (
@@ -115,7 +116,7 @@ function GroupSection({ group, sitLong, expanded, onToggle }: { group: any; sitL
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {group.list.map((m: any, i: number) => (
             <div key={m.chair.id} style={{ animation: `fade-up 0.3s cubic-bezier(0.16,1,0.3,1) both ${i * 0.04}s` }}>
-              <ChairCard match={m} sitLong={sitLong} hero={group.key === "perfect"} />
+              <ChairCard match={m} sitLong={sitLong} hero={group.key === "perfect"} gender={gender} />
             </div>
           ))}
         </div>
@@ -125,7 +126,8 @@ function GroupSection({ group, sitLong, expanded, onToggle }: { group: any; sitL
 }
 
 export default function MatchPage() {
-  const { h: hStr, w: wStr, sit: sitStr } = useQueryParams();
+  const { h: hStr, w: wStr, sit: sitStr, g: genderStr } = useQueryParams();
+  const gender: "male" | "female" | null = genderStr === "male" || genderStr === "female" ? genderStr : null;
   const [loaded, setLoaded] = useState(false);
   // 满分区(perfect)默认展开，其他默认收起
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["perfect"]));
@@ -207,6 +209,7 @@ export default function MatchPage() {
           sitLong={sitLong}
           expanded={expandedGroups.has(g.key)}
           onToggle={() => toggleGroup(g.key)}
+          gender={gender}
         />
       ))}
     </div>
