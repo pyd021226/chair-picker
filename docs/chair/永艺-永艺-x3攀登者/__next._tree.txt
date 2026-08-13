@@ -1,0 +1,2 @@
+:HL["/chair-picker/_next/static/chunks/3t4dvle7bj0n2.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"chair","param":null,"prefetchHints":4192,"slots":{"children":{"name":"slug","param":{"type":"d","key":"%E6%B0%B8%E8%89%BA-%E6%B0%B8%E8%89%BA-x3%E6%94%80%E7%99%BB%E8%80%85","siblings":[]},"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}},"staleTime":300,"buildId":"sWBvjHYxurg8-Mua1p6Pg"}
