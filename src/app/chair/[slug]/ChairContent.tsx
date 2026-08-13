@@ -124,7 +124,7 @@ export default function ChairContent() {
       {/* 雷达图 */}
       {match && body && (
         <div className="mt-6">
-          <RadarComparison body={body} chair={chair} dimensions={match.dimensions} />
+          <RadarComparison dimensions={match.dimensions} />
         </div>
       )}
 
