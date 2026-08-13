@@ -6,7 +6,7 @@ import { chairs, getChairById } from "@/data/chairs";
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import DimensionBar from "@/components/visualization/DimensionBar";
-import RadarComparison from "@/components/visualization/RadarComparison";
+import RadarComparison, { CATEGORIES, ACTIVATED } from "@/components/visualization/RadarComparison";
 import type { BodyDimensions, ChairMatch } from "@/engine/types";
 
 /** 从 URL pathname 解析 slug：/chair-picker/chair/xxx/ → xxx */
@@ -106,18 +106,29 @@ export default function ChairContent() {
         </div>
       )}
 
-      {/* 尺寸对比 */}
+      {/* 维度对比（尺寸/坐感/功能三组） */}
       {match && body && (
-        <div className="mt-6 space-y-4">
-          <h3 className="font-bold text-neutral-800">📐 尺寸匹配</h3>
-          {match.dimensions
-            .filter(d => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key))
-            .map(d => (
-              <DimensionBar key={d.key} dimKey={d.key} label={d.label}
-                userMin={d.userIdeal.min} userMax={d.userIdeal.max}
-                chairMin={d.chairRange.min} chairMax={d.chairRange.max}
-                coverage={d.coverage} status={d.status} />
-            ))}
+        <div className="mt-6 space-y-6">
+          {CATEGORIES.map(cat => (
+            <div key={cat.title}>
+              <h3 className="font-bold text-neutral-800 mb-3">{cat.title}</h3>
+              <div className="space-y-2">
+                {cat.items.map(item => {
+                  const dim = match.dimensions.find(d => d.key === item.key);
+                  const isActivated = ACTIVATED.has(item.key);
+                  if (isActivated && dim && !dim.chairDataMissing) {
+                    return (
+                      <DimensionBar key={item.key} dimKey={dim.key} label={item.label}
+                        userMin={dim.userIdeal.min} userMax={dim.userIdeal.max}
+                        chairMin={dim.chairRange.min} chairMax={dim.chairRange.max}
+                        coverage={dim.coverage} status={dim.status} />
+                    );
+                  }
+                  return <NoDataBar key={item.key} label={item.label} />;
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -182,4 +193,17 @@ function Spec({ label, v }: { label: string; v: { min: number; max: number } | n
 
 function surfaceLabel(s: string): string {
   switch (s) { case "mesh": return "网布"; case "sponge": return "海绵/软包"; case "leather": return "真皮"; default: return s; }
+}
+
+/** 未激活维度的灰色占位条 */
+function NoDataBar({ label }: { label: string }) {
+  return (
+    <div className="rounded-xl p-4 bg-neutral-50 border border-neutral-100">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-semibold text-neutral-400">{label}</span>
+        <span className="text-xs text-neutral-300">暂未数据</span>
+      </div>
+      <div className="h-1.5 bg-neutral-100 rounded-full" />
+    </div>
+  );
 }

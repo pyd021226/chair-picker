@@ -12,10 +12,10 @@ interface Props {
 }
 
 /** 已激活（有评分代码）的维度 */
-const ACTIVATED = new Set(["seatHeight", "seatDepth", "seatWidth"]);
+export const ACTIVATED = new Set(["seatHeight", "seatDepth", "seatWidth"]);
 
 /** 三个分类 */
-const CATEGORIES = [
+export const CATEGORIES = [
   {
     title: "尺寸",
     items: [
