@@ -100,26 +100,27 @@ function RadarChart({ title, items, dimMap }: { title: string; items: { key: str
 
             return (
               <g key={item.key}>
-                <line x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#e5e7eb" strokeWidth="1" />
+                {/* 从中心点出发的轴线（辐条） */}
+                <line x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d1d5db" strokeWidth="1.5" />
                 <text
-                  x={point(1.18, i).x}
-                  y={point(1.18, i).y}
+                  x={point(1.22, i).x}
+                  y={point(1.22, i).y}
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize="10"
                   fontWeight="bold"
-                  fill={isActive ? "#374151" : "#c0c0c0"}
+                  fill={isActive ? "#374151" : "#9ca3af"}
                 >
                   {item.label}
                 </text>
                 {/* 数值 / 暂未数据 */}
                 <text
-                  x={point(1.34, i).x}
-                  y={point(1.34, i).y}
+                  x={point(1.38, i).x}
+                  y={point(1.38, i).y}
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize="8"
-                  fill={isActive ? "#3b82f6" : "#d0d0d0"}
+                  fill={isActive ? "#3b82f6" : "#b0b0b0"}
                 >
                   {isActive ? `${Math.round(dim!.coverage * 100)}%` : "暂未数据"}
                 </text>
