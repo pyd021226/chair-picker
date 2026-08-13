@@ -57,17 +57,24 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
         <p className="text-[10px] text-neutral-400">{chair.brand}</p>
         <h3 className="font-semibold text-neutral-900 text-sm mt-0.5 line-clamp-2">{chair.name}</h3>
 
-        {/* 维度条 */}
-        <div className="space-y-1 mt-2">
-          {dims.map((d: any) => (
-            <div key={d.key} className="flex items-center gap-2 text-xs">
-              <span className="w-8 text-neutral-400 flex-shrink-0">{d.label}</span>
-              <div className="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: scoreColor(d.coverage * 100) }} />
+        {/* 维度条 + 渐隐提示 */}
+        <div className="relative mt-2">
+          <div className="space-y-1">
+            {dims.map((d: any) => (
+              <div key={d.key} className="flex items-center gap-2 text-xs">
+                <span className="w-8 text-neutral-400 flex-shrink-0">{d.label}</span>
+                <div className="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: scoreColor(d.coverage * 100) }} />
+                </div>
+                <span className="w-7 text-right font-medium text-neutral-600 flex-shrink-0">{Math.round(d.coverage * 100)}%</span>
               </div>
-              <span className="w-7 text-right font-medium text-neutral-600 flex-shrink-0">{Math.round(d.coverage * 100)}%</span>
-            </div>
-          ))}
+            ))}
+          </div>
+          {/* 渐隐提示：暗示下面还有更多维度 */}
+          <div className="absolute bottom-0 left-0 right-0 h-7 bg-gradient-to-t from-white via-white/70 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 text-center text-[9px] text-neutral-300 pointer-events-none">
+            更多维度 · 点进详情
+          </div>
         </div>
 
         {/* 价格 + 功能 */}
