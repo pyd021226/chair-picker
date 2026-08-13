@@ -39,7 +39,13 @@ export function calculateBodyDimensions(
     lumbarTension: calcLumbarTension(H, W, c),
     lumbarPosition: calcLumbarPosition(H, c),
     lumbarDepth: calcLumbarDepth(W, c),
+    requiredCapacity: calcRequiredCapacity(W),
   };
+}
+
+function calcRequiredCapacity(W: number): number {
+  // 需要的承重 = 体重 + 20kg 安全余量，再向上取整到 10kg
+  return Math.ceil((W + 20) / 10) * 10;
 }
 
 function calcSeatHeight(H: number, c: FormulaConfig): Range {

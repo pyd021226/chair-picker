@@ -50,7 +50,8 @@ export type DimensionKey =
   | "seatFirmness"
   | "lumbarTension"
   | "lumbarPosition"
-  | "lumbarDepth";
+  | "lumbarDepth"
+  | "capacity";
 
 /** 用户身体尺寸估算结果 */
 export interface BodyDimensions {
@@ -69,6 +70,7 @@ export interface BodyDimensions {
   lumbarTension: number;
   lumbarPosition: Range;
   lumbarDepth: number;
+  requiredCapacity: number; // kg, 需要的承重 = 体重 + 安全余量
 }
 
 /** 清洗后的椅子数据 */

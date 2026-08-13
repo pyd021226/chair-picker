@@ -106,6 +106,7 @@ export interface MatchRules {
     lumbarTension: number;
     lumbarPosition: number;
     lumbarDepth: number;
+    capacity: number;
   };
 }
 
@@ -118,17 +119,18 @@ export const DEFAULT_MATCH_RULES: MatchRules = {
     seatHeight: 18,
     seatDepth: 16,
     seatWidth: 12,
-    backHeight: 0,
-    backWidth: 0,
-    armrestHeight: 0,
-    armrestWidth: 0,
-    headrestRange: 0,
-    headrestNeed: 0,
-    reclineTension: 0,
-    seatFirmness: 0,
-    lumbarTension: 0,
-    lumbarPosition: 0,
-    lumbarDepth: 0,
+    backHeight: 8,
+    backWidth: 6,
+    armrestHeight: 8,
+    armrestWidth: 6,
+    headrestRange: 6,
+    headrestNeed: 2,
+    reclineTension: 4,
+    seatFirmness: 4,
+    lumbarTension: 4,
+    lumbarPosition: 4,
+    lumbarDepth: 2,
+    capacity: 6,
   },
 };
 

@@ -38,6 +38,7 @@ const DEFAULT_WEIGHTS: WeightConfig = {
   lumbarTension: 4,
   lumbarPosition: 4,
   lumbarDepth: 2,
+  capacity: 6,
 };
 
 // ---- 辅助 ----
@@ -274,6 +275,24 @@ function scoreLumbarDepth(ctx: ScoreContext): DimensionResult {
   );
 }
 
+function scoreCapacity(ctx: ScoreContext): DimensionResult {
+  const key: DimensionKey = "capacity";
+  const required = ctx.body.requiredCapacity;
+  const maxWeight = ctx.chair.maxWeight;
+  if (!maxWeight) return missingDim(key, "五星杆承重", "kg", 15, ctx);
+  const coverage = maxWeight >= required ? 1 : clamp(maxWeight / required, 0, 1);
+  const status = coverageToStatus(coverage, ctx.rules);
+  const explanation = maxWeight >= required
+    ? `椅子承重${maxWeight}kg ≥ 需要${required}kg，安全`
+    : `椅子承重${maxWeight}kg < 需要${required}kg，不足`;
+  return {
+    key, label: "五星杆承重", unit: "kg",
+    userIdeal: { min: required, max: required },
+    chairRange: { min: maxWeight, max: maxWeight },
+    coverage, status, explanation, priority: 15, chairDataMissing: false,
+  };
+}
+
 // ---- 辅助打分函数 ----
 
 function missingDim(
@@ -386,19 +405,19 @@ export function matchChair(
     scoreLumbarTension(ctx),
     scoreLumbarPosition(ctx),
     scoreLumbarDepth(ctx),
+    scoreCapacity(ctx),
   ];
 
-  // 计算总分：坐高、坐深、坐宽三个维度的平均覆盖度
-  const coreKeys = ["seatHeight", "seatDepth", "seatWidth"];
-  let dimCount = 0;
-  let dimSum = 0;
+  // 计算总分：所有有数据维度的加权平均，缺失数据跳过不计
+  let totalWeight = 0;
+  let weightedSum = 0;
   for (const dim of dimensions) {
-    if (!coreKeys.includes(dim.key)) continue;
     if (dim.chairDataMissing) continue;
-    dimSum += dim.coverage;
-    dimCount++;
+    const w = weights[dim.key] ?? 0;
+    weightedSum += dim.coverage * w;
+    totalWeight += w;
   }
-  const overallScore = dimCount > 0 ? Math.floor((dimSum / dimCount) * 100) : 0;
+  const overallScore = totalWeight > 0 ? Math.floor((weightedSum / totalWeight) * 100) : 0;
 
   // 生成总结
   const goodDims = dimensions.filter(d => d.status === "good").length;
