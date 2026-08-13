@@ -137,7 +137,7 @@ export default function ChairContent() {
                   })}
                 </div>
                 {/* 对应雷达图 */}
-                <RadarChart title={cat.title} items={cat.items} dimMap={dimMap} />
+                <RadarChart title={cat.title} items={cat.items} chair={chair} />
               </div>
             ))}
           </div>
