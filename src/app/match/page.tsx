@@ -64,7 +64,7 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
               <div key={d.key} className="flex items-center gap-2 text-xs">
                 <span className="w-8 text-neutral-400 flex-shrink-0">{d.label}</span>
                 <div className="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: scoreColor(d.coverage * 100) }} />
+                  <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: scoreColor(Math.round(d.coverage * 100)) }} />
                 </div>
                 <span className="w-7 text-right font-medium text-neutral-600 flex-shrink-0">{Math.round(d.coverage * 100)}%</span>
               </div>
