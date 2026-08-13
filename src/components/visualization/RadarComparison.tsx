@@ -59,11 +59,11 @@ export function RadarChart({ title, items, dimMap }: { title: string; items: { k
     return { x: cx + dist * Math.cos(angle), y: cy + dist * Math.sin(angle) };
   }
 
-  // 有数据的维度（椅子数据存在就显示真实）
+  // 激活且有数据的维度（坐高/坐深/坐宽）
   const activeAxes: { label: string; coverage: number; i: number }[] = [];
   items.forEach((item, i) => {
     const dim = dimMap[item.key];
-    if (dim && !dim.chairDataMissing) {
+    if (dim && ACTIVATED.has(item.key) && !dim.chairDataMissing) {
       activeAxes.push({ label: item.label, coverage: dim.coverage, i });
     }
   });
@@ -96,7 +96,7 @@ export function RadarChart({ title, items, dimMap }: { title: string; items: { k
           {items.map((item, i) => {
             const p = point(1, i);
             const dim = dimMap[item.key];
-            const isActive = dim && !dim.chairDataMissing;
+            const isActive = dim && ACTIVATED.has(item.key) && !dim.chairDataMissing;
 
             return (
               <g key={item.key}>

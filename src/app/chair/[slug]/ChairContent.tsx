@@ -6,7 +6,7 @@ import { chairs, getChairById } from "@/data/chairs";
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import DimensionBar from "@/components/visualization/DimensionBar";
-import { RadarChart, CATEGORIES } from "@/components/visualization/RadarComparison";
+import { RadarChart, CATEGORIES, ACTIVATED } from "@/components/visualization/RadarComparison";
 import type { BodyDimensions, ChairMatch, DimensionResult } from "@/engine/types";
 
 /** 从 URL pathname 解析 slug：/chair-picker/chair/xxx/ → xxx */
@@ -118,16 +118,22 @@ export default function ChairContent() {
                 {/* 对比条 */}
                 <div className="space-y-2 mb-4">
                   {cat.items.map(item => {
-                    const dim = dimMap[item.key];
-                    if (dim && !dim.chairDataMissing) {
-                      return (
-                        <DimensionBar key={item.key} dimKey={dim.key} label={item.label}
-                          userMin={dim.userIdeal.min} userMax={dim.userIdeal.max}
-                          chairMin={dim.chairRange.min} chairMax={dim.chairRange.max}
-                          coverage={dim.coverage} status={dim.status} />
-                      );
+                    // 激活维度（坐高/坐深/坐宽）：完整对比
+                    if (ACTIVATED.has(item.key)) {
+                      const dim = dimMap[item.key];
+                      if (dim && !dim.chairDataMissing) {
+                        return (
+                          <DimensionBar key={item.key} dimKey={dim.key} label={item.label}
+                            userMin={dim.userIdeal.min} userMax={dim.userIdeal.max}
+                            chairMin={dim.chairRange.min} chairMax={dim.chairRange.max}
+                            coverage={dim.coverage} status={dim.status} />
+                        );
+                      }
+                      return <NoDataBar key={item.key} label={item.label} />;
                     }
-                    return <NoDataBar key={item.key} label={item.label} />;
+                    // 非激活维度：只显示椅子数据，不虚构人的数据
+                    const value = getChairDataValue(chair, item.key);
+                    return <NoDataBar key={item.key} label={item.label} value={value || undefined} />;
                   })}
                 </div>
                 {/* 对应雷达图 */}
@@ -194,15 +200,32 @@ function surfaceLabel(s: string): string {
   switch (s) { case "mesh": return "网布"; case "sponge": return "海绵/软包"; case "leather": return "真皮"; default: return s; }
 }
 
-/** 未激活维度的灰色占位条 */
-function NoDataBar({ label }: { label: string }) {
+/** 未激活维度的占位条：有椅子数据显示数据，否则"暂未数据" */
+function NoDataBar({ label, value }: { label: string; value?: string }) {
+  const hasData = !!value;
   return (
     <div className="rounded-xl p-4 bg-neutral-50 border border-neutral-100">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-semibold text-neutral-400">{label}</span>
-        <span className="text-xs text-neutral-300">暂未数据</span>
+      <div className="flex items-center justify-between">
+        <span className={`text-sm font-semibold ${hasData ? "text-neutral-700" : "text-neutral-400"}`}>{label}</span>
+        <span className={`text-xs ${hasData ? "text-neutral-600" : "text-neutral-300"}`}>{value || "暂未数据"}</span>
       </div>
-      <div className="h-1.5 bg-neutral-100 rounded-full" />
     </div>
   );
+}
+
+/** 从椅子数据提取某维度的值（仅椅子数据，不涉及人的公式） */
+function getChairDataValue(chair: any, key: string): string | null {
+  const fmt = (v: { min: number; max: number }) => v.min === v.max ? `${v.min}cm` : `${v.min}-${v.max}cm`;
+  switch (key) {
+    case "backHeight": return chair.backHeight ? fmt(chair.backHeight) : null;
+    case "backWidth": return chair.backWidth != null ? `${chair.backWidth}cm` : null;
+    case "armrestWidth": return chair.armrestWidth != null ? `${chair.armrestWidth}cm` : null;
+    case "headrestRange": return chair.headrestHeight ? fmt(chair.headrestHeight) : null;
+    case "lumbarPosition": return chair.lumbarHeight != null ? `${chair.lumbarHeight}cm` : null;
+    case "lumbarFunc": return chair.lumbarFunc || null;
+    case "headrestFunc": return chair.headrestFunc || null;
+    case "armrestFunc": return chair.armrestFunc || null;
+    case "capacity": return chair.maxWeight != null ? `承重${chair.maxWeight}kg` : null;
+    default: return null;
+  }
 }
