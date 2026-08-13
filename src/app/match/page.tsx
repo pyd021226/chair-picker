@@ -5,7 +5,8 @@ import Link from "next/link";
 import { chairs } from "@/data/chairs";
 import { matchAllChairs } from "@/engine/matcher";
 import { calculateBodyDimensions } from "@/engine/formulas";
-import { loadCustomChairs, applyOverrides } from "@/engine/storage";
+import { loadCustomChairs, loadOverrides, applyOverrides } from "@/engine/storage";
+import { loadConfig, loadMatchRules, DEFAULT_CONFIG, DEFAULT_MATCH_RULES, type FormulaConfig, type MatchRules } from "@/engine/config";
 
 function useQueryParams() {
   const [p, setP] = useState({ h: "", w: "", sit: "" });
@@ -134,16 +135,27 @@ export default function MatchPage() {
   const isValid = !isNaN(H) && !isNaN(W) && H >= 130 && H <= 220 && W >= 30 && W <= 150;
   const sitLong = sitStr === "1";
 
-  const body = useMemo(() => isValid ? calculateBodyDimensions(H, W) : null, [H, W, isValid]);
   const [allChairs, setAllChairs] = useState(chairs);
-  useEffect(() => { setAllChairs(applyOverrides([...chairs, ...loadCustomChairs()])); }, []);
+  const [cfg, setCfg] = useState<FormulaConfig>(DEFAULT_CONFIG);
+  const [rules, setRules] = useState<MatchRules>(DEFAULT_MATCH_RULES);
+  const body = useMemo(() => isValid ? calculateBodyDimensions(H, W, cfg) : null, [H, W, isValid, cfg]);
+  useEffect(() => {
+    (async () => {
+      const [custom, overrides, loadedCfg, loadedRules] = await Promise.all([
+        loadCustomChairs(), loadOverrides(), loadConfig(), loadMatchRules(),
+      ]);
+      setAllChairs(applyOverrides([...chairs, ...custom], overrides));
+      setCfg(loadedCfg);
+      setRules(loadedRules);
+    })();
+  }, []);
   const matches = useMemo(() => {
     if (!isValid) return [];
-    let r = matchAllChairs(allChairs, H, W);
+    let r = matchAllChairs(allChairs, H, W, undefined, cfg, rules);
     if (sitLong) r = r.map(m => ({ ...m, overallScore: Math.round(m.overallScore * 0.75 + (countFeatures(m.chair) / 3) * 25) }));
     r = r.map(m => ({ ...m, h: H, w: W }));
     return r.sort((a, b) => b.overallScore - a.overallScore);
-  }, [H, W, isValid, allChairs, sitLong]);
+  }, [H, W, isValid, allChairs, sitLong, cfg, rules]);
 
   const toggleGroup = (key: string) => {
     setExpandedGroups(prev => {

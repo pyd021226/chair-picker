@@ -10,6 +10,7 @@
     "deploy": "GITHUB_PAGES=true next build && git checkout --orphan gh-pages-temp && git rm -rf --cached . && git clean -fdx --exclude=out --exclude=.git --exclude=node_modules && mkdir -p docs && cp -r out/* docs/ && touch docs/.nojekyll && git add docs && git commit -m \"Deploy\" && git push origin gh-pages-temp:gh-pages --force && git checkout main --force && git branch -D gh-pages-temp && echo \"✅ 部署完成！https://pyd021226.github.io/chair-picker/\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
     "next": "16.3.0",
     "playwright": "^1.62.1",
     "react": "19.2.8",

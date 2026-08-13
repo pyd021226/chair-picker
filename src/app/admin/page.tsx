@@ -5,7 +5,8 @@ import { DEFAULT_CONFIG, loadConfig, saveConfig, resetConfig, exportConfig, DEFA
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import { chairs } from "@/data/chairs";
-import { getUsageStats, clearUsageRecords, loadCustomChairs, addCustomChair, removeCustomChair, saveCustomChairs, updateChairOverride, loadOverrides } from "@/engine/storage";
+import { getUsageStats, clearUsageRecords, loadCustomChairs, addCustomChair, removeCustomChair, updateChairOverride, loadOverrides } from "@/engine/storage";
+import { getSupabase, isAdminLoggedIn, adminLogin, adminLogout } from "@/lib/supabase";
 import type { Chair } from "@/engine/types";
 import Link from "next/link";
 
@@ -13,12 +14,45 @@ export default function AdminPage() {
   const [config, setConfig] = useState<FormulaConfig>(DEFAULT_CONFIG);
   const [rules, setRules] = useState<MatchRules>(DEFAULT_MATCH_RULES);
   const [loaded, setLoaded] = useState(false);
+  const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginErr, setLoginErr] = useState("");
   const [testH, setTestH] = useState("175");
   const [testW, setTestW] = useState("70");
   const [saveMsg, setSaveMsg] = useState("");
   const [tab, setTab] = useState<"formula" | "rules" | "dashboard" | "addchair" | "chairs">("formula");
 
-  useEffect(() => { setConfig(loadConfig()); setRules(loadMatchRules()); setLoaded(true); }, []);
+  useEffect(() => {
+    (async () => {
+      const logged = await isAdminLoggedIn();
+      setLoggedIn(logged);
+      if (logged) {
+        const [cfg, r] = await Promise.all([loadConfig(), loadMatchRules()]);
+        setConfig(cfg);
+        setRules(r);
+      }
+      setLoaded(true);
+    })();
+  }, []);
+
+  const handleLogin = async () => {
+    const res = await adminLogin(email, password);
+    if (res.ok) {
+      setLoggedIn(true);
+      setLoginErr("");
+      const [cfg, r] = await Promise.all([loadConfig(), loadMatchRules()]);
+      setConfig(cfg);
+      setRules(r);
+    } else {
+      setLoginErr(res.error || "登录失败");
+    }
+  };
+
+  const handleLogout = async () => {
+    await adminLogout();
+    setLoggedIn(false);
+  };
 
   const H = parseFloat(testH) || 175;
   const W = parseFloat(testW) || 70;
@@ -36,8 +70,8 @@ export default function AdminPage() {
     });
   }, []);
 
-  const handleSave = () => { saveConfig(config); saveMatchRules(rules); setSaveMsg("✅ 已保存！"); setTimeout(() => setSaveMsg(""), 3000); };
-  const handleReset = () => { resetConfig(); resetMatchRules(); setConfig(DEFAULT_CONFIG); setRules(DEFAULT_MATCH_RULES); setSaveMsg("已重置"); setTimeout(() => setSaveMsg(""), 2000); };
+  const handleSave = async () => { await saveConfig(config); await saveMatchRules(rules); setSaveMsg("✅ 已保存！"); setTimeout(() => setSaveMsg(""), 3000); };
+  const handleReset = async () => { await resetConfig(); await resetMatchRules(); setConfig(DEFAULT_CONFIG); setRules(DEFAULT_MATCH_RULES); setSaveMsg("已重置"); setTimeout(() => setSaveMsg(""), 2000); };
   const handleExport = () => exportConfig(config);
 
   // 简化的参数列表：每组只暴露最关键的系数
@@ -122,6 +156,24 @@ export default function AdminPage() {
 
   if (!loaded) return <div className="p-8 text-neutral-400">加载中...</div>;
 
+  // 登录门：未登录显示登录表单
+  if (loggedIn === false) {
+    return (
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="w-full max-w-sm bg-white rounded-2xl border border-neutral-200 shadow-float p-6">
+          <h1 className="text-xl font-bold mb-1">后台登录</h1>
+          <p className="text-xs text-neutral-400 mb-6">仅限管理员访问</p>
+          <div className="space-y-3">
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="邮箱" className="w-full px-3 py-2.5 border border-neutral-200 rounded-lg text-sm" />
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleLogin()} placeholder="密码" className="w-full px-3 py-2.5 border border-neutral-200 rounded-lg text-sm" />
+            {loginErr && <p className="text-red-500 text-xs">{loginErr}</p>}
+            <button onClick={handleLogin} className="w-full py-2.5 bg-neutral-900 text-white rounded-lg text-sm font-semibold hover:bg-neutral-800">登录</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
@@ -133,6 +185,7 @@ export default function AdminPage() {
           <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">💾 保存</button>
           <button onClick={handleReset} className="px-3 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm hover:bg-neutral-200">↺ 重置</button>
           <button onClick={handleExport} className="px-3 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm hover:bg-neutral-200">📥 导出</button>
+          <button onClick={handleLogout} className="px-3 py-2 text-neutral-400 text-sm hover:text-neutral-600">退出</button>
           <Link href="/" className="px-3 py-2 text-neutral-400 text-sm hover:text-neutral-600">← 回首页</Link>
         </div>
       </div>
@@ -240,8 +293,16 @@ export default function AdminPage() {
 }
 // ====== 数据看板 ======
 function DashboardTab() {
-  const stats = getUsageStats();
-  const customChairs = loadCustomChairs();
+  const [stats, setStats] = useState<any>(null);
+  const [customChairs, setCustomChairs] = useState<Chair[]>([]);
+  useEffect(() => {
+    (async () => {
+      setStats(await getUsageStats());
+      setCustomChairs(await loadCustomChairs());
+    })();
+  }, []);
+
+  if (!stats) return <div className="text-center py-12 text-neutral-400">加载中...</div>;
 
   if (stats.total === 0) {
     return (
@@ -252,8 +313,8 @@ function DashboardTab() {
       </div>
     );
   }
-  const maxH = Math.max(...stats.heightDist.map(d => d.count), 1);
-  const maxW = Math.max(...stats.weightDist.map(d => d.count), 1);
+  const maxH = Math.max(...stats.heightDist.map((d: any) => d.count), 1);
+  const maxW = Math.max(...stats.weightDist.map((d: any) => d.count), 1);
 
   return (
     <div className="space-y-6">
@@ -279,7 +340,7 @@ function DashboardTab() {
       {/* 身高分布 */}      <div className="border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-3">📏 身高分布（每5cm一组）</h3>
         <div className="space-y-1">
-          {stats.heightDist.map(d => (
+          {stats.heightDist.map((d: any) => (
             <div key={d.label} className="flex items-center gap-2 text-xs">
               <span className="w-16 text-right text-neutral-500">{d.label}cm</span>
               <div className="flex-1 h-5 bg-neutral-100 rounded relative">
@@ -293,7 +354,7 @@ function DashboardTab() {
       {/* 体重分布 */}      <div className="border rounded-xl p-4">
         <h3 className="text-sm font-semibold mb-3">⚖️ 体重分布（每5kg一组）</h3>
         <div className="space-y-1">
-          {stats.weightDist.map(d => (
+          {stats.weightDist.map((d: any) => (
             <div key={d.label} className="flex items-center gap-2 text-xs">
               <span className="w-16 text-right text-neutral-500">{d.label}kg</span>
               <div className="flex-1 h-5 bg-neutral-100 rounded relative">
@@ -309,7 +370,7 @@ function DashboardTab() {
         <p className="text-2xl font-bold text-neutral-700">{customChairs.length} 把</p>
       </div>
 
-      <button onClick={() => { if(confirm("确定清空所有使用数据？")) clearUsageRecords(); window.location.reload(); }}        className="text-xs text-red-400 hover:text-red-600">清空使用数据</button>
+      <button onClick={async () => { if(confirm("确定清空所有使用数据？")) { await clearUsageRecords(); window.location.reload(); } }} className="text-xs text-red-400 hover:text-red-600">清空使用数据</button>
     </div>
   );
 }
@@ -323,9 +384,9 @@ function AddChairTab() {
     headrestFunc: "", armrestFunc: "", lumbarFunc: "",
   });
 
-  useEffect(() => { setCustomChairs(loadCustomChairs()); }, []);
+  useEffect(() => { (async () => { setCustomChairs(await loadCustomChairs()); })(); }, []);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.brand || !form.name) { setMsg("品牌和名称必填"); return; }    const shMin = parseFloat(form.seatHeightMin) || 0;
     const shMax = parseFloat(form.seatHeightMax) || shMin;
     const sdMin = parseFloat(form.seatDepthMin) || 0;
@@ -351,15 +412,15 @@ function AddChairTab() {
       totalHeight: null, reclineAngle: null, reclineTensionAdjustable: false,
       baseType: null, gasCylinder: null, baseMaterial: null, maxWeight: null, tags: [],
     };
-    addCustomChair(newChair);
-    setCustomChairs(loadCustomChairs());
+    await addCustomChair(newChair);
+    setCustomChairs(await loadCustomChairs());
     setMsg("✅ 已添加！去匹配页刷新即可看到");
     setForm({ brand: "", name: "", price: "", seatHeightMin: "", seatHeightMax: "", seatDepthMin: "", seatDepthMax: "", seatWidth: "", surface: "mesh", headrestFunc: "", armrestFunc: "", lumbarFunc: "" });
   };
 
-  const handleDelete = (id: string) => {
-    removeCustomChair(id);
-    setCustomChairs(loadCustomChairs());
+  const handleDelete = async (id: string) => {
+    await removeCustomChair(id);
+    setCustomChairs(await loadCustomChairs());
     setMsg("已删除");
   };
 
@@ -412,13 +473,15 @@ function ChairsTableTab() {
   const [overrides, setOverrides] = useState<Record<string, Partial<Chair>>>({});
 
   useEffect(() => {
-    setCustomChairs(loadCustomChairs());
-    setOverrides(loadOverrides());
+    (async () => {
+      setCustomChairs(await loadCustomChairs());
+      setOverrides(await loadOverrides());
+    })();
   }, []);
 
-  const refresh = () => {
-    setCustomChairs(loadCustomChairs());
-    setOverrides(loadOverrides());
+  const refresh = async () => {
+    setCustomChairs(await loadCustomChairs());
+    setOverrides(await loadOverrides());
   };
 
   // 应用覆盖 + 合并自定义
@@ -447,7 +510,7 @@ function ChairsTableTab() {
     });
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editId) return;
     const editData: Partial<Chair> = {
       brand: editForm.brand, name: editForm.name,
@@ -464,18 +527,15 @@ function ChairsTableTab() {
 
     const isCustom = customChairs.some(c => c.id === editId);
     if (isCustom) {
-      const clist = loadCustomChairs();
-      const idx = clist.findIndex(c => c.id === editId);
-      if (idx >= 0) {
-        const orig = clist[idx];
-        clist[idx] = { ...orig, ...editData } as Chair;
-        saveCustomChairs(clist);
+      const orig = customChairs.find(c => c.id === editId);
+      if (orig) {
+        await addCustomChair({ ...orig, ...editData } as Chair);
       }
     } else {
-      updateChairOverride(editId, editData);
+      await updateChairOverride(editId, editData);
     }
     setEditId(null);
-    refresh();
+    await refresh();
   };
 
   return (

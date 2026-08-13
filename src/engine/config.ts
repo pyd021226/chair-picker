@@ -212,32 +212,25 @@ export const DEFAULT_CONFIG: FormulaConfig = {
   },
 };
 
-const STORAGE_KEY = "chair-picker-formula-config";
-const RULES_STORAGE_KEY = "chair-picker-match-rules";
+import { getSupabase } from "@/lib/supabase";
 
-/** 从 localStorage 加载用户修改过的配置 */
-export function loadConfig(): FormulaConfig {
-  if (typeof window === "undefined") return DEFAULT_CONFIG;
+/** 从 Supabase 加载公式配置 */
+export async function loadConfig(): Promise<FormulaConfig> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_CONFIG;
-    const saved = JSON.parse(raw);
-    return deepMerge(DEFAULT_CONFIG, saved);
-  } catch {
-    return DEFAULT_CONFIG;
-  }
+    const { data, error } = await getSupabase().from("app_config").select("formula_config").eq("id", 1).single();
+    if (error || !data || !data.formula_config) return DEFAULT_CONFIG;
+    return deepMerge(DEFAULT_CONFIG, data.formula_config);
+  } catch { return DEFAULT_CONFIG; }
 }
 
-/** 保存配置到 localStorage */
-export function saveConfig(config: FormulaConfig): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+/** 保存公式配置到 Supabase */
+export async function saveConfig(config: FormulaConfig): Promise<void> {
+  await getSupabase().from("app_config").upsert({ id: 1, formula_config: config });
 }
 
-/** 重置为默认配置 */
-export function resetConfig(): void {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(STORAGE_KEY);
+/** 重置公式配置 */
+export async function resetConfig(): Promise<void> {
+  await getSupabase().from("app_config").upsert({ id: 1, formula_config: DEFAULT_CONFIG });
 }
 
 /** 导出配置为 JSON 文件下载 */
@@ -264,23 +257,20 @@ function deepMerge<T extends Record<string, any>>(base: T, overlay: Partial<T>):
 }
 
 /** 加载匹配规则 */
-export function loadMatchRules(): MatchRules {
-  if (typeof window === "undefined") return DEFAULT_MATCH_RULES;
+export async function loadMatchRules(): Promise<MatchRules> {
   try {
-    const raw = localStorage.getItem(RULES_STORAGE_KEY);
-    if (!raw) return DEFAULT_MATCH_RULES;
-    return { ...DEFAULT_MATCH_RULES, ...JSON.parse(raw) };
+    const { data, error } = await getSupabase().from("app_config").select("match_rules").eq("id", 1).single();
+    if (error || !data || !data.match_rules) return DEFAULT_MATCH_RULES;
+    return { ...DEFAULT_MATCH_RULES, ...data.match_rules };
   } catch { return DEFAULT_MATCH_RULES; }
 }
 
 /** 保存匹配规则 */
-export function saveMatchRules(rules: MatchRules): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(RULES_STORAGE_KEY, JSON.stringify(rules));
+export async function saveMatchRules(rules: MatchRules): Promise<void> {
+  await getSupabase().from("app_config").upsert({ id: 1, match_rules: rules });
 }
 
 /** 重置匹配规则 */
-export function resetMatchRules(): void {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(RULES_STORAGE_KEY);
+export async function resetMatchRules(): Promise<void> {
+  await getSupabase().from("app_config").upsert({ id: 1, match_rules: DEFAULT_MATCH_RULES });
 }
