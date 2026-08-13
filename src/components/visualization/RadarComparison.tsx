@@ -87,7 +87,14 @@ export function RadarChart({ title, items, dimMap }: { title: string; items: { k
             const s = scored[i];
             return (
               <g key={item.key}>
-                <line x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#dde1e6" strokeWidth="1" />
+                {/* 辐条：有分数的从原点画到评分点，没分数的画到外圈 */}
+                <line
+                  x1={cx} y1={cy}
+                  x2={s.hasScore ? point(s.coverage, i).x : p.x}
+                  y2={s.hasScore ? point(s.coverage, i).y : p.y}
+                  stroke={s.hasScore ? "#2c5ea8" : "#dde1e6"}
+                  strokeWidth={s.hasScore ? "2" : "1"}
+                />
                 <text
                   x={point(1.22, i).x}
                   y={point(1.22, i).y}
