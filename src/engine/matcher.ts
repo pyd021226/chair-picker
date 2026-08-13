@@ -398,7 +398,7 @@ export function matchChair(
     dimSum += dim.coverage;
     dimCount++;
   }
-  const overallScore = dimCount > 0 ? Math.round((dimSum / dimCount) * 100) : 0;
+  const overallScore = dimCount > 0 ? Math.floor((dimSum / dimCount) * 100) : 0;
 
   // 生成总结
   const goodDims = dimensions.filter(d => d.status === "good").length;
