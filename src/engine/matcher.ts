@@ -417,7 +417,7 @@ export function matchChair(
     weightedSum += dim.coverage * w;
     totalWeight += w;
   }
-  const overallScore = totalWeight > 0 ? Math.floor((weightedSum / totalWeight) * 100) : 0;
+  const overallScore = totalWeight > 0 ? Math.round((weightedSum / totalWeight) * 100) : 0;
 
   // 生成总结
   const goodDims = dimensions.filter(d => d.status === "good").length;

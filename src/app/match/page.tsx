@@ -158,9 +158,15 @@ export default function MatchPage() {
   if (!isValid) return <div className="flex flex-col items-center justify-center py-24 gap-3"><p className="text-neutral-400">参数不完整</p><Link href="/" className="text-blue-600 text-sm hover:underline">返回首页</Link></div>;
   if (!body) return null;
 
+  // 完美 = 坐高、坐深、坐宽三个维度都显示 100%
+  const isPerfect = (m: any) => {
+    const core = m.dimensions.filter((d: any) => ["seatHeight", "seatDepth", "seatWidth"].includes(d.key) && !d.chairDataMissing);
+    return core.length === 3 && core.every((d: any) => Math.round(d.coverage * 100) === 100);
+  };
+
   const groups = [
-    { key: "perfect", label: "完美契合", icon: "P", color: "#2563eb", list: matches.filter(m => m.overallScore === 100) },
-    { key: "good", label: "合适", icon: "G", color: "#16a34a", list: matches.filter(m => m.overallScore >= 95 && m.overallScore < 100) },
+    { key: "perfect", label: "完美契合", icon: "P", color: "#2563eb", list: matches.filter(isPerfect) },
+    { key: "good", label: "合适", icon: "G", color: "#16a34a", list: matches.filter(m => !isPerfect(m) && m.overallScore >= 95) },
     { key: "ok", label: "凑合", icon: "O", color: "#ca8a04", list: matches.filter(m => m.overallScore >= 80 && m.overallScore < 95) },
     { key: "poor", label: "不建议", icon: "N", color: "#dc2626", list: matches.filter(m => m.overallScore < 80) },
   ];
