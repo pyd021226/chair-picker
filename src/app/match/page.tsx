@@ -24,18 +24,17 @@ function countFeatures(chair: any): number {
 const scoreColor = (v: number) => v >= 100 ? "#2563eb" : v >= 95 ? "#16a34a" : v >= 80 ? "#ca8a04" : "#dc2626";
 
 /* 电商商品卡：顶部大照片 + 下方信息 */
-function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
+function ChairCard({ match, sitLong, hero }: { match: any; sitLong: boolean; hero?: boolean }) {
   const { chair, overallScore } = match;
   const dims = match.dimensions.filter((d: any) => !d.chairDataMissing && ["seatHeight", "seatDepth", "seatWidth"].includes(d.key));
 
   return (
     <Link
       href={"/chair/" + chair.id + "?h=" + match.h + "&w=" + match.w + (sitLong ? "&sit=1" : "")}
-      className="flex flex-col bg-white border border-neutral-200 rounded-2xl overflow-hidden h-full transition-shadow duration-300 hover:shadow-lg"
-      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+      className={`card-lift flex flex-col bg-white border border-neutral-100 rounded-2xl overflow-hidden h-full ${hero ? "shadow-hero" : "shadow-float"}`}
     >
       {/* 顶部大照片 */}
-      <div className="relative aspect-[4/3] bg-neutral-100 overflow-hidden">
+      <div className="img-zoom relative aspect-[4/3] bg-neutral-100">
         {chair.imageUrl ? (
           <img src={chair.imageUrl} alt={chair.name} className="w-full h-full object-cover" />
         ) : (
@@ -46,7 +45,7 @@ function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
         {/* 分数徽章悬浮右上角 */}
         <div
           className="absolute top-2 right-2 rounded-full text-white text-sm font-bold flex items-center justify-center"
-          style={{ backgroundColor: scoreColor(overallScore), width: "44px", height: "44px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}
+          style={{ backgroundColor: scoreColor(overallScore), width: "44px", height: "44px", boxShadow: "0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2)" }}
         >
           {overallScore}
         </div>
@@ -100,7 +99,7 @@ function GroupSection({ group, sitLong, expanded, onToggle }: { group: any; sitL
       {/* 分组标题（可点击展开/收起） */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-2 text-sm font-bold mb-4 cursor-pointer select-none text-left"
+        className="press w-full flex items-center gap-2 text-sm font-bold mb-4 cursor-pointer select-none text-left"
       >
         <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold" style={{ backgroundColor: group.color }}>
           {group.icon}
@@ -115,7 +114,7 @@ function GroupSection({ group, sitLong, expanded, onToggle }: { group: any; sitL
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {group.list.map((m: any, i: number) => (
             <div key={m.chair.id} style={{ animation: `fade-up 0.3s cubic-bezier(0.16,1,0.3,1) both ${i * 0.04}s` }}>
-              <ChairCard match={m} sitLong={sitLong} />
+              <ChairCard match={m} sitLong={sitLong} hero={group.key === "perfect"} />
             </div>
           ))}
         </div>
@@ -179,8 +178,8 @@ export default function MatchPage() {
         返回修改
       </Link>
 
-      {/* Body badge */}
-      <div className="inline-flex flex-wrap items-center gap-3 px-4 py-2 bg-white border border-neutral-200 rounded-xl mb-8 text-xs">
+      {/* Body badge — 毛玻璃悬浮，滚动时产生纵深 */}
+      <div className="glass shadow-float inline-flex flex-wrap items-center gap-3 px-5 py-2.5 rounded-2xl mb-8 text-xs sticky top-4 z-20">
         <span className="text-neutral-700 font-medium">{H}cm / {W}kg{sitLong ? " / 久坐" : ""}</span>
         <span className="text-neutral-200">|</span>
         <span className="text-neutral-400">坐高 <b className="text-neutral-800">{body.seatHeight.min}-{body.seatHeight.max}cm</b></span>

@@ -89,3 +89,61 @@ body::before {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+/* ===== 深度层次系统 ===== */
+/* 三级阴影：从"贴近背景"到"悬浮主角" */
+.shadow-float {
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 12px rgba(0,0,0,0.05),
+    0 12px 32px rgba(0,0,0,0.05);
+}
+.shadow-float-hover {
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.05),
+    0 8px 20px rgba(0,0,0,0.08),
+    0 24px 56px rgba(0,0,0,0.10);
+}
+.shadow-hero {
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.06),
+    0 8px 20px rgba(0,0,0,0.10),
+    0 32px 72px rgba(0,0,0,0.12);
+}
+
+/* 悬浮卡片的 hover 上浮 + 阴影扩散 */
+.card-lift {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.05),
+    0 8px 20px rgba(0,0,0,0.08),
+    0 24px 56px rgba(0,0,0,0.10);
+}
+
+/* 毛玻璃悬浮元素 */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+/* 按压物理反馈 */
+.press {
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* 图片 hover 微缩放 */
+.img-zoom { overflow: hidden; }
+.img-zoom img {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.img-zoom:hover img {
+  transform: scale(1.04);
+}

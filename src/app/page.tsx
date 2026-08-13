@@ -158,7 +158,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-3">
               {(["male", "female"] as const).map(k => (
                 <button key={k} onClick={() => { setGender(k); setErrors({}); }}
-                  className={"py-5 rounded-xl border-2 font-medium transition-all duration-200 pressable " + (gender === k ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]" : "border-[#e5e5e5] bg-white text-[#525252] hover:border-[#d4d4d4]")}>
+                  className={"py-5 rounded-xl border-2 font-medium transition-all duration-200 press " + (gender === k ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]" : "border-[#e5e5e5] bg-white text-[#525252] hover:border-[#d4d4d4]")}>
                   <div className="text-xl">{k === "male" ? "男" : "女"}</div>
                 </button>
               ))}
@@ -200,7 +200,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-3">
               {[{ k: true, l: "是，超过6小时" }, { k: false, l: "否，6小时以内" }].map(o => (
                 <button key={String(o.k)} onClick={() => { setSitLong(o.k); setErrors({}); }}
-                  className={"py-5 rounded-xl border-2 font-medium transition-all duration-200 pressable " + (sitLong === o.k ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]" : "border-[#e5e5e5] bg-white text-[#525252] hover:border-[#d4d4d4]")}>
+                  className={"py-5 rounded-xl border-2 font-medium transition-all duration-200 press " + (sitLong === o.k ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]" : "border-[#e5e5e5] bg-white text-[#525252] hover:border-[#d4d4d4]")}>
                   <div className="text-sm">{o.l}</div>
                 </button>
               ))}
@@ -235,7 +235,7 @@ export default function Home() {
         {step === 7 && (
           <div className="animate-fade-up space-y-3">
             <label className="block text-lg font-semibold text-[#171717]">身体分析报告</label>
-            <div className="bg-white border border-[#e5e5e5] rounded-xl p-5 min-h-[220px] space-y-2 text-sm leading-relaxed shadow-sm">
+            <div className="shadow-float bg-white border border-[#e5e5e5] rounded-xl p-5 min-h-[220px] space-y-2 text-sm leading-relaxed">
               {summaryLines.slice(0, typedCount).map((line, i) => (
                 <p key={i} className="text-[#525252]" style={{ animation: "fade-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: i * 0.05 + "s" }}>
                   {i === 0 ? <span className="font-semibold text-[#171717] text-base">{line}</span> : line}
@@ -245,7 +245,7 @@ export default function Home() {
             </div>
             {typingDone && (
               <button onClick={handleSubmit}
-                className="w-full py-3.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-xl text-base transition-all duration-200 pressable"
+                className="w-full py-3.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-xl text-base transition-all duration-200 press"
                 style={{ animation: "fade-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both" }}>
                 我已了解，开始匹配
               </button>
@@ -258,11 +258,11 @@ export default function Home() {
       {step < 7 && (
         <div className="w-full mt-8 flex gap-3">
           {step > 1 && (
-            <button onClick={() => setStep(step - 1)} className="px-5 py-3 border border-[#e5e5e5] rounded-xl text-[#525252] font-medium hover:bg-[#f5f5f5] transition-colors duration-200 pressable">
+            <button onClick={() => setStep(step - 1)} className="px-5 py-3 border border-[#e5e5e5] rounded-xl text-[#525252] font-medium hover:bg-[#f5f5f5] transition-colors duration-200 press">
               上一步
             </button>
           )}
-          <button onClick={step === 6 ? next : next} className="flex-1 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-xl transition-colors duration-200 pressable">
+          <button onClick={step === 6 ? next : next} className="flex-1 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-xl transition-colors duration-200 press">
             {step === 6 ? "生成身体报告" : "下一步"}
           </button>
         </div>
