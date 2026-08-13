@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { chairs } from "@/data/chairs";
 import { matchAllChairs } from "@/engine/matcher";
@@ -22,92 +22,107 @@ function countFeatures(chair: any): number {
 }
 
 const accentColor = (s: number) => s === 100 ? "#2563eb" : s >= 95 ? "#16a34a" : s >= 80 ? "#ca8a04" : "#dc2626";
+const dimColor = (status: string) => status === "good" ? "#16a34a" : status === "marginal" ? "#ca8a04" : "#dc2626";
 
-/* 单张椅子卡片 */
+/* 电商商品卡：顶部大照片 + 下方信息 */
 function ChairCard({ match, sitLong }: { match: any; sitLong: boolean }) {
   const { chair, overallScore } = match;
-  const [peek, setPeek] = useState(false);
-  const linkRef = useRef<HTMLAnchorElement>(null);
-
-  const dims = match.dimensions.filter((d: any) => !d.chairDataMissing && ["seatHeight","seatDepth","seatWidth"].includes(d.key));
-
-  // 触屏：第一次点击显示照片，第二次才跳转
-  const handleClick = (e: React.MouseEvent) => {
-    if (!peek && window.matchMedia("(pointer: coarse)").matches) {
-      e.preventDefault();
-      setPeek(true);
-    }
-  };
+  const dims = match.dimensions.filter((d: any) => !d.chairDataMissing && ["seatHeight", "seatDepth", "seatWidth"].includes(d.key));
 
   return (
-    <div className="relative group">
-      {/* 照片 — 悬停/触屏首次点击后从背后探出 */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 rounded-2xl overflow-hidden bg-neutral-100 shadow-lg transition-all duration-400 ease-out z-0 pointer-events-none"
-        style={{
-          width: peek ? "150px" : "100px",
-          height: peek ? "200px" : "120px",
-          bottom: peek ? "55px" : "35px",
-          opacity: peek ? 1 : 0.25,
-          transform: `translateX(-50%) translateY(${peek ? "-28px" : "0"})`,
-        }}
-      >
+    <Link
+      href={"/chair/" + chair.id + "?h=" + match.h + "&w=" + match.w + (sitLong ? "&sit=1" : "")}
+      className="flex flex-col bg-white border border-neutral-200 rounded-2xl overflow-hidden h-full transition-shadow duration-300 hover:shadow-lg"
+      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+    >
+      {/* 顶部大照片 */}
+      <div className="relative aspect-[4/3] bg-neutral-100 overflow-hidden">
         {chair.imageUrl ? (
-          <img src={chair.imageUrl} alt="" className="w-full h-full object-cover" />
+          <img src={chair.imageUrl} alt={chair.name} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 text-3xl text-neutral-300 select-none">
-            {chair.name.slice(0, 1)}
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 text-4xl text-neutral-300 select-none">
+            {chair.brand.slice(0, 1)}
           </div>
         )}
+        {/* 分数徽章悬浮右上角 */}
+        <div
+          className="absolute top-2 right-2 rounded-full text-white text-sm font-bold flex items-center justify-center"
+          style={{ backgroundColor: accentColor(overallScore), width: "44px", height: "44px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}
+        >
+          {overallScore}
+        </div>
       </div>
 
-      {/* 卡片 */}
-      <Link
-        ref={linkRef}
-        href={"/chair/" + chair.id + "?h=" + match.h + "&w=" + match.w + (sitLong ? "&sit=1" : "")}
-        onClick={handleClick}
-        className="relative z-10 flex flex-col bg-white border border-neutral-200 rounded-2xl p-4 transition-all duration-300 hover:shadow-md h-full"
-        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)", minHeight: "200px" }}
-        onMouseEnter={() => setPeek(true)}
-        onMouseLeave={() => setPeek(false)}
-      >
-        <div className="flex items-start justify-between mb-3">
-          <div className="min-w-0 min-h-[40px]">
-            <p className="text-[10px] text-neutral-400 uppercase tracking-wider">{chair.brand}</p>
-            <h3 className="font-semibold text-neutral-900 text-sm mt-0.5 line-clamp-2">{chair.name}</h3>
-          </div>
-          <span className="flex-shrink-0 ml-2 text-2xl font-bold tracking-tighter" style={{ color: accentColor(overallScore) }}>
-            {overallScore}
-          </span>
-        </div>
-        <div className="space-y-1.5" style={{ minHeight: "54px" }}>
+      {/* 下方信息 */}
+      <div className="flex flex-col flex-1 p-3">
+        <p className="text-[10px] text-neutral-400">{chair.brand}</p>
+        <h3 className="font-semibold text-neutral-900 text-sm mt-0.5 line-clamp-2">{chair.name}</h3>
+
+        {/* 维度条 */}
+        <div className="space-y-1 mt-2">
           {dims.map((d: any) => (
             <div key={d.key} className="flex items-center gap-2 text-xs">
-              <span className="w-8 text-neutral-400">{d.label}</span>
+              <span className="w-8 text-neutral-400 flex-shrink-0">{d.label}</span>
               <div className="flex-1 h-1 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: accentColor(overallScore) }} />
+                <div className="h-full rounded-full" style={{ width: Math.round(d.coverage * 100) + "%", backgroundColor: dimColor(d.status) }} />
               </div>
-              <span className="w-7 text-right font-medium text-neutral-600">{Math.round(d.coverage * 100)}%</span>
+              <span className="w-7 text-right font-medium text-neutral-600 flex-shrink-0">{Math.round(d.coverage * 100)}%</span>
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between mt-auto pt-3 border-t border-neutral-100" style={{ minHeight: "32px" }}>
-          {chair.price ? <span className="text-sm font-bold text-blue-600">{chair.price}</span> : <span />}
+
+        {/* 价格 + 功能 */}
+        <div className="flex items-center justify-between mt-auto pt-2 border-t border-neutral-100 mt-2">
+          {chair.price ? <span className="text-sm font-bold text-blue-600">¥{chair.price}</span> : <span />}
           {sitLong && (
             <span className="text-[10px] font-medium" style={{ color: countFeatures(chair) >= 3 ? "#16a34a" : countFeatures(chair) >= 2 ? "#ca8a04" : "#dc2626" }}>
               功能 {countFeatures(chair)}/3
             </span>
           )}
         </div>
-      </Link>
+      </div>
+    </Link>
+  );
+}
+
+/* 分组区块：满分区默认展开，其他默认收起 */
+function GroupSection({ group, sitLong, expanded, onToggle }: { group: any; sitLong: boolean; expanded: boolean; onToggle: () => void }) {
+  if (group.list.length === 0) return null;
+
+  return (
+    <div className="mb-8">
+      {/* 分组标题（可点击展开/收起） */}
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-2 text-sm font-bold mb-4 cursor-pointer select-none text-left"
+      >
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold" style={{ backgroundColor: group.color }}>
+          {group.icon}
+        </span>
+        <span style={{ color: group.color }}>{group.label}</span>
+        <span className="text-neutral-400 font-normal text-xs">({group.list.length})</span>
+        <span className="ml-auto text-xs text-neutral-300">{expanded ? "收起 ▲" : "展开 ▼"}</span>
+      </button>
+
+      {/* 卡片网格 */}
+      {expanded && (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          {group.list.map((m: any, i: number) => (
+            <div key={m.chair.id} style={{ animation: `fade-up 0.3s cubic-bezier(0.16,1,0.3,1) both ${i * 0.04}s` }}>
+              <ChairCard match={m} sitLong={sitLong} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-/* 主页面 */
 export default function MatchPage() {
   const { h: hStr, w: wStr, sit: sitStr } = useQueryParams();
   const [loaded, setLoaded] = useState(false);
+  // 满分区(perfect)默认展开，其他默认收起
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["perfect"]));
   useEffect(() => { setTimeout(() => setLoaded(true), 80); }, []);
 
   const H = parseFloat(hStr), W = parseFloat(wStr);
@@ -121,10 +136,17 @@ export default function MatchPage() {
     if (!isValid) return [];
     let r = matchAllChairs(allChairs, H, W);
     if (sitLong) r = r.map(m => ({ ...m, overallScore: Math.round(m.overallScore * 0.75 + (countFeatures(m.chair) / 3) * 25) }));
-    // 注入 h, w 参数给每个 match，方便卡片构建链接
     r = r.map(m => ({ ...m, h: H, w: W }));
     return r.sort((a, b) => b.overallScore - a.overallScore);
   }, [H, W, isValid, allChairs, sitLong]);
+
+  const toggleGroup = (key: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
 
   if (!loaded) return <div className="flex items-center justify-center py-24"><div className="h-5 w-40 rounded-full bg-neutral-100 animate-pulse" /></div>;
   if (!isValid) return <div className="flex flex-col items-center justify-center py-24 gap-3"><p className="text-neutral-400">参数不完整</p><Link href="/" className="text-blue-600 text-sm hover:underline">返回首页</Link></div>;
@@ -155,37 +177,15 @@ export default function MatchPage() {
       </div>
 
       {/* 分组 */}
-      {groups.map(g => {
-        if (g.list.length === 0) return null;
-        return (
-          <div key={g.key} className="mb-10">
-            <h3 className="flex items-center gap-2 text-sm font-bold mb-4" style={{ color: g.color }}>
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-[10px] font-bold" style={{ backgroundColor: g.color }}>{g.icon}</span>
-              {g.label}
-              <span className="text-neutral-400 font-normal text-xs ml-1">({g.list.length})</span>
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {g.list.slice(0, 3).map((m, i) => (
-                <div key={m.chair.id} style={{ animation: `fade-up 0.35s cubic-bezier(0.16,1,0.3,1) both ${i * 0.06}s` }}>
-                  <ChairCard match={m} sitLong={sitLong} />
-                </div>
-              ))}
-            </div>
-            {g.list.length > 3 && (
-              <details className="mt-4">
-                <summary className="text-xs text-neutral-400 cursor-pointer hover:text-neutral-600">展开剩余 {g.list.length - 3} 款</summary>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                  {g.list.slice(3).map((m, i) => (
-                    <div key={m.chair.id} style={{ animation: `fade-up 0.35s cubic-bezier(0.16,1,0.3,1) both ${i * 0.04}s` }}>
-                      <ChairCard match={m} sitLong={sitLong} />
-                    </div>
-                  ))}
-                </div>
-              </details>
-            )}
-          </div>
-        );
-      })}
+      {groups.map(g => (
+        <GroupSection
+          key={g.key}
+          group={g}
+          sitLong={sitLong}
+          expanded={expandedGroups.has(g.key)}
+          onToggle={() => toggleGroup(g.key)}
+        />
+      ))}
     </div>
   );
 }
