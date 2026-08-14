@@ -7,8 +7,11 @@ import { loadProfiles, deleteProfile, type Profile } from "@/engine/profiles";
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [backPid, setBackPid] = useState("");
 
   useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    setBackPid(sp.get("pid") || "");
     setProfiles(loadProfiles());
     setLoaded(true);
   }, []);
@@ -18,6 +21,8 @@ export default function ProfilesPage() {
   const matchHref = (p: Profile) =>
     "/match?h=" + p.height + "&w=" + p.weight + "&sit=" + (p.sitLong ? "1" : "0") +
     "&g=" + (p.gender || "") + "&bmin=" + p.budgetMin + "&bmax=" + p.budgetMax + "&pid=" + p.id;
+
+  const backProfile = backPid ? profiles.find(p => p.id === backPid) : null;
 
   if (!loaded) return <div className="p-8 text-neutral-400">加载中...</div>;
 
@@ -55,7 +60,7 @@ export default function ProfilesPage() {
         </div>
       )}
 
-      <Link href="/" className="block mt-8 text-center text-sm text-neutral-400 hover:text-neutral-600">← 返回首页</Link>
+      <Link href={backProfile ? matchHref(backProfile) : "/"} className="block mt-8 text-center text-sm text-neutral-400 hover:text-neutral-600">← 返回椅子页</Link>
     </div>
   );
 }

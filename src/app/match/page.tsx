@@ -188,7 +188,7 @@ export default function MatchPage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Nav：人员管理 + 我的报告 */}
       <div className="flex items-center justify-between mb-6">
-        <Link href="/profiles" className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition-colors duration-200">
+        <Link href={"/profiles?pid=" + pid} className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition-colors duration-200">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M3.5 13.5c0-2.2 1.8-3.5 4.5-3.5s4.5 1.3 4.5 3.5"/></svg>
           人员管理
         </Link>

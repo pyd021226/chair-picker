@@ -39,6 +39,7 @@ export default function ReportPage() {
   const gender = profile.gender || "male";
   const summaryLines = generateSummaryLines({ nickname: profile.nickname, gender, height: profile.height, weight: profile.weight, sitLong: profile.sitLong });
   const plan = generatePlan({ nickname: profile.nickname, gender, height: profile.height, weight: profile.weight, sitLong: profile.sitLong, budgetMin: profile.budgetMin, budgetMax: profile.budgetMax });
+  const matchHref = "/match?h=" + profile.height + "&w=" + profile.weight + "&sit=" + (profile.sitLong ? "1" : "0") + "&g=" + (profile.gender || "") + "&bmin=" + profile.budgetMin + "&bmax=" + profile.budgetMax + "&pid=" + profile.id;
 
   const dims = [
     { label: "坐高", unit: "cm", formula: "身高 × 坐高系数（按身高分档）", value: `${body.seatHeight.min}–${body.seatHeight.max}` },
@@ -63,7 +64,7 @@ export default function ReportPage() {
           <h1 className="text-2xl font-bold text-[#171717]">我的报告</h1>
           <p className="text-sm text-neutral-400 mt-0.5">{profile.nickname} · {profile.height}cm / {profile.weight}kg</p>
         </div>
-        <Link href="/" className="text-sm text-neutral-400 hover:text-neutral-600">← 返回</Link>
+        <Link href={matchHref} className="text-sm text-neutral-400 hover:text-neutral-600">← 返回椅子页</Link>
       </div>
 
       {/* 一、我的数据 */}
