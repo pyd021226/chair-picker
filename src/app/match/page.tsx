@@ -9,8 +9,8 @@ import { loadCustomChairs, loadOverrides, applyOverrides, recordChairClick } fro
 import { loadConfig, loadMatchRules, DEFAULT_CONFIG, DEFAULT_MATCH_RULES, type FormulaConfig, type MatchRules } from "@/engine/config";
 
 function useQueryParams() {
-  const [p, setP] = useState({ h: "", w: "", sit: "", g: "" });
-  useEffect(() => { const sp = new URLSearchParams(window.location.search); setP({ h: sp.get("h") || "", w: sp.get("w") || "", sit: sp.get("sit") || "", g: sp.get("g") || "" }); }, []);
+  const [p, setP] = useState({ h: "", w: "", sit: "", g: "", pid: "" });
+  useEffect(() => { const sp = new URLSearchParams(window.location.search); setP({ h: sp.get("h") || "", w: sp.get("w") || "", sit: sp.get("sit") || "", g: sp.get("g") || "", pid: sp.get("pid") || "" }); }, []);
   return p;
 }
 
@@ -126,7 +126,7 @@ function GroupSection({ group, sitLong, expanded, onToggle, gender }: { group: a
 }
 
 export default function MatchPage() {
-  const { h: hStr, w: wStr, sit: sitStr, g: genderStr } = useQueryParams();
+  const { h: hStr, w: wStr, sit: sitStr, g: genderStr, pid } = useQueryParams();
   const gender: "male" | "female" | null = genderStr === "male" || genderStr === "female" ? genderStr : null;
   const [loaded, setLoaded] = useState(false);
   // 满分区(perfect)默认展开，其他默认收起
@@ -186,19 +186,15 @@ export default function MatchPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      {/* Nav */}
-      <Link href="/" className="inline-flex items-center text-sm text-neutral-400 hover:text-neutral-600 transition-colors duration-200 mb-6">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="mr-1"><path d="M10 3L5 8l5 5"/></svg>
-        返回修改
-      </Link>
-
-      {/* Body badge — 毛玻璃悬浮，滚动时产生纵深 */}
-      <div className="glass shadow-float inline-flex flex-wrap items-center gap-3 px-5 py-2.5 rounded-2xl mb-8 text-xs sticky top-4 z-20">
-        <span className="text-neutral-700 font-medium">{H}cm / {W}kg{sitLong ? " / 久坐" : ""}</span>
-        <span className="text-neutral-200">|</span>
-        <span className="text-neutral-400">坐高 <b className="text-neutral-800">{body.seatHeight.min}-{body.seatHeight.max}cm</b></span>
-        <span className="text-neutral-400">坐深 <b className="text-neutral-800">{body.seatDepth.min}-{body.seatDepth.max}cm</b></span>
-        <span className="text-neutral-400">坐宽 <b className="text-neutral-800">{body.seatWidth.min}-{body.seatWidth.max}cm</b></span>
+      {/* Nav：人员管理 + 我的报告 */}
+      <div className="flex items-center justify-between mb-6">
+        <Link href="/profiles" className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition-colors duration-200">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M3.5 13.5c0-2.2 1.8-3.5 4.5-3.5s4.5 1.3 4.5 3.5"/></svg>
+          人员管理
+        </Link>
+        <Link href={"/report?pid=" + pid} className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-full transition-colors duration-200">
+          我的报告
+        </Link>
       </div>
 
       {/* 分组 */}

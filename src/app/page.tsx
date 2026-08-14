@@ -3,39 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { recordUsage } from "@/engine/storage";
+import { saveProfile, getProfile, newProfileId } from "@/engine/profiles";
+import { generateSummaryLines } from "@/engine/summary";
 
 const TOTAL_STEPS = 7;
-
-const MALE_H = { mean: 172.5, sd: 5.8 };
-const FEMALE_H = { mean: 161.5, sd: 5.3 };
-const MALE_BMI = { mean: 22.5, sd: 3.0 };
-const FEMALE_BMI = { mean: 21.8, sd: 2.8 };
-
-function percentile(val: number, mean: number, sd: number): number {
-  const z = (val - mean) / sd;
-  const t = 1 / (1 + 0.2316419 * Math.abs(z));
-  const d = 0.3989423 * Math.exp(-z * z / 2);
-  const p = 1 - d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-  const raw = z > 0 ? p : 1 - p;
-  return Math.min(99.9, Math.max(0.1, Math.round(raw * 1000) / 10));
-}
-
-function heightLabel(pct: number): { label: string; short: string } {
-  if (pct >= 95) return { label: "大高个", short: "高" };
-  if (pct >= 80) return { label: "高个子", short: "高" };
-  if (pct >= 60) return { label: "中高", short: "中高" };
-  if (pct <= 5) return { label: "迷你", short: "矮" };
-  if (pct <= 20) return { label: "小个子", short: "矮" };
-  if (pct <= 40) return { label: "中小个子", short: "中小" };
-  return { label: "标准身高", short: "标准" };
-}
-
-function weightLabel(bmi: number): string {
-  if (bmi < 18.5) return "偏瘦";
-  if (bmi < 24) return "标准体重";
-  if (bmi < 28) return "偏胖";
-  return "肥胖";
-}
 
 export default function Home() {
   const router = useRouter();
@@ -51,39 +22,7 @@ export default function Home() {
   const [summaryLines, setSummaryLines] = useState<string[]>([]);
   const [typedCount, setTypedCount] = useState(0);
   const [typingDone, setTypingDone] = useState(false);
-
-  function generateSummary(): string[] {
-    if (!gender) return [];
-    const h = parseFloat(height);
-    const w = parseFloat(weight);
-    const bmi = w / ((h / 100) * (h / 100));
-    const hRef = gender === "male" ? MALE_H : FEMALE_H;
-    const bRef = gender === "male" ? MALE_BMI : FEMALE_BMI;
-    const hPct = percentile(h, hRef.mean, hRef.sd);
-    const bmiPct = percentile(bmi, bRef.mean, bRef.sd);
-    const hInfo = heightLabel(hPct);
-    const wLabel = weightLabel(bmi);
-    const gLabel = gender === "male" ? "男性" : "女性";
-    const pctDisplay = (hInfo.label === "迷你" || hInfo.label === "大高个") ? hPct.toFixed(3) : hPct.toFixed(1);
-
-    const lines = [
-      nickname + "，根据你的数据（" + gLabel + "，" + h + "cm / " + w + "kg），分析如下：",
-      "身高在" + gLabel + "中超过 " + pctDisplay + "% 的人，属于「" + hInfo.label + "」。",
-      "BMI 为 " + bmi.toFixed(1) + "，属于「" + wLabel + "」。",
-      "体型结论：" + hInfo.short + "身高，" + wLabel + "体型。",
-    ];
-
-    if (bmi >= 28) lines.push("体重较大，需更强腰部支撑和偏硬网面坐垫，防止坐骨触底。");
-    else if (bmi >= 24) lines.push("偏壮体型，建议腰部支撑较强、坐垫中等偏硬的椅子。");
-    else if (bmi < 18.5) lines.push("偏瘦体型，肌肉量较低，建议坐垫偏软、腰撑力度柔和。");
-
-    if (gender === "female") lines.push("女性腰椎曲度通常更大，建议腰撑位置可调、坐感偏软。");
-    if (sitLong) lines.push("每天久坐超过6小时，颈部、肩部、腰部长期受压。强烈建议带头枕、多维扶手、强支撑腰靠的椅子。");
-    else lines.push("久坐时间在6小时以内，标准配置工学椅即可满足需求。");
-
-    lines.push("接下来，将根据你的身体数据和预算匹配最适合的椅子。");
-    return lines;
-  }
+  const [editId, setEditId] = useState<string | null>(null);
 
   function validateStep(s: number): boolean {
     const e: Record<string, string> = {};
@@ -99,7 +38,7 @@ export default function Home() {
 
   function next() {
     if (validateStep(step)) {
-      if (step === 6) { setSummaryLines(generateSummary()); setTypedCount(0); setTypingDone(false); }
+      if (step === 6 && gender) { setSummaryLines(generateSummaryLines({ nickname, gender, height: parseFloat(height), weight: parseFloat(weight), sitLong: sitLong ?? false })); setTypedCount(0); setTypingDone(false); }
       setStep(step + 1);
     }
   }
@@ -107,8 +46,10 @@ export default function Home() {
   function handleSubmit() {
     const h = parseFloat(height); const w = parseFloat(weight);
     const bMin = parseFloat(budgetMin); const bMax = parseFloat(budgetMax);
+    const pid = editId || newProfileId();
+    saveProfile({ id: pid, nickname, gender, height: h, weight: w, budgetMin: bMin, budgetMax: bMax, sitLong: sitLong ?? false, updatedAt: Date.now() });
     recordUsage({ nickname, gender, height: h, weight: w, sitLong: sitLong ?? false, budgetMin: bMin, budgetMax: bMax });
-    router.push("/match?h=" + h + "&w=" + w + "&bmin=" + bMin + "&bmax=" + bMax + "&sit=" + (sitLong ? "1" : "0") + "&g=" + (gender || ""));
+    router.push("/match?h=" + h + "&w=" + w + "&bmin=" + bMin + "&bmax=" + bMax + "&sit=" + (sitLong ? "1" : "0") + "&g=" + (gender || "") + "&pid=" + pid);
   }
 
   useEffect(() => {
@@ -121,6 +62,25 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [step, typedCount, summaryLines, typingDone]);
+
+  // 编辑模式：?edit=<id> 预填已有档案
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const id = sp.get("edit");
+    if (id) {
+      const p = getProfile(id);
+      if (p) {
+        setEditId(p.id);
+        setNickname(p.nickname);
+        setGender(p.gender);
+        setHeight(String(p.height));
+        setWeight(String(p.weight));
+        setSitLong(p.sitLong);
+        setBudgetMin(String(p.budgetMin));
+        setBudgetMax(String(p.budgetMax));
+      }
+    }
+  }, []);
 
   const pct = (step / TOTAL_STEPS) * 100;
 
