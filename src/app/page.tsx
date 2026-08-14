@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { recordUsage } from "@/engine/storage";
 
 const TOTAL_STEPS = 7;
@@ -269,7 +268,7 @@ export default function Home() {
       )}
 
       <p className="mt-6 text-xs text-[#a3a3a3]">
-        已收录 60 款工学椅 · <Link href="/admin" className="text-[#2563eb] hover:underline">公式管理</Link>
+        已收录 60 款工学椅
       </p>
     </main>
   );
