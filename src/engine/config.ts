@@ -119,10 +119,10 @@ export const DEFAULT_MATCH_RULES: MatchRules = {
     seatHeight: 18,
     seatDepth: 16,
     seatWidth: 12,
-    backHeight: 0,
-    backWidth: 0,
+    backHeight: 8,
+    backWidth: 6,
     armrestHeight: 0,
-    armrestWidth: 0,
+    armrestWidth: 6,
     headrestRange: 0,
     headrestNeed: 0,
     reclineTension: 0,
@@ -161,16 +161,16 @@ export const DEFAULT_CONFIG: FormulaConfig = {
     meshDeduction: 5, spongeDeduction: 1,
   },
   backHeight: {
-    coefLow: 0.33, coefHigh: 0.37,
+    coefLow: 0.355, coefHigh: 0.395,  // 0.375H ± 0.02，Sydor h7 = 0.50×0.75×H
     tallThreshold: 185,
-    tallCoefLow: 0.36, tallCoefHigh: 0.38,
+    tallCoefLow: 0.355, tallCoefHigh: 0.395,
     shortThreshold: 155,
-    shortCoefLow: 0.32, shortCoefHigh: 0.34,
+    shortCoefLow: 0.355, shortCoefHigh: 0.395,
   },
   backWidth: {
-    coef: 0.22,
+    coef: 0.23,  // Sydor b4 = 0.23H
     weightThreshold: 80,
-    weightBonus: 0.03,
+    weightBonus: 0,
   },
   armrestHeight: {
     coefLow: 0.15, coefHigh: 0.17,
@@ -181,7 +181,7 @@ export const DEFAULT_CONFIG: FormulaConfig = {
     shortCoefLow: 0.15, shortCoefHigh: 0.16,
   },
   armrestWidth: {
-    coefH: 0.152, coefW: 0.113, offset: 4.95,
+    coefH: 0.27, coefW: 0, offset: 6,  // Sydor b5 = 0.27H + 6cm
   },
   headrest: {
     coefCenter: 0.44, coefLow: 0.39, coefHigh: 0.49,

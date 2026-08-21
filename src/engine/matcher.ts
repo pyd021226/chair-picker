@@ -27,10 +27,10 @@ const DEFAULT_WEIGHTS: WeightConfig = {
   seatHeight: 18,
   seatDepth: 16,
   seatWidth: 12,
-  backHeight: 0,
-  backWidth: 0,
+  backHeight: 8,
+  backWidth: 6,
   armrestHeight: 0,
-  armrestWidth: 0,
+  armrestWidth: 6,
   headrestRange: 0,
   headrestNeed: 0,
   reclineTension: 0,
@@ -142,14 +142,19 @@ function scoreBackWidth(ctx: ScoreContext): DimensionResult {
   const chairVal = ctx.chair.backWidth;
   if (!chairVal) return missingScalar(key, "背宽", "cm", 5, ctx);
 
+  // Sydor: b4 应 ≥ 肩宽 G = 0.23H，更宽不扣分
   const userVal = ctx.body.backWidth;
-  const coverage = clamp(1 - Math.abs(userVal - chairVal) / 5, 0, 1);
+  const coverage = chairVal >= userVal ? 1 : clamp(chairVal / userVal, 0, 1);
+  const diff = chairVal - userVal;
+  const explanation = diff >= 0
+    ? `椅背${chairVal}cm ≥ 肩宽${userVal}cm，宽裕${diff.toFixed(1)}cm`
+    : `椅背${chairVal}cm < 肩宽${userVal}cm，窄${Math.abs(diff).toFixed(1)}cm`;
   return {
     key, label: "背宽", unit: "cm",
     userIdeal: { min: userVal, max: userVal },
     chairRange: { min: chairVal, max: chairVal },
     coverage, status: coverageToStatus(coverage, ctx.rules),
-    explanation: `用户需要${userVal}cm，椅子${chairVal}cm`,
+    explanation,
     priority: 5, chairDataMissing: false,
   };
 }
@@ -173,7 +178,7 @@ function scoreArmrestHeight(ctx: ScoreContext): DimensionResult {
 function scoreArmrestWidth(ctx: ScoreContext): DimensionResult {
   return scoreScalar(
     "armrestWidth", "扶手宽", "cm", 7, ctx,
-    ctx.body.armrestWidth, ctx.chair.armrestWidth, 5
+    ctx.body.armrestWidth, ctx.chair.armrestWidth, 8
   );
 }
 

@@ -71,18 +71,15 @@ function calcSeatWidth(H: number, W: number, c: FormulaConfig): Range {
   return r(0, B_cm + s.activityHigh); // 范围从0到最大需求
 }
 
-function calcBackHeight(H: number, c: FormulaConfig): Range {
-  const { backHeight: b } = c;
-  if (H > b.tallThreshold) return r(H * b.tallCoefLow, H * b.tallCoefHigh);
-  if (H < b.shortThreshold) return r(H * b.shortCoefLow, H * b.shortCoefHigh);
-  return r(H * b.coefLow, H * b.coefHigh);
+function calcBackHeight(H: number, _c: FormulaConfig): Range {
+  // Sydor 2023 Eq.6: h7 = 0.50 × 0.75 × H = 0.375H
+  const target = H * 0.375;
+  return r(target - 4, target + 4);
 }
 
-function calcBackWidth(H: number, W: number, c: FormulaConfig): number {
-  const { backWidth: b } = c;
-  const base = H * b.coef;
-  const bonus = Math.max(0, (W - b.weightThreshold) * b.weightBonus);
-  return Math.round((base + bonus) * 10) / 10;
+function calcBackWidth(H: number, _W: number, _c: FormulaConfig): number {
+  // Sydor 2023 Eq.7: b4 = 0.23H，椅背应 ≥ 肩宽
+  return Math.round(H * 0.23 * 10) / 10;
 }
 
 function calcArmrestHeight(H: number, c: FormulaConfig): Range {
@@ -92,9 +89,9 @@ function calcArmrestHeight(H: number, c: FormulaConfig): Range {
   return r(H * a.coefLow + a.offset, H * a.coefHigh + a.offset);
 }
 
-function calcArmrestWidth(H: number, W: number, c: FormulaConfig): number {
-  const { armrestWidth: a } = c;
-  return Math.round((a.coefH * H + a.coefW * W + a.offset) * 10) / 10;
+function calcArmrestWidth(H: number, _W: number, _c: FormulaConfig): number {
+  // Sydor 2023 Eq.4: b5 = 0.27H + 2×3cm
+  return Math.round((0.27 * H + 6) * 10) / 10;
 }
 
 function calcHeadrestCenter(H: number, c: FormulaConfig): number {

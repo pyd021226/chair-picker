@@ -43,7 +43,7 @@ export default function ChairContent() {
   const body = useMemo(() => hasUser ? calculateBodyDimensions(H, W, cfg) : null, [H, W, hasUser, cfg]);
   const match = useMemo(() => {
     if (!hasUser || !chair) return null;
-    const matches = matchAllChairs([chair], H, W, rules.weights, cfg, rules);
+    const matches = matchAllChairs([chair], H, W, undefined, cfg, rules);
     return matches[0] || null;
   }, [chair, H, W, hasUser, cfg, rules]);
 
@@ -89,7 +89,7 @@ export default function ChairContent() {
       </div>
 
       {/* 价格 → 链接 */}
-      <div className="mt-4 text-center">
+      <div className="mt-4 bg-white border border-neutral-200 rounded-xl p-4 text-left">
         {chair.price ? (
           <p className="text-2xl font-bold text-blue-600">
             ¥{chair.price}
@@ -99,7 +99,7 @@ export default function ChairContent() {
           <p className="text-sm text-neutral-400">价格暂无</p>
         )}
         {chair.purchaseUrl ? (
-          <a href={chair.purchaseUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-1 text-sm text-blue-600 hover:underline">
+          <a href={chair.purchaseUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-1 text-sm text-blue-600 hover:underline break-all">
             {chair.purchaseUrl}
           </a>
         ) : (

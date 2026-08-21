@@ -6,7 +6,7 @@
 "use client";
 
 /** 已激活（有评分代码）的维度 */
-export const ACTIVATED = new Set(["seatHeight", "seatDepth", "seatWidth"]);
+export const ACTIVATED = new Set(["seatHeight", "seatDepth", "seatWidth", "backHeight", "backWidth", "armrestWidth"]);
 
 /** 三个分类 */
 export const CATEGORIES = [
