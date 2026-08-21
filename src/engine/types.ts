@@ -44,16 +44,13 @@ export type DimensionKey =
   | "backWidth"
   | "armrestHeight"
   | "armrestWidth"
-  | "armrestFunc"
   | "headrestRange"
   | "headrestNeed"
-  | "headrestFunc"
   | "reclineTension"
   | "seatFirmness"
   | "lumbarTension"
   | "lumbarPosition"
   | "lumbarDepth"
-  | "lumbarFunc"
   | "capacity";
 
 /** 用户身体尺寸估算结果 */
