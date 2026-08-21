@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { chairs, getChairById } from "@/data/chairs";
+import { getChairById } from "@/data/chairs";
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { matchAllChairs } from "@/engine/matcher";
 import DimensionBar from "@/components/visualization/DimensionBar";
 import { RadarChart, CATEGORIES, ACTIVATED } from "@/components/visualization/RadarComparison";
-import type { BodyDimensions, ChairMatch, DimensionResult } from "@/engine/types";
+import { loadConfig, loadMatchRules, DEFAULT_CONFIG, DEFAULT_MATCH_RULES, type FormulaConfig, type MatchRules } from "@/engine/config";
+import type { DimensionResult } from "@/engine/types";
 
 /** 从 URL pathname 解析 slug：/chair-picker/chair/xxx/ → xxx */
 function useSlugFromURL(): string {
@@ -27,20 +28,24 @@ export default function ChairContent() {
 
   // 从 URL 读取 h/w 参数
   const [query, setQuery] = useState({ h: "", w: "" });
+  const [cfg, setCfg] = useState<FormulaConfig>(DEFAULT_CONFIG);
+  const [rules, setRules] = useState<MatchRules>(DEFAULT_MATCH_RULES);
+  const [reportOpen, setReportOpen] = useState(false);
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     setQuery({ h: sp.get("h") || "", w: sp.get("w") || "" });
+    Promise.all([loadConfig(), loadMatchRules()]).then(([c, r]) => { setCfg(c); setRules(r); });
   }, []);
 
   const H = parseFloat(query.h), W = parseFloat(query.w);
   const hasUser = !isNaN(H) && !isNaN(W);
 
-  const body = useMemo(() => hasUser ? calculateBodyDimensions(H, W) : null, [H, W, hasUser]);
+  const body = useMemo(() => hasUser ? calculateBodyDimensions(H, W, cfg) : null, [H, W, hasUser, cfg]);
   const match = useMemo(() => {
     if (!hasUser || !chair) return null;
-    const matches = matchAllChairs([chair], H, W);
+    const matches = matchAllChairs([chair], H, W, rules.weights, cfg, rules);
     return matches[0] || null;
-  }, [chair, H, W, hasUser]);
+  }, [chair, H, W, hasUser, cfg, rules]);
 
   if (!chair) {
     return (
@@ -57,25 +62,52 @@ export default function ChairContent() {
         ← {hasUser ? "返回匹配列表" : "返回首页"}
       </Link>
 
-      {/* 标题 + 图片 */}
-      <div className="flex gap-4 mt-4">
-        {/* 椅子图片 2:3 */}
-        <div className="flex-shrink-0 w-40 h-60 rounded-xl bg-neutral-100 overflow-hidden">
-          {chair.imageUrl ? (
-            <img src={chair.imageUrl} alt={chair.name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-5xl text-neutral-300 bg-gradient-to-br from-neutral-50 to-neutral-100">
-              🪑<span className="text-xs mt-2 text-neutral-400">暂无图片</span>
-            </div>
-          )}
-        </div>
-        <div className="flex-1">
-          <span className="text-xs text-neutral-400">{chair.brand}</span>
-          <h1 className="text-xl font-bold mt-1">{chair.name}</h1>
-        </div>
+      {/* 名称居中 */}
+      <div className="text-center mt-6">
+        <p className="text-xs text-neutral-400">{chair.brand}</p>
+        <h1 className="text-xl font-bold mt-1">{chair.name}</h1>
       </div>
 
-      {/* 匹配评分（如果有用户数据） */}
+      {/* 三视图：正 / 侧 / 后 */}
+      <div className="grid grid-cols-3 gap-2 mt-5">
+        {[
+          { label: "正面", src: chair.imageFront || chair.imageUrl },
+          { label: "侧面", src: chair.imageSide || null },
+          { label: "背面", src: chair.imageBack || null },
+        ].map(v => (
+          <div key={v.label} className="aspect-[3/4] rounded-xl bg-neutral-100 overflow-hidden flex flex-col items-center justify-center">
+            {v.src ? (
+              <img src={v.src} alt={chair.name + " " + v.label} className="w-full h-full object-cover" />
+            ) : (
+              <>
+                <span className="text-3xl text-neutral-300 select-none">🪑</span>
+                <span className="text-[10px] text-neutral-400 mt-1">{v.label} · 暂无图片</span>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* 价格 → 链接 */}
+      <div className="mt-4 text-center">
+        {chair.price ? (
+          <p className="text-2xl font-bold text-blue-600">
+            ¥{chair.price}
+            {chair.priceWithFootrest && <span className="text-sm font-normal text-neutral-400 ml-2">带脚托 ¥{chair.priceWithFootrest}</span>}
+          </p>
+        ) : (
+          <p className="text-sm text-neutral-400">价格暂无</p>
+        )}
+        {chair.purchaseUrl ? (
+          <a href={chair.purchaseUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-1 text-sm text-blue-600 hover:underline">
+            {chair.purchaseUrl}
+          </a>
+        ) : (
+          <p className="mt-1 text-sm text-neutral-400">暂无</p>
+        )}
+      </div>
+
+      {/* 匹配评分 */}
       {match && (
         <div className={`mt-4 rounded-2xl p-5 text-white ${
           match.overallScore === 100 ? "bg-blue-500" :
@@ -98,51 +130,49 @@ export default function ChairContent() {
         </div>
       )}
 
-      {/* 价格 */}
-      {chair.price && (
-        <div className="mt-4 bg-neutral-50 border border-neutral-200 rounded-xl p-4 flex items-center justify-between">
-          <span className="text-2xl font-bold text-blue-600">¥{chair.price}</span>
-          {chair.priceWithFootrest && <span className="text-sm text-neutral-400">带脚托 ¥{chair.priceWithFootrest}</span>}
+      {/* 更详细的报告：尺寸对比 + 雷达，默认收起 */}
+      {match && body && (
+        <div className="mt-4">
+          <button
+            onClick={() => setReportOpen(v => !v)}
+            className="press w-full py-3 bg-white border border-neutral-200 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          >
+            {reportOpen ? "收起详细报告 ▲" : "更详细的报告 ▼"}
+          </button>
+          {reportOpen && (() => {
+            const dimMap: Record<string, DimensionResult> = {};
+            for (const d of match.dimensions) dimMap[d.key] = d;
+            return (
+              <div className="mt-4 space-y-8">
+                {CATEGORIES.map(cat => (
+                  <div key={cat.title}>
+                    <h3 className="font-bold text-neutral-800 mb-3">{cat.title}</h3>
+                    <div className="space-y-2 mb-4">
+                      {cat.items.map(item => {
+                        if (ACTIVATED.has(item.key)) {
+                          const dim = dimMap[item.key];
+                          if (dim && !dim.chairDataMissing) {
+                            return (
+                              <DimensionBar key={item.key} dimKey={dim.key} label={item.label}
+                                userMin={dim.userIdeal.min} userMax={dim.userIdeal.max}
+                                chairMin={dim.chairRange.min} chairMax={dim.chairRange.max}
+                                coverage={dim.coverage} status={dim.status} />
+                            );
+                          }
+                          return <NoDataBar key={item.key} label={item.label} />;
+                        }
+                        const value = getChairDataValue(chair, item.key);
+                        return <NoDataBar key={item.key} label={item.label} value={value || undefined} />;
+                      })}
+                    </div>
+                    <RadarChart title={cat.title} items={cat.items} dimMap={dimMap} />
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
-
-      {/* 维度对比：每个分类 = 对比条 + 对应雷达图 */}
-      {match && body && (() => {
-        const dimMap: Record<string, DimensionResult> = {};
-        for (const d of match.dimensions) dimMap[d.key] = d;
-        return (
-          <div className="mt-6 space-y-8">
-            {CATEGORIES.map(cat => (
-              <div key={cat.title}>
-                <h3 className="font-bold text-neutral-800 mb-3">{cat.title}</h3>
-                {/* 对比条 */}
-                <div className="space-y-2 mb-4">
-                  {cat.items.map(item => {
-                    // 激活维度（坐高/坐深/坐宽）：完整对比
-                    if (ACTIVATED.has(item.key)) {
-                      const dim = dimMap[item.key];
-                      if (dim && !dim.chairDataMissing) {
-                        return (
-                          <DimensionBar key={item.key} dimKey={dim.key} label={item.label}
-                            userMin={dim.userIdeal.min} userMax={dim.userIdeal.max}
-                            chairMin={dim.chairRange.min} chairMax={dim.chairRange.max}
-                            coverage={dim.coverage} status={dim.status} />
-                        );
-                      }
-                      return <NoDataBar key={item.key} label={item.label} />;
-                    }
-                    // 非激活维度：只显示椅子数据，不虚构人的数据
-                    const value = getChairDataValue(chair, item.key);
-                    return <NoDataBar key={item.key} label={item.label} value={value || undefined} />;
-                  })}
-                </div>
-                {/* 对应雷达图 */}
-                <RadarChart title={cat.title} items={cat.items} dimMap={dimMap} />
-              </div>
-            ))}
-          </div>
-        );
-      })()}
 
       {/* 完整参数 */}
       <div className="mt-6">
@@ -165,17 +195,24 @@ export default function ChairContent() {
         </div>
       </div>
 
-      {/* 功能 */}
-      {(chair.lumbarFunc || chair.armrestFunc || chair.headrestFunc) && (
-        <div className="mt-6">
-          <h3 className="font-bold text-neutral-800 mb-2">🔧 功能特性</h3>
-          <div className="space-y-1 text-sm">
-            {chair.lumbarFunc && <div className="flex gap-2"><span className="text-neutral-400">腰撑</span><span>{chair.lumbarFunc}</span></div>}
-            {chair.armrestFunc && <div className="flex gap-2"><span className="text-neutral-400">扶手</span><span>{chair.armrestFunc}</span></div>}
-            {chair.headrestFunc && <div className="flex gap-2"><span className="text-neutral-400">头枕</span><span>{chair.headrestFunc}</span></div>}
-          </div>
+      {/* 评价标准 */}
+      <div className="mt-6">
+        <h3 className="font-bold text-neutral-800 mb-3">评价标准</h3>
+        <div className="space-y-2 text-sm">
+          {[
+            { color: "#2563eb", label: "完美", desc: "所有需求完美覆盖" },
+            { color: "#16a34a", label: "合适", desc: "覆盖率 95% ~ 99%" },
+            { color: "#ca8a04", label: "凑合", desc: "80% ~ 94%" },
+            { color: "#dc2626", label: "不合适", desc: "低于 80%" },
+          ].map(r => (
+            <div key={r.label} className="flex items-center gap-3 bg-neutral-50 rounded-xl px-3 py-2.5">
+              <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: r.color }} />
+              <span className="font-medium w-12" style={{ color: r.color }}>{r.label}</span>
+              <span className="text-neutral-500">{r.desc}</span>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
       {!hasUser && (
         <div className="mt-6 p-4 bg-neutral-50 rounded-xl text-center">

@@ -7,6 +7,7 @@ import { matchAllChairs } from "@/engine/matcher";
 import { calculateBodyDimensions } from "@/engine/formulas";
 import { loadCustomChairs, loadOverrides, applyOverrides, recordChairClick } from "@/engine/storage";
 import { loadConfig, loadMatchRules, DEFAULT_CONFIG, DEFAULT_MATCH_RULES, type FormulaConfig, type MatchRules } from "@/engine/config";
+import { touchLastSession } from "@/engine/profiles";
 
 function useQueryParams() {
   const [p, setP] = useState({ h: "", w: "", sit: "", g: "", pid: "" });
@@ -111,7 +112,6 @@ function GroupSection({ group, sitLong, expanded, onToggle, gender }: { group: a
         <span className="ml-auto text-xs text-neutral-300">{expanded ? "收起 ▲" : "展开 ▼"}</span>
       </button>
 
-      {/* 卡片网格 */}
       {expanded && (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {group.list.map((m: any, i: number) => (
@@ -132,6 +132,7 @@ export default function MatchPage() {
   // 满分区(perfect)默认展开，其他默认收起
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["perfect"]));
   useEffect(() => { setTimeout(() => setLoaded(true), 80); }, []);
+  useEffect(() => { if (pid) touchLastSession(pid); }, [pid]);
 
   const H = parseFloat(hStr), W = parseFloat(wStr);
   const isValid = !isNaN(H) && !isNaN(W) && H >= 130 && H <= 220 && W >= 30 && W <= 150;
@@ -188,10 +189,15 @@ export default function MatchPage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Nav：人员管理 + 我的报告 */}
       <div className="flex items-center justify-between mb-6">
-        <Link href={"/profiles?pid=" + pid} className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition-colors duration-200">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M3.5 13.5c0-2.2 1.8-3.5 4.5-3.5s4.5 1.3 4.5 3.5"/></svg>
-          人员管理
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href={"/profiles?pid=" + pid} className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition-colors duration-200">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M3.5 13.5c0-2.2 1.8-3.5 4.5-3.5s4.5 1.3 4.5 3.5"/></svg>
+            人员管理
+          </Link>
+          <Link href={pid ? "/?edit=" + pid : "/?new=1"} className="text-sm text-neutral-400 hover:text-neutral-700 transition-colors duration-200">
+            修改数据
+          </Link>
+        </div>
         <Link href={"/report?pid=" + pid} className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-full transition-colors duration-200">
           我的报告
         </Link>

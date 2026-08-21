@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { recordUsage } from "@/engine/storage";
-import { saveProfile, getProfile, newProfileId } from "@/engine/profiles";
+import { saveProfile, getProfile, newProfileId, getRememberedProfile, profileMatchHref, touchLastSession } from "@/engine/profiles";
 import { generateSummaryLines } from "@/engine/summary";
 
 const TOTAL_STEPS = 7;
@@ -23,6 +23,7 @@ export default function Home() {
   const [typedCount, setTypedCount] = useState(0);
   const [typingDone, setTypingDone] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   function validateStep(s: number): boolean {
     const e: Record<string, string> = {};
@@ -47,9 +48,11 @@ export default function Home() {
     const h = parseFloat(height); const w = parseFloat(weight);
     const bMin = parseFloat(budgetMin); const bMax = parseFloat(budgetMax);
     const pid = editId || newProfileId();
-    saveProfile({ id: pid, nickname, gender, height: h, weight: w, budgetMin: bMin, budgetMax: bMax, sitLong: sitLong ?? false, updatedAt: Date.now() });
+    const profile = { id: pid, nickname, gender, height: h, weight: w, budgetMin: bMin, budgetMax: bMax, sitLong: sitLong ?? false, updatedAt: Date.now() };
+    saveProfile(profile);
+    touchLastSession(pid);
     recordUsage({ nickname, gender, height: h, weight: w, sitLong: sitLong ?? false, budgetMin: bMin, budgetMax: bMax });
-    router.push("/match?h=" + h + "&w=" + w + "&bmin=" + bMin + "&bmax=" + bMax + "&sit=" + (sitLong ? "1" : "0") + "&g=" + (gender || "") + "&pid=" + pid);
+    router.push(profileMatchHref(profile));
   }
 
   useEffect(() => {
@@ -63,10 +66,11 @@ export default function Home() {
     }
   }, [step, typedCount, summaryLines, typingDone]);
 
-  // 编辑模式：?edit=<id> 预填已有档案
+  // 7 天内有记忆：直接去匹配结果页。?edit / ?new 则留在问卷。
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const id = sp.get("edit");
+    const isNew = sp.get("new") === "1";
     if (id) {
       const p = getProfile(id);
       if (p) {
@@ -79,10 +83,27 @@ export default function Home() {
         setBudgetMin(String(p.budgetMin));
         setBudgetMax(String(p.budgetMax));
       }
+      setReady(true);
+      return;
     }
-  }, []);
+    if (isNew) { setReady(true); return; }
+    const remembered = getRememberedProfile();
+    if (remembered) {
+      router.replace(profileMatchHref(remembered));
+      return;
+    }
+    setReady(true);
+  }, [router]);
 
   const pct = (step / TOTAL_STEPS) * 100;
+
+  if (!ready) {
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-10">
+        <div className="h-5 w-40 rounded-full bg-neutral-100 animate-pulse" />
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 flex flex-col items-center justify-center px-4 py-10 max-w-md mx-auto w-full">

@@ -44,13 +44,16 @@ export type DimensionKey =
   | "backWidth"
   | "armrestHeight"
   | "armrestWidth"
+  | "armrestFunc"
   | "headrestRange"
   | "headrestNeed"
+  | "headrestFunc"
   | "reclineTension"
   | "seatFirmness"
   | "lumbarTension"
   | "lumbarPosition"
   | "lumbarDepth"
+  | "lumbarFunc"
   | "capacity";
 
 /** 用户身体尺寸估算结果 */
@@ -81,6 +84,12 @@ export interface Chair {
   sku: string | null;
   /** 椅子产品图片 URL（可选，支持本地 /chairs/ 路径或外部链接） */
   imageUrl: string | null;
+  /** 三视图，暂缺则占位 */
+  imageFront?: string | null;
+  imageSide?: string | null;
+  imageBack?: string | null;
+  /** 购买链接，暂缺显示「暂无」 */
+  purchaseUrl?: string | null;
   price: number | null;
   priceWithFootrest: number | null;
   surface: "mesh" | "sponge" | "leather" | "fabric" | null;

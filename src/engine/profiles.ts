@@ -58,3 +58,35 @@ export function getProfile(id: string): Profile | null {
   if (typeof window === "undefined") return null;
   return loadProfiles().find(x => x.id === id) || null;
 }
+
+const SESSION_KEY = "chair_picker_last_session";
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** 记住当前档案，7 天内再打开网站直达匹配页 */
+export function touchLastSession(profileId: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ id: profileId, at: Date.now() }));
+  } catch { /* 静默失败 */ }
+}
+
+export function profileMatchHref(p: Profile): string {
+  return "/match?h=" + p.height + "&w=" + p.weight + "&sit=" + (p.sitLong ? "1" : "0") +
+    "&g=" + (p.gender || "") + "&bmin=" + p.budgetMin + "&bmax=" + p.budgetMax + "&pid=" + p.id;
+}
+
+/** 7 天内有记忆则返回该档案，否则 null */
+export function getRememberedProfile(): Profile | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) {
+      const last = loadProfiles()[0];
+      if (last && Date.now() - last.updatedAt < WEEK_MS) return last;
+      return null;
+    }
+    const s = JSON.parse(raw) as { id: string; at: number };
+    if (!s?.id || Date.now() - s.at > WEEK_MS) return null;
+    return getProfile(s.id);
+  } catch { return null; }
+}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { loadProfiles, deleteProfile, type Profile } from "@/engine/profiles";
+import { loadProfiles, deleteProfile, profileMatchHref, type Profile } from "@/engine/profiles";
 
 export default function ProfilesPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -18,9 +18,7 @@ export default function ProfilesPage() {
 
   const refresh = () => setProfiles(loadProfiles());
 
-  const matchHref = (p: Profile) =>
-    "/match?h=" + p.height + "&w=" + p.weight + "&sit=" + (p.sitLong ? "1" : "0") +
-    "&g=" + (p.gender || "") + "&bmin=" + p.budgetMin + "&bmax=" + p.budgetMax + "&pid=" + p.id;
+  const matchHref = profileMatchHref;
 
   const backProfile = backPid ? profiles.find(p => p.id === backPid) : null;
 
@@ -33,7 +31,7 @@ export default function ProfilesPage() {
           <h1 className="text-2xl font-bold text-[#171717]">人员管理</h1>
           <p className="text-sm text-neutral-400 mt-1">管理已保存的用户档案</p>
         </div>
-        <Link href="/" className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-full transition-colors duration-200">＋ 添加用户</Link>
+        <Link href="/?new=1" className="px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-full transition-colors duration-200">＋ 添加用户</Link>
       </div>
 
       {profiles.length === 0 ? (
